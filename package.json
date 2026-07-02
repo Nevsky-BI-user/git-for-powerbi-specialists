@@ -1,0 +1,12 @@
+{
+  "name": "git-for-powerbi-specialists",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "index": "node scripts/build-search-index.mjs",
+    "qa": "node scripts/qa.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}

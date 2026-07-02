@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Виправлення помилок · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="04-vypravlennia">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html" class="active"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+<div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>reset · restore · revert</span></a>
+<a href="#s1" data-sec="s1" class="ex"><span class="num">02</span><span>Вправи · Модуль C</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+
+<div class="crumb">Модуль C — виправлення</div>
+<h2>Скасування змін</h2>
+<p class="lead">Три інструменти для трьох ситуацій. Плутанина між ними — найчастіша причина втрати роботи.</p>
+<div class="goalbox"><b>Ціль уроку</b>обирати правильний інструмент скасування без втрати роботи.</div>
+<div class="tdef"><div class="t">orphaned commit (осиротілий коміт)</div><div class="d">Коміт, на який більше не вказує жодна гілка чи тег. Видимо «зник», але фізично ще лежить у .git деякий час.</div><div class="plain"><b>Простими словами:</b> фотографія, вирвана з альбому — її ще можна знайти в смітнику (reflog), поки не прибрали.</div></div>
+<h3>Як reset рухає вказівник (граф)</h3>
+<div class="widget"><div class="wtitle">Візуалізація: reset пересуває гілку назад</div><div class="gplayer" data-p="reset"></div></div>
+<h3>Три режими reset (що зі зонами)</h3>
+<p>Граф історії при reset завжди однаковий. Різниця — що відбувається зі staging і робочою директорією. Обери режим:</p>
+<div class="widget">
+  <div class="btnrow" style="margin-bottom:14px">
+    <button onclick="rs('soft')">--soft</button>
+    <button onclick="rs('mixed')">--mixed (за замовч.)</button>
+    <button onclick="rs('hard')">--hard</button>
+  </div>
+  <div class="resetgrid" id="rsGrid">
+    <div class="rz" data-r="head"><div class="rl">HEAD / гілка</div><div class="rs">—</div></div>
+    <div class="rz" data-r="stage"><div class="rl">Staging</div><div class="rs">—</div></div>
+    <div class="rz" data-r="work"><div class="rl">Working Dir</div><div class="rs">—</div></div>
+  </div>
+  <div class="wexplain" id="rsExp">Обери режим, щоб побачити які зони він зачіпає.</div>
+</div>
+<table class="cmdtable">
+<tr><td>git restore &lt;файл&gt;</td><td>Відкинути зміни файлу у working dir. Історію не чіпає.</td></tr>
+<tr><td>git restore --staged &lt;файл&gt;</td><td>Прибрати файл зі staging (зміни лишаються).</td></tr>
+<tr><td>git reset --soft &lt;commit&gt;</td><td>Гілка назад; зміни лишаються у staging.</td></tr>
+<tr><td>git reset --mixed &lt;commit&gt;</td><td>За замовч. Гілка назад + очистка staging; зміни у working dir.</td></tr>
+<tr><td>git reset --hard &lt;commit&gt;</td><td><b style="color:var(--drop)">Небезпечно.</b> Усі три зони назад. Незакомічене втрачається.</td></tr>
+<tr><td>git revert &lt;commit&gt;</td><td>НОВИЙ коміт, що скасовує зміни. Безпечно для спільних гілок.</td></tr>
+</table>
+<div class="note warn"><b>reset переписує історію, revert — ні.</b> На спільних гілках (main) — лише revert. reset --hard — локально й усвідомлено.</div>
+
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Модуль C — перевірка</div>
+<h2>Вправи: виправлення</h2>
+<p class="lead">Матеріал про reset/restore/revert і reflog пройдено. Перевір себе.</p>
+<div class="goalbox"><b>Ціль уроку</b>закріпити сценарії виправлення.</div>
+<div class="quiz" data-q="modC"></div>
+
+</section>
+<div class="pager"><a href="03-komandy.html"><span class="lbl">← попередній модуль</span>Щоденні команди</a><a class="nxt" href="05-rebase.html"><span class="lbl">наступний модуль →</span>Rebase та історія</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

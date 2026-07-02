@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Щоденні команди · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="03-komandy">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html" class="active"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+<div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Перші команди</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Налаштування: config і .gitattributes</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Гілки та злиття</span></a>
+<a href="#s3" data-sec="s3"><span class="num">04</span><span>Під капотом: гілки, HEAD, detached HEAD</span></a>
+<a href="#s4" data-sec="s4"><span class="num">05</span><span>Локальний і хмарний репозиторій</span></a>
+<a href="#s5" data-sec="s5"><span class="num">06</span><span>Автентифікація: SSH і PAT</span></a>
+<a href="#s6" data-sec="s6"><span class="num">07</span><span>Корисні команди</span></a>
+<a href="#s7" data-sec="s7"><span class="num">08</span><span>Поглиблено: add -p, diff, log</span></a>
+<a href="#s8" data-sec="s8" class="ex"><span class="num">09</span><span>Вправи · Модуль B</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+
+<div class="crumb">Модуль B — команди</div>
+<h2>Перші команди</h2>
+<p class="lead">Мінімум для старту. Кожен рядок прокоментовано, кожен термін пояснено.</p>
+<div class="goalbox"><b>Ціль уроку</b>пройти цикл init → status → add → commit → log власноруч.</div>
+<div class="tdef"><div class="t">git init</div><div class="d">Перетворює звичайну папку на Git-репозиторій (створює <code>.git</code>).</div><div class="plain"><b>Простими словами:</b> «увімкнути запис історії» у цій папці.</div></div>
+<div class="tdef"><div class="t">git clone</div><div class="d">Завантажує існуючий репозиторій із сервера на твій комп'ютер разом з усією історією.</div><div class="plain"><b>Простими словами:</b> «забрати собі повну копію спільного проєкту».</div></div>
+<pre><span class="cmd">git init</span>                   <span class="c"># новий репозиторій тут</span>
+<span class="cmd">git clone</span> <span class="arg">&lt;url&gt;</span>         <span class="c"># завантажити існуючий</span></pre>
+<h3>Перегляд</h3>
+<pre><span class="cmd">git status</span>                 <span class="c"># стан файлів</span>
+<span class="cmd">git log</span> <span class="arg">--oneline --graph</span> <span class="c"># історія + дерево</span>
+<span class="cmd">git diff</span>                   <span class="c"># зміни ще не в staging</span>
+<span class="cmd">git diff</span> <span class="arg">--staged</span>         <span class="c"># що піде в коміт</span></pre>
+<h3>Як коміти будують ланцюг</h3>
+<p>Кожен коміт зберігає посилання на батька (попередній коміт). Послідовні коміти утворюють лінію; <code>HEAD</code> і гілка рухаються разом на новий tip (найновіший коміт). Гортай:</p>
+<div class="widget"><div class="wtitle">Візуалізація: лінійна історія</div><div class="gplayer" data-p="commits"></div></div>
+<div class="tdef"><div class="t">tip (верхівка гілки)</div><div class="d">Найновіший коміт гілки — той, на який вказує її вказівник.</div><div class="plain"><b>Простими словами:</b> «остання фотографія в альбомі цієї гілки».</div></div>
+<h3>Фіксація</h3>
+<table class="cmdtable">
+<tr><td>git add &lt;файл&gt;</td><td>Додати файл у staging.</td></tr>
+<tr><td>git add .</td><td>Усі зміни в поточній папці й нижче.</td></tr>
+<tr><td>git commit -m "…"</td><td>Коміт із повідомленням (-m = message).</td></tr>
+<tr><td>git commit --amend</td><td>Змінити ОСТАННІЙ коміт. Переписує SHA.</td></tr>
+</table>
+<div class="note warn"><b>--amend переписує історію.</b> Якщо коміт уже на сервері й спільний — після amend знадобиться <code>push --force-with-lease</code>, що може зламати копії колег.</div>
+
+<h3>Симулятор: спробуй сам</h3>
+<div class="csim" data-cs="cs_init"></div>
+<div class="csim" data-cs="cs_status"></div>
+<div class="csim" data-cs="cs_addall"></div>
+<div class="csim" data-cs="cs_commit"></div>
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Модуль B — команди</div>
+<h2>Налаштування Git: config і .gitattributes</h2>
+<p class="lead">Перше у новому середовищі — представитися Git і узгодити кінці рядків. Для крос-платформної PBIP-команди це критично.</p>
+<div class="goalbox"><b>Ціль уроку</b>налаштувати імʼя, редактор і кінці рядків для крос-платформної команди.</div>
+<div class="tdef"><div class="t">git config та його три рівні</div><div class="d"><b>--system</b> — для всіх користувачів ПК; <b>--global</b> — для поточного користувача (усі його репозиторії); <b>--local</b> — лише для цього репозиторію (за замовчуванням).</div><div class="plain"><b>Простими словами:</b> налаштування «для всіх / для мене / для цього проєкту». Вужчий рівень перекриває ширший.</div></div>
+<pre><span class="cmd">git config</span> <span class="arg">--global user.name "Іван Коваленко"</span>   <span class="c"># ім'я автора комітів</span>
+<span class="cmd">git config</span> <span class="arg">--global user.email "ivan@company.com"</span> <span class="c"># email автора</span>
+<span class="cmd">git config</span> <span class="arg">--global core.editor "code --wait"</span>    <span class="c"># редактор повідомлень</span>
+<span class="cmd">git config</span> <span class="arg">--list --show-origin</span>                <span class="c"># усі налаштування + звідки взяті</span></pre>
+<div class="note warn"><b>user.name та user.email — обов'язкові.</b> Без них коміти підпишуться невідомо ким, і авторство в історії буде зламане.</div>
+<h3>Кінці рядків і .gitattributes</h3>
+<div class="tdef"><div class="t">CRLF vs LF (кінці рядків)</div><div class="d">Windows завершує рядок двома символами (CRLF), Linux/macOS — одним (LF). Якщо не узгодити, Git бачитиме «зміни» у всьому файлі лише через кінці рядків.</div><div class="plain"><b>Простими словами:</b> невидима різниця в «кінці рядка» через різні ОС роздуває діфи на порожньому місці.</div></div>
+<div class="tdef"><div class="t">.gitattributes</div><div class="d">Файл у репозиторії, що задає правила обробки файлів: нормалізацію кінців рядків, які файли бінарні тощо. Діє на всіх однаково.</div><div class="plain"><b>Простими словами:</b> спільні «правила гри» для файлів, незалежно від ОС розробника.</div></div>
+<pre><span class="c"># .gitattributes — однакова поведінка на всіх ОС</span>
+* text=auto                 <span class="c"># Git сам нормалізує кінці рядків</span>
+*.tmdl text eol=lf          <span class="c"># TMDL завжди LF у репозиторії</span>
+*.json text eol=lf
+*.pbix binary               <span class="c"># не намагатись діфити/мерджити бінарник</span></pre>
+<div class="note tip"><b>Для PBIP-команди.</b> Зафіксуйте <code>*.tmdl text eol=lf</code> і <code>*.json text eol=lf</code> — це прибирає фальшиві діфи через CRLF/LF між Windows-машинами та уникає шумних конфліктів у моделі й звіті.</div>
+
+<div class="qcheck" data-qc="qc_config"></div>
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+
+<div class="crumb">Модуль B — команди</div>
+<h2>Гілки та злиття (branch · merge)</h2>
+<p class="lead">Гілка — окрема лінія роботи. Нову фічу роблять у власній гілці, потім зливають у основну.</p>
+<div class="goalbox"><b>Ціль уроку</b>створювати гілки, зливати їх і читати граф історії.</div>
+<div class="tdef"><div class="t">merge (злиття)</div><div class="d">Об'єднання змін однієї гілки в іншу.</div><div class="plain"><b>Простими словами:</b> «звести напрацювання з паралельного всесвіту назад у головний».</div></div>
+<div class="tdef"><div class="t">parent (батьківський коміт)</div><div class="d">Коміт, на якому базується інший. Merge-коміт має двох батьків.</div><div class="plain"><b>Простими словами:</b> «попередній кадр», з якого виріс цей.</div></div>
+<pre><span class="cmd">git branch</span>                       <span class="c"># список гілок</span>
+<span class="cmd">git switch</span> <span class="arg">-c feature/svg-badge</span>   <span class="c"># створити й перейти (-c = create)</span>
+<span class="cmd">git switch</span> <span class="arg">main</span>                 <span class="c"># перейти на існуючу</span>
+<span class="cmd">git merge</span> <span class="arg">feature/svg-badge</span>     <span class="c"># влити в поточну</span>
+<span class="cmd">git branch</span> <span class="arg">-d feature/svg-badge</span>  <span class="c"># видалити після злиття</span></pre>
+<h3>Візуалізація: створення гілки й розгалуження</h3>
+<div class="widget"><div class="wtitle">Гілкування крок за кроком</div><div class="gplayer" data-p="branching"></div></div>
+<h3>Два типи злиття</h3>
+<div class="tdef"><div class="t">Fast-forward (швидке перемотування)</div><div class="d">Коли основна гілка не отримала нових комітів після відгалуження — Git просто пересуває її вказівник уперед. Нового коміту немає.</div><div class="plain"><b>Простими словами:</b> «наздогнати вперед», бо розходитись не було куди.</div></div>
+<div class="widget"><div class="wtitle">Fast-forward merge</div><div class="gplayer" data-p="ff"></div></div>
+<div class="tdef"><div class="t">Merge-коміт (три-сторонній merge)</div><div class="d">Коли обидві гілки мали власні коміти — Git створює окремий коміт із ДВОМА батьками, фіксуючи факт об'єднання.</div><div class="plain"><b>Простими словами:</b> «вузол», де дві лінії історії знову сходяться в одну.</div></div>
+<div class="widget"><div class="wtitle">Three-way merge (merge-коміт)</div><div class="gplayer" data-p="mergecommit"></div></div>
+<h3>Як це читати у git log --graph</h3>
+<div class="widget"><div class="wtitle">Реальна історія з розгалуженням і злиттям</div><div class="gplayer" data-p="complex"></div></div>
+<div class="note"><b>switch vs checkout.</b> Стара універсальна команда — <code>git checkout</code>. Нові розділені: <code>git switch</code> (гілки), <code>git restore</code> (файли).</div>
+
+<h3>Симулятор: спробуй сам</h3>
+<div class="csim" data-cs="cs_branch"></div>
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+
+<div class="crumb">Модуль B — команди</div>
+<h2>Під капотом: гілки, HEAD і detached HEAD</h2>
+<p class="lead">Гілка в Git — це не копія файлів, а крихітний вказівник. Зрозумівши це, легко не загубити коміти.</p>
+<div class="goalbox"><b>Ціль уроку</b>розуміти, що таке HEAD, і не губити коміти в detached-стані.</div>
+<div class="tdef"><div class="t">Гілка = вказівник (41 байт)</div><div class="d">Технічно гілка — це маленький файл у <code>.git/refs/heads/</code>, що містить лише хеш коміту (40 символів + перенесення рядка).</div><div class="plain"><b>Простими словами:</b> гілка — це «закладка» на коміт, а не окрема копія проєкту. Тому створення гілки миттєве й майже безкоштовне.</div><div class="ex">Файл <code>.git/refs/heads/main</code> містить рядок на кшталт <code>a1b2c3d…</code></div></div>
+<div class="tdef"><div class="t">HEAD</div><div class="d">Вказівник на те, де ти зараз. Зазвичай: HEAD → гілка → коміт.</div><div class="plain"><b>Простими словами:</b> «ти тут». Коли комітиш, рухається та гілка, на яку дивиться HEAD.</div></div>
+<div class="tdef"><div class="t">Detached HEAD (відчеплений HEAD)</div><div class="d">Стан, коли HEAD указує ПРЯМО на коміт, а не на гілку. Виникає після <code>git checkout &lt;sha&gt;</code>.</div><div class="plain"><b>Простими словами:</b> ти стоїш «на коміті без закладки». Нові коміти тут не належать жодній гілці й при перемиканні можуть загубитись.</div></div>
+<div class="widget"><div class="wtitle">Як виникає й вирішується detached HEAD</div><div class="gplayer" data-p="detached"></div></div>
+<pre><span class="cmd">git checkout</span> <span class="arg">a1b2c3d</span>        <span class="c"># перейти на коміт → detached HEAD</span>
+<span class="c"># … зробив коміт X (поки нічий) …</span>
+<span class="cmd">git switch</span> <span class="arg">-c rescue</span>         <span class="c"># закріпити X гілкою rescue — у безпеці</span></pre>
+<div class="note warn"><b>Якщо вже перемкнувся й «втратив» коміт:</b> знайди його SHA в <code>git reflog</code> і створи на ньому гілку: <code>git branch rescue &lt;sha&gt;</code>.</div>
+
+</section>
+<section class="lesson show" id="s4" data-n="s4">
+
+<div class="crumb">Модуль B — команди</div>
+<h2>Локальний і хмарний репозиторій</h2>
+<p class="lead">Найважливіша для команди тема. Тут усе показано візуально: що на твоєму комп'ютері (локально) і що на сервері (хмара) одночасно.</p>
+<div class="goalbox"><b>Ціль уроку</b>розрізняти локальний репозиторій і сервер; знати clone, push, pull, fetch.</div>
+<div class="tdef"><div class="t">Локальний vs віддалений (remote)</div>
+<div class="d"><b>Локальний</b> репозиторій — на твоєму комп'ютері. <b>Віддалений (remote)</b> — на сервері. Це ДВІ окремі копії, що синхронізуються командами.</div>
+<div class="plain"><b>Простими словами:</b> твій робочий стіл і спільна хмарна папка. Файли там не оновлюються самі — ти явно відправляєш і забираєш зміни.</div></div>
+<div class="tdef"><div class="t">origin / main / origin/main</div>
+<div class="d"><code>origin</code> — назва сервера. <code>main</code> — твоя локальна основна гілка. <code>origin/main</code> — локальне «відображення» серверної гілки на момент останнього обміну (не сам сервер у реальному часі).</div>
+<div class="plain"><b>Простими словами:</b> <code>origin/main</code> — це «фотографія» стану сервера, яку ти останній раз бачив. Щоб оновити фото — роби fetch.</div></div>
+
+<h4 class="sub">git clone — отримати копію вперше</h4>
+<p>Завантажує весь віддалений репозиторій локально й під'єднує <code>origin</code>.</p>
+<div class="widget"><div class="wtitle">Візуалізація: clone (сервер → твій комп'ютер)</div><div class="gplayer" data-p="clone"></div></div>
+
+<h4 class="sub">git fetch / git pull — забрати чужі зміни</h4>
+<div class="tdef"><div class="t">fetch vs pull</div><div class="d"><code>fetch</code> завантажує коміти з сервера, але НЕ чіпає твої робочі файли. <code>pull</code> = fetch + одразу merge у поточну гілку.</div><div class="plain"><b>Простими словами:</b> fetch — «подивитись, що нового на сервері». pull — «подивитись і одразу собі забрати».</div></div>
+<div class="widget"><div class="wtitle">Візуалізація: pull (сервер ↔ твій комп'ютер)</div><div class="gplayer" data-p="pull"></div></div>
+
+<h4 class="sub">git push — відправити свої зміни</h4>
+<div class="widget"><div class="wtitle">Візуалізація: push (твій комп'ютер → сервер)</div><div class="gplayer" data-p="remote"></div></div>
+
+<h4 class="sub">Коли двоє пушать одночасно — конфлікт синхронізації</h4>
+<p>Найчастіша ситуація в команді з двох розробників: обидва зробили коміти й намагаються запушити. Хто перший — той пройде. Другому push відхилять.</p>
+<div class="widget"><div class="wtitle">Візуалізація: push відхилено → pull --rebase → push</div><div class="gplayer" data-p="pushreject"></div></div>
+<pre><span class="cmd">git push</span>
+<span class="out"># ! [rejected] main -> main (non-fast-forward)</span>
+<span class="cmd">git pull</span> <span class="arg">--rebase</span>      <span class="c"># забрати чужий коміт і перенести свій поверх</span>
+<span class="cmd">git push</span>               <span class="c"># тепер проходить</span></pre>
+<div class="note tip"><b>Чому --rebase, а не звичайний pull?</b> Звичайний pull створив би merge-коміт «Merge branch main». <code>pull --rebase</code> переносить твій коміт поверх чужого, лишаючи історію лінійною й чистою.</div>
+<pre><span class="cmd">git remote</span> <span class="arg">-v</span>          <span class="c"># показати під'єднані сервери</span>
+<span class="cmd">git push</span> <span class="arg">-u origin feature/x</span>  <span class="c"># перший push нової гілки (-u запам'ятає зв'язок)</span></pre>
+
+<div class="qcheck" data-qc="qc_fetch"></div>
+<h3>Симулятор: спробуй сам</h3>
+<div class="csim" data-cs="cs_clone"></div>
+<div class="csim" data-cs="cs_push"></div>
+</section>
+<section class="lesson show" id="s5" data-n="s5">
+
+<div class="crumb">Модуль B — команди</div>
+<h2>Автентифікація: SSH-ключі та Personal Access Token</h2>
+<p class="lead">Сервер має знати, що push робиш саме ти. Два стандартні способи — токен для HTTPS і SSH-ключі.</p>
+<div class="goalbox"><b>Ціль уроку</b>налаштувати доступ до сервера без введення пароля щоразу.</div>
+<div class="tdef"><div class="t">Personal Access Token (PAT)</div><div class="d">Згенерований на сервері (Azure DevOps, GitHub) рядок-токен, що використовується ЗАМІСТЬ пароля при роботі через HTTPS. Має термін дії та обмежені права (scopes).</div><div class="plain"><b>Простими словами:</b> «тимчасовий пароль лише для Git» — вводиш один раз при першому push, далі його запам'ятовує менеджер креденшлів.</div><div class="ex">Azure DevOps: User settings → Personal access tokens → New Token → права Code (Read & write).</div></div>
+<div class="tdef"><div class="t">Credential manager (менеджер креденшлів)</div><div class="d">Системне сховище, куди Git кладе введений токен, щоб не питати його щоразу.</div><div class="plain"><b>Простими словами:</b> «запам'ятовувач паролів» для Git. На Windows ставиться разом із Git (Git Credential Manager).</div></div>
+<div class="tdef"><div class="t">SSH-ключі</div><div class="d">Пара файлів: <b>приватний</b> ключ (лишається тільки в тебе) і <b>публічний</b> (додається у профіль на сервері). Сервер звіряє пару — пароль не потрібен взагалі.</div><div class="plain"><b>Простими словами:</b> «замок і ключ»: публічний ключ-замок віддаєш серверу, приватним ключем відмикаєш. Приватний ключ нікому й ніколи не передається.</div></div>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">ssh-keygen -t ed25519 -C "ivan@company.com"</span>   <span class="tw-cm"># створити пару ключів</span>
+<span class="tw-p">$</span> <span class="tw-c">cat ~/.ssh/id_ed25519.pub</span>                     <span class="tw-cm"># показати ПУБЛІЧНИЙ ключ</span>
+<span class="tw-o">ssh-ed25519 AAAA… ivan@company.com</span>              <span class="tw-cm"># цей рядок → у профіль на сервері</span></div></div>
+<table class="cmdtable">
+<tr><td>HTTPS + PAT</td><td>Простіше стартувати; токен має термін дії; зберігається credential manager-ом.</td></tr>
+<tr><td>SSH</td><td>Разове налаштування; без паролів назавжди; URL виду git@…</td></tr>
+</table>
+<div class="note warn"><b>Токен = пароль.</b> Ніколи не встав-ляй PAT у код, .tmdl, M-вирази чи README — це витік (кейс 26 у довіднику). Якщо токен потрапив у коміт — негайно відкликати і згенерувати новий.</div>
+<div class="qcheck" data-qc="qc_auth"></div>
+
+</section>
+<section class="lesson show" id="s6" data-n="s6">
+
+<div class="crumb">Модуль B — команди</div>
+<h2>Корисні команди: stash, cherry-pick, tag, reflog</h2>
+<p class="lead">Чотири інструменти, що часто рятують у щоденній роботі.</p>
+<div class="goalbox"><b>Ціль уроку</b>мати під рукою status, stash, tag та інші щоденні команди.</div>
+<div class="tdef"><div class="t">stash (схованка)</div><div class="d">Тимчасово прибирає незакомічені зміни «у кишеню», щоб перемкнути гілку з чистою робочою директорією.</div><div class="plain"><b>Простими словами:</b> «згорнути недороблене вбік, щоб не заважало», потім розгорнути назад.</div></div>
+<pre><span class="cmd">git stash</span>                    <span class="c"># сховати зміни</span>
+<span class="cmd">git stash pop</span>                <span class="c"># повернути назад</span>
+<span class="cmd">git stash list</span>               <span class="c"># список схованок</span></pre>
+<div class="tdef"><div class="t">cherry-pick</div><div class="d">Копіює ОДИН конкретний коміт з іншої гілки в поточну (як новий коміт із новим SHA), не зливаючи всю гілку.</div><div class="plain"><b>Простими словами:</b> «зірвати одну вишеньку» — узяти лише потрібний коміт, а не весь кошик.</div></div>
+<pre><span class="cmd">git cherry-pick</span> <span class="arg">&lt;sha&gt;</span></pre>
+<div class="widget"><div class="wtitle">Візуалізація: cherry-pick одного коміту</div><div class="gplayer" data-p="cherry"></div></div>
+<div class="tdef"><div class="t">tag (мітка)</div><div class="d">Нерухома позначка на коміті, зазвичай для релізної версії.</div><div class="plain"><b>Простими словами:</b> «закладка» на важливому коміті. На відміну від гілки, тег не рухається.</div></div>
+<pre><span class="cmd">git tag</span> <span class="arg">v3.0</span>                <span class="c"># мітка на поточний коміт</span>
+<span class="cmd">git tag</span> <span class="arg">-a v3.0 -m "Реліз 3.0"</span>  <span class="c"># анотована мітка</span></pre>
+<div class="tdef"><div class="t">reflog (журнал HEAD)</div><div class="d">Показує всі переміщення HEAD за ~90 днів. Рятує після «втрати» комітів через reset/rebase.</div><div class="plain"><b>Простими словами:</b> «чорна скринька» Git — записує кожен твій крок, навіть якщо коміт уже не видно.</div></div>
+<pre><span class="cmd">git reflog</span>                   <span class="c"># історія руху HEAD</span>
+<span class="cmd">git reset</span> <span class="arg">--hard &lt;sha-з-reflog&gt;</span>  <span class="c"># відновити стан</span></pre>
+<div class="note tip"><b>reflog — головне рятівне коло Git.</b> Навіть orphaned-коміти після <code>reset --hard</code> зазвичай ще доступні тут.</div>
+
+</section>
+<section class="lesson show" id="s7" data-n="s7">
+
+<div class="crumb">Модуль B — команди</div>
+<h2>Поглиблено: вибірковий staging, diff і log</h2>
+<p class="lead">Інструменти для чистих, атомарних комітів і точного перегляду змін.</p>
+<div class="goalbox"><b>Ціль уроку</b>збирати атомарні коміти та точно шукати зміни в історії.</div>
+<div class="tdef"><div class="t">git add -p (patch mode)</div><div class="d">Додає у staging не весь файл, а окремі БЛОКИ змін (hunks) на твій вибір.</div><div class="plain"><b>Простими словами:</b> якщо в одному файлі дві різні правки — можна застейджити лише одну, щоб коміт лишився логічним.</div></div>
+<div class="tdef"><div class="t">Атомарний коміт</div><div class="d">Коміт, що містить одну логічну зміну.</div><div class="plain"><b>Простими словами:</b> «один коміт — одна думка». Легше читати історію, робити revert і review.</div></div>
+<pre><span class="cmd">git add</span> <span class="arg">-p</span>            <span class="c"># для кожного блоку: y (взяти), n (пропустити), s (розбити на менші)</span>
+<span class="c"># приклад блоку у Sales.tmdl:</span>
+<span class="c"># - SUM(Sales[Amount])</span>
+<span class="c"># + SUMX(Sales, Sales[Amount] * (1 - Sales[Discount]))</span></pre>
+<h3>diff — точний перегляд</h3>
+<table class="cmdtable">
+<tr><td>git diff</td><td>Незакомічені зміни (working dir vs staging).</td></tr>
+<tr><td>git diff --staged</td><td>Що увійде в коміт (staging vs останній коміт).</td></tr>
+<tr><td>git diff --stat</td><td>Лише статистика: які файли й на скільки рядків змінились.</td></tr>
+<tr><td>git diff --word-diff</td><td>Підсвічування змінених СЛІВ, а не рядків — зручно для DAX.</td></tr>
+<tr><td>git diff main..feature</td><td>Різниця між двома гілками.</td></tr>
+</table>
+<h3>log — пошук в історії</h3>
+<table class="cmdtable">
+<tr><td>git log --oneline --graph</td><td>Компактна історія з деревом гілок.</td></tr>
+<tr><td>git log --author="Іван"</td><td>Коміти конкретного автора.</td></tr>
+<tr><td>git log -S "Total Sales"</td><td>Коміти, де з'явився або зник рядок із цим текстом (pickaxe).</td></tr>
+<tr><td>git log --follow Tables/Sales.tmdl</td><td>Історія файлу, навіть якщо його перейменовували.</td></tr>
+<tr><td>git show &lt;sha&gt;</td><td>Повні деталі та зміни конкретного коміту.</td></tr>
+</table>
+<div class="note tip"><b>PBIP-сценарій.</b> <code>git log -S "'Total Sales'"</code> швидко знаходить коміт, де міру додали чи змінили; <code>--word-diff</code> робить зміни в DAX-формулах наочними.</div>
+
+<div class="qcheck" data-qc="qc_addp"></div>
+</section>
+<section class="lesson show" id="s8" data-n="s8">
+
+<div class="crumb">Модуль B — перевірка</div>
+<h2>Вправи: команди</h2>
+<p class="lead">Матеріал модуля B пройдено (команди, гілки, локальний/хмарний обмін, корисні інструменти). Перевір себе.</p>
+<div class="goalbox"><b>Ціль уроку</b>закріпити щоденні команди.</div>
+<div class="quiz" data-q="modB"></div>
+
+</section>
+<div class="pager"><a href="02-osnovy.html"><span class="lbl">← попередній модуль</span>Основи Git</a><a class="nxt" href="04-vypravlennia.html"><span class="lbl">наступний модуль →</span>Виправлення помилок</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

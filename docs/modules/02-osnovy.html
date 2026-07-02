@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Основи Git · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="02-osnovy">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html" class="active"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+<div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Навіщо потрібен Git</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Базові поняття</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Як Git зберігає дані</span></a>
+<a href="#s3" data-sec="s3"><span class="num">04</span><span>Три зони · життєвий цикл</span></a>
+<a href="#s4" data-sec="s4" class="ex"><span class="num">05</span><span>Вправи · Модуль A</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+
+<div class="crumb">Модуль A — основи</div>
+<h2>Навіщо потрібен Git</h2>
+<p class="lead">Почнемо з найпростішого, не припускаючи жодних попередніх знань.</p>
+<div class="goalbox"><b>Ціль уроку</b>назвати проблеми, які Git вирішує для Power BI-розробника.</div>
+<h3>Що таке «версія» файлу</h3>
+<p>Коли ти зберігаєш файл, на диску лишається його поточний стан. Якщо завтра щось зміниш і збережеш знову — старий стан зникне назавжди. <strong>Версія</strong> — це збережений знімок файлу в певний момент. Контроль версій дозволяє мати багато таких знімків і повертатись до будь-якого.</p>
+<div class="tdef"><div class="t">Система контролю версій (Version Control System, VCS)</div>
+<div class="d">Програма, що запам'ятовує кожен збережений стан проєкту й дозволяє повертатись назад, порівнювати стани й об'єднувати правки кількох людей.</div>
+<div class="plain"><b>Простими словами:</b> як «точки збереження» (save points) у відеогрі. У будь-який момент можна повернутись до раніше збереженої точки, навіть якщо після неї все пішло не так.</div>
+<div class="ex">Приклад: ти зламав звіт правкою. З Git відкочуєшся до вчорашнього стану однією командою.</div></div>
+<div class="tdef"><div class="t">Git</div>
+<div class="d">Найпоширеніша система контролю версій. Працює локально на твоєму комп'ютері: уся історія зберігається у твоїй папці проєкту.</div>
+<div class="plain"><b>Простими словами:</b> «розумний журнал змін», що живе прямо в папці проєкту й пам'ятає кожен твій крок.</div></div>
+<h3>Проблема без Git</h3>
+<p>Ручний підхід: <code>report_final.pbix</code>, <code>report_final_v2.pbix</code>, <code>report_final_REALLY_final.pbix</code>. Неможливо побачити різницю, безпечно об'єднати правки двох людей чи зрозуміти, що зламалось і коли.</p>
+<h3>Git ≠ GitHub ≠ SourceTree</h3>
+<p>Ці три речі часто плутають. Вони різні:</p>
+<div class="cards">
+<div class="card"><h4>Git</h4><p>Сама програма контролю версій. Працює локально, без інтернету.</p><div class="ex">Як двигун автомобіля.</div></div>
+<div class="card"><h4>GitHub / Azure DevOps</h4><p>Хмарні сервіси, що зберігають копію репозиторію онлайн для спільної роботи та резервування.</p><div class="ex">Як гараж, де машину бачить уся команда.</div></div>
+<div class="card"><h4>SourceTree</h4><p>Графічна програма (GUI) з кнопками замість команд. Кожна кнопка викликає Git під капотом.</p><div class="ex">Як зручна панель приладів над двигуном.</div></div>
+</div>
+<div class="note tip"><b>Для Power BI це критично.</b> Бінарний <code>.pbix</code> Git бачить як один нероздільний блок. Формат <span class="term">PBIP</span> (текст + JSON + TMDL) робить кожну зміну DAX-міри чи візуала видимою. Цьому присвячені модулі E–F.</div>
+
+<div class="qcheck" data-qc="qc_why_git"></div>
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Модуль A — основи</div>
+<h2>Базові поняття</h2>
+<p class="lead">Сім термінів-фундаментів. Кожен пояснено так, ніби ти бачиш Git уперше.</p>
+<div class="goalbox"><b>Ціль уроку</b>без плутанини розуміти слова репозиторій, коміт, гілка, remote.</div>
+<div class="tdef"><div class="t">Repository (репозиторій, скорочено «репо»)</div>
+<div class="d">Папка проєкту, за якою стежить Git. Усередині неї Git створює приховану підпапку <code>.git</code>, де зберігає всю історію.</div>
+<div class="plain"><b>Простими словами:</b> звичайна папка проєкту + невидимий «чорний ящик» <code>.git</code>, що пам'ятає кожну зміну.</div>
+<div class="ex">Напр. папка <code>C:\Repos\PDP</code>.</div></div>
+<div class="tdef"><div class="t">Commit (коміт)</div>
+<div class="d">Збережений знімок усіх файлів у певний момент разом із метаданими: хто, коли, з яким описом. Кожен коміт має унікальний номер — SHA.</div>
+<div class="plain"><b>Простими словами:</b> «фотографія» проєкту з підписом. Серія фотографій = історія.</div>
+<div class="ex">Коміт «Додано міру Total Sales» зберігає всі файли саме в той момент.</div></div>
+<div class="tdef"><div class="t">SHA (хеш коміту)</div>
+<div class="d">40-символьний код, обчислений із вмісту коміту. Унікальний «паспорт» коміту. Зазвичай пишуть перші 7 символів.</div>
+<div class="plain"><b>Простими словами:</b> як штрих-код фотографії — двох однакових не буває.</div>
+<div class="ex"><code>a1b2c3d</code></div></div>
+<div class="tdef"><div class="t">Working Directory (робоча директорія)</div>
+<div class="d">Файли проєкту, які ти зараз бачиш на диску й редагуєш у редакторі.</div>
+<div class="plain"><b>Простими словами:</b> те, що зараз «на столі» — поточний стан файлів.</div></div>
+<div class="tdef"><div class="t">Staging Area / Index (зона підготовки)</div>
+<div class="d">Проміжна «коробка». Командою <code>git add</code> ти кладеш туди зміни, які увійдуть у наступний коміт.</div>
+<div class="plain"><b>Простими словами:</b> як кошик у магазині. Спершу складаєш товари (add), потім оплачуєш усе разом (commit).</div>
+<div class="ex">Змінив 5 файлів, але хочеш закомітити лише 2 пов'язані — кладеш у кошик саме їх.</div></div>
+<div class="tdef"><div class="t">Branch (гілка)</div>
+<div class="d">Рухомий вказівник на коміт; окрема лінія розробки.</div>
+<div class="plain"><b>Простими словами:</b> як паралельний всесвіт проєкту. Можеш експериментувати в окремій гілці, не чіпаючи основну.</div>
+<div class="ex"><code>main</code> — основна; <code>feature/svg-badge</code> — під нову фічу.</div></div>
+<div class="tdef"><div class="t">HEAD</div>
+<div class="d">Вказівник на те, де ти зараз «стоїш» — на яку гілку чи коміт.</div>
+<div class="plain"><b>Простими словами:</b> як «ви тут» на карті торгового центру.</div>
+<div class="ex"><code>HEAD → main → a1b2c3d</code></div></div>
+<div class="tdef"><div class="t">Remote (віддалений репозиторій)</div>
+<div class="d">Копія репозиторію на сервері (GitHub, Azure DevOps). Стандартна назва — <code>origin</code>.</div>
+<div class="plain"><b>Простими словами:</b> спільна хмарна копія, до якої під'єднуються всі члени команди.</div></div>
+<div class="note"><b>Запис <code>HEAD~</code>.</b> <code>HEAD~1</code> — батько поточного коміту (на 1 назад), <code>HEAD~2</code> — на 2 назад. Зручно адресувати: <code>git reset HEAD~2</code> = «відкотись на 2 коміти».</div>
+
+<div class="qcheck" data-qc="qc_terms"></div>
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+
+<div class="crumb">Модуль A — основи</div>
+<h2>Як Git зберігає дані: знімки, не дельти</h2>
+<p class="lead">Розуміння цього пояснює, чому Git швидкий і чому гілки в ньому майже безкоштовні.</p>
+<div class="goalbox"><b>Ціль уроку</b>пояснити модель знімків і чому гілки в Git дешеві.</div>
+<div class="tdef"><div class="t">Дельта (delta)</div><div class="d">Збережена РІЗНИЦЯ між версіями файлу: базова версія + список змін.</div><div class="plain"><b>Простими словами:</b> як список правок «у рядку 5 додай слово». Щоб дістати стару версію, треба застосувати всі правки по черзі.</div></div>
+<div class="tdef"><div class="t">Знімок (snapshot)</div><div class="d">Повний стан усіх файлів на момент коміту. Якщо файл не змінився — Git зберігає лише посилання на попередню копію.</div><div class="plain"><b>Простими словами:</b> як повне фото проєкту щоразу; незмінні файли — це «те саме фото, дивись туди».</div></div>
+<div class="cards">
+<div class="card"><h4>Старі системи (дельти)</h4><p>Базовий файл + ланцюг різниць. Щоб дістати версію — застосувати всі дельти послідовно. Економить місце, але повільніше.</p></div>
+<div class="card"><h4>Git (знімки)</h4><p>Повний знімок на кожен коміт; незмінні файли — посилання. Порівняння й перемикання дуже швидкі. Сховище стискається у pack-файли.</p></div>
+</div>
+<pre><span class="c"># Дельти: версія = база + delta + delta + delta …</span>
+<span class="c"># Git: кожен коміт — знімок; file2 не змінився → посилання на попередній</span>
+Коміт 1: [file1: A]  [file2: B]
+Коміт 2: [file1: A'] [file2: → з Коміту 1]</pre>
+<div class="tdef"><div class="t">SHA / хеш як адреса</div><div class="d">Кожен об'єкт (коміт, файл, дерево) адресується SHA-хешем свого вмісту.</div><div class="plain"><b>Простими словами:</b> однаковий вміст → однаковий хеш; зміна вмісту → інший хеш. Тому Git одразу «бачить», що саме змінилось.</div></div>
+<div class="note tip"><b>Чому це важливо для PBIP.</b> Незмінені <code>.tmdl</code>-файли не дублюються в історії — змінюється лише те, що ти справді правив. Тому історія моделі лишається компактною й читабельною.</div>
+<div class="qcheck" data-qc="qc_a_snapshot"></div>
+
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+
+<div class="crumb">Модуль A — основи</div>
+<h2>Три зони та життєвий цикл файлу</h2>
+<p class="lead">Файл у Git завжди в одній із зон. Розберемо кожну, потім подивимось рух наживо.</p>
+<div class="goalbox"><b>Ціль уроку</b>простежити шлях зміни: робоча папка → staging → коміт.</div>
+<div class="tdef"><div class="t">Чотири місця, де «живе» файл</div>
+<div class="d"><b>1) Working Directory</b> — на диску, ти редагуєш. <b>2) Staging</b> — у кошику, готовий до коміту. <b>3) Repository (.git)</b> — закомічено, у локальній історії. <b>4) Remote</b> — на сервері, доступно команді.</div>
+<div class="plain"><b>Простими словами:</b> чернетка на столі → кошик у магазині → куплено й удома → відправлено друзям.</div></div>
+<div class="widget">
+  <div class="wtitle">Інтерактив: рух файлу командами Git</div>
+  <div class="zones" id="lcZones">
+    <div class="zone" data-z="0"><div class="zl">редагуєш<b>Working Dir</b></div><div class="chiphold"></div></div>
+    <div class="zone" data-z="1"><div class="zl">кошик<b>Staging</b></div><div class="chiphold"></div></div>
+    <div class="zone" data-z="2"><div class="zl">локально<b>Repository</b></div><div class="chiphold"></div></div>
+    <div class="zone" data-z="3"><div class="zl">сервер<b>Remote</b></div><div class="chiphold"></div></div>
+  </div>
+  <div class="btnrow">
+    <button onclick="lc(1,'add')">git add</button>
+    <button onclick="lc(2,'commit')">git commit</button>
+    <button onclick="lc(3,'push')">git push</button>
+    <button onclick="lc(2,'fetch')">git fetch</button>
+    <button onclick="lc(0,'restore')">git restore</button>
+    <button onclick="lc(0,'reset')">git reset</button>
+  </div>
+  <div class="wexplain" id="lcExp">Файл змінено в робочій директорії — Git бачить його як «modified».</div>
+</div>
+<h3>Стандартний цикл</h3>
+<pre><span class="cmd">git status</span>                 <span class="c"># що змінилось і в якій зоні</span>
+<span class="cmd">git add</span> <span class="arg">model.tmdl</span>        <span class="c"># покласти у staging (кошик)</span>
+<span class="cmd">git commit</span> <span class="arg">-m "Додано міру Salary Range Position"</span>  <span class="c"># зафіксувати</span>
+<span class="cmd">git push</span>                   <span class="c"># відправити на сервер</span></pre>
+<div class="note"><b>Навіщо аж дві зони (staging + commit)?</b> Кошик дозволяє зібрати коміт вибірково: змінив багато — закомітив лише пов'язане між собою. Так історія лишається логічною й читабельною.</div>
+<div class="qcheck" data-qc="qc_a_zones"></div>
+
+<div class="order" data-o="or_zones"></div>
+</section>
+<section class="lesson show" id="s4" data-n="s4">
+
+<div class="crumb">Модуль A — перевірка</div>
+<h2>Вправи: основи</h2>
+<p class="lead">Тепер, коли весь матеріал модуля A пройдено, перевір себе. Відповідь дає миттєве пояснення.</p>
+<div class="goalbox"><b>Ціль уроку</b>перевірити розуміння основ.</div>
+<div class="quiz" data-q="modA"></div>
+
+</section>
+<div class="pager"><a href="01-terminal.html"><span class="lbl">← попередній модуль</span>Термінал і файли</a><a class="nxt" href="03-komandy.html"><span class="lbl">наступний модуль →</span>Щоденні команди</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

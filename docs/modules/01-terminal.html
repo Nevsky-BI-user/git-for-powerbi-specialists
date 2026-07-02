@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Термінал і файли · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="01-terminal">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/01-terminal.html" class="active"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+<div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Що таке термінал</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Навігація: pwd, cd, ls</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Створення: mkdir, touch, echo</span></a>
+<a href="#s3" data-sec="s3"><span class="num">04</span><span>Копіювання, переміщення, видалення: cp, mv, rm</span></a>
+<a href="#s4" data-sec="s4"><span class="num">05</span><span>Дрібниці, що рятують новачка</span></a>
+<a href="#s5" data-sec="s5"><span class="num">06</span><span>Встановлення Git і перший запуск</span></a>
+<a href="#s6" data-sec="s6" class="ex"><span class="num">07</span><span>Вправи · Термінал</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+
+<div class="crumb">Термінал і файли</div>
+<h2>Що таке термінал (командний рядок)</h2>
+<p class="lead">Git найчастіше керують текстовими командами. Спершу розберемось, де їх вводити.</p>
+<div class="goalbox"><b>Ціль уроку</b>розрізняти GUI і CLI та знати, де вводити команди Git.</div>
+<div class="tdef"><div class="t">Термінал / командний рядок (CLI)</div><div class="d">Текстове вікно, де ти друкуєш команду словами, тиснеш Enter — і комп'ютер її виконує, виводячи відповідь текстом.</div><div class="plain"><b>Простими словами:</b> замість того, щоб клікати мишкою по кнопках, ти пишеш коротку інструкцію текстом. Це швидше й точніше для багатьох задач.</div></div>
+<div class="tdef"><div class="t">GUI vs CLI</div><div class="d"><b>GUI</b> — графічний інтерфейс (вікна, кнопки, миша). <b>CLI</b> — текстові команди.</div><div class="plain"><b>Простими словами:</b> GUI — як меню в ресторані з картинками; CLI — як сказати офіціанту точне замовлення словами. Git працює і так, і так, але команди дають повний контроль.</div></div>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-cm"># знак $ або &gt; — це «запрошення»: термінал чекає команду</span>
+<span class="tw-p">$</span> <span class="tw-c">git --version</span>
+<span class="tw-o">git version 2.45.0</span></div></div>
+<div class="tdef"><div class="t">Запрошення (prompt)</div><div class="d">Символ на початку рядка (<code>$</code>, <code>&gt;</code> або шлях), після якого вводять команду.</div><div class="plain"><b>Простими словами:</b> це «курсор готовності». Сам символ <code>$</code> друкувати не треба — він уже там.</div></div>
+<div class="note tip">Де відкрити: на Windows — «Git Bash» або вбудований термінал у VS Code; на macOS/Linux — застосунок «Terminal». У VS Code термінал відкривається сполученням <code>Ctrl + `</code> (клавіша під Esc).</div>
+<div class="qcheck" data-qc="qc_term_what"></div>
+
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Термінал і файли</div>
+<h2>Де я і що навколо: pwd, cd, ls</h2>
+<p class="lead">Три команди, з якими ти ніколи не загубишся у файловій системі.</p>
+<div class="goalbox"><b>Ціль уроку</b>вільно визначати, де ти у файловій системі, і переміщатись між папками.</div>
+<div class="tdef"><div class="t">pwd</div><div class="d">Показує поточну папку — повний шлях до місця, де ти зараз перебуваєш.</div><div class="plain"><b>Простими словами:</b> «де я?». pwd = print working directory.</div></div>
+<div class="tdef"><div class="t">ls (у Windows CMD — dir)</div><div class="d">Виводить список файлів і папок у поточній директорії.</div><div class="plain"><b>Простими словами:</b> «що тут лежить?».</div></div>
+<div class="tdef"><div class="t">cd &lt;папка&gt;</div><div class="d">Переходить в іншу папку. <code>cd ..</code> — на рівень вгору, <code>cd ~</code> — у домашню папку.</div><div class="plain"><b>Простими словами:</b> «зайти всередину» папки або «вийти назовні». cd = change directory.</div></div>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">pwd</span>
+<span class="tw-o">/home/ivan</span>
+<span class="tw-p">$</span> <span class="tw-c">ls</span>
+<span class="tw-o">projects   Documents   Downloads</span>
+<span class="tw-p">$</span> <span class="tw-c">cd projects</span>
+<span class="tw-p">$</span> <span class="tw-c">pwd</span>
+<span class="tw-o">/home/ivan/projects</span>
+<span class="tw-p">$</span> <span class="tw-c">cd ..</span>
+<span class="tw-p">$</span> <span class="tw-c">pwd</span>
+<span class="tw-o">/home/ivan</span></div></div>
+<table class="cmdtable">
+<tr><td>pwd</td><td>Показати поточну папку.</td></tr>
+<tr><td>ls</td><td>Список вмісту поточної папки.</td></tr>
+<tr><td>cd reports</td><td>Зайти в папку reports.</td></tr>
+<tr><td>cd ..</td><td>Піднятись на одну папку вгору.</td></tr>
+<tr><td>cd ~</td><td>Перейти в домашню папку.</td></tr>
+</table>
+<div class="tdef"><div class="t">Абсолютний vs відносний шлях</div><div class="d"><b>Абсолютний</b> — повний шлях від кореня (<code>/home/ivan/projects</code> або <code>C:\Users\Ivan</code>). <b>Відносний</b> — від поточної папки (<code>reports</code>, <code>../data</code>).</div><div class="plain"><b>Простими словами:</b> абсолютний — «повна адреса міста й вулиці»; відносний — «сусідній під'їзд від того місця, де стоїш».</div></div>
+<div class="qcheck" data-qc="qc_pwd"></div>
+<div class="qcheck" data-qc="qc_cd"></div>
+<div class="qcheck" data-qc="qc_ls"></div>
+<h3>Симулятор: спробуй сам</h3>
+<div class="csim" data-cs="cs_pwd"></div>
+<div class="csim" data-cs="cs_cd"></div>
+
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+
+<div class="crumb">Термінал і файли</div>
+<h2>Створюємо папки й файли: mkdir, touch, echo</h2>
+<p class="lead">Перш ніж робити Git-репозиторій, треба вміти створити папку проєкту й файли в ній.</p>
+<div class="goalbox"><b>Ціль уроку</b>створювати папки й файли та записувати текст у файл з термінала.</div>
+<div class="tdef"><div class="t">mkdir &lt;назва&gt;</div><div class="d">Створює нову папку. mkdir = make directory.</div><div class="plain"><b>Простими словами:</b> «зроби папку». <code>mkdir reports</code> створює папку reports.</div></div>
+<div class="tdef"><div class="t">touch &lt;файл&gt;</div><div class="d">Створює порожній файл (на Windows аналог — <code>New-Item файл</code> у PowerShell).</div><div class="plain"><b>Простими словами:</b> «створи порожній файл» із заданою назвою.</div></div>
+<div class="tdef"><div class="t">echo "текст" &gt; файл</div><div class="d">Записує текст у файл. Один <code>&gt;</code> перезаписує файл; два <code>&gt;&gt;</code> дописують у кінець.</div><div class="plain"><b>Простими словами:</b> echo — «вивести текст»; стрілка <code>&gt;</code> перенаправляє цей текст не на екран, а у файл.</div></div>
+<div class="tdef"><div class="t">cat &lt;файл&gt;</div><div class="d">Показує вміст файлу в терміналі.</div><div class="plain"><b>Простими словами:</b> «покажи, що всередині файлу».</div></div>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">mkdir pdp-report</span>      <span class="tw-cm"># створили папку</span>
+<span class="tw-p">$</span> <span class="tw-c">cd pdp-report</span>
+<span class="tw-p">$</span> <span class="tw-c">touch README.md</span>       <span class="tw-cm"># порожній файл</span>
+<span class="tw-p">$</span> <span class="tw-c">echo "# Звіт PDP" &gt; README.md</span>   <span class="tw-cm"># записали рядок (перезапис)</span>
+<span class="tw-p">$</span> <span class="tw-c">echo "Автор: Іван" &gt;&gt; README.md</span> <span class="tw-cm"># дописали рядок</span>
+<span class="tw-p">$</span> <span class="tw-c">cat README.md</span>
+<span class="tw-o"># Звіт PDP
+Автор: Іван</span></div></div>
+<table class="cmdtable">
+<tr><td>mkdir name</td><td>Створити папку.</td></tr>
+<tr><td>touch file</td><td>Створити порожній файл.</td></tr>
+<tr><td>echo "txt" &gt; file</td><td>Записати текст у файл (перезапис).</td></tr>
+<tr><td>echo "txt" &gt;&gt; file</td><td>Дописати текст у кінець файлу.</td></tr>
+<tr><td>cat file</td><td>Показати вміст файлу.</td></tr>
+</table>
+<div class="qcheck" data-qc="qc_mkdir"></div>
+<div class="qcheck" data-qc="qc_touch_echo"></div>
+<h3>Симулятор: спробуй сам</h3>
+<div class="csim" data-cs="cs_mkdir"></div>
+<div class="csim" data-cs="cs_touch"></div>
+
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+
+<div class="crumb">Термінал і файли</div>
+<h2>Копіювання, переміщення, видалення: cp, mv, rm</h2>
+<p class="lead">Останні три файлові команди, без яких не обійтись у щоденній роботі.</p>
+<div class="goalbox"><b>Ціль уроку</b>копіювати, переміщати, перейменовувати й обережно видаляти файли та папки.</div>
+<div class="tdef"><div class="t">cp &lt;що&gt; &lt;куди&gt;</div><div class="d">Копіює файл. Для папки з вмістом — <code>cp -r</code>. Оригінал лишається на місці.</div><div class="plain"><b>Простими словами:</b> «зроби копію». cp = copy.</div></div>
+<div class="tdef"><div class="t">mv &lt;що&gt; &lt;куди&gt;</div><div class="d">Переміщає файл або папку. Та сама команда й ПЕРЕЙМЕНОВУЄ: <code>mv old.txt new.txt</code>.</div><div class="plain"><b>Простими словами:</b> «перенеси» або «перейменуй». mv = move. Оригінал зникає зі старого місця.</div></div>
+<div class="tdef"><div class="t">rm &lt;файл&gt;</div><div class="d">Видаляє файл. Папку з вмістом — <code>rm -r</code>.</div><div class="plain"><b>Простими словами:</b> «видали». rm = remove.</div></div>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">cp README.md backup/README.md</span>   <span class="tw-cm"># копія у папку backup</span>
+<span class="tw-p">$</span> <span class="tw-c">mv draft.md notes.md</span>              <span class="tw-cm"># перейменування</span>
+<span class="tw-p">$</span> <span class="tw-c">mv notes.md docs/</span>                 <span class="tw-cm"># переміщення в папку docs</span>
+<span class="tw-p">$</span> <span class="tw-c">rm old.txt</span>                        <span class="tw-cm"># видалити файл</span>
+<span class="tw-p">$</span> <span class="tw-c">rm -r temp/</span>                       <span class="tw-cm"># видалити папку з усім вмістом</span></div></div>
+<table class="cmdtable">
+<tr><td>cp file dir/</td><td>Скопіювати файл у папку.</td></tr>
+<tr><td>cp -r dir1 dir2</td><td>Скопіювати папку з вмістом.</td></tr>
+<tr><td>mv file dir/</td><td>Перемістити файл.</td></tr>
+<tr><td>mv old new</td><td>Перейменувати.</td></tr>
+<tr><td>rm file</td><td>Видалити файл.</td></tr>
+<tr><td>rm -r dir</td><td>Видалити папку з вмістом.</td></tr>
+</table>
+<div class="note warn"><b>rm не має кошика.</b> Видалене термінальним rm не потрапляє в «Кошик» — відновити штатними засобами не можна. Перед <code>rm -r</code> двічі перевір шлях. У Git-репозиторії закомічені файли захищені історією: їх можна повернути навіть після rm (урок «reset · restore · revert»).</div>
+<div class="qcheck" data-qc="qc_cp"></div>
+<div class="qcheck" data-qc="qc_rm"></div>
+
+</section>
+<section class="lesson show" id="s4" data-n="s4">
+
+<div class="crumb">Термінал і файли</div>
+<h2>Дрібниці, що рятують новачка</h2>
+<p class="lead">Кілька звичок, які роблять роботу в терміналі швидкою й безпомилковою.</p>
+<div class="goalbox"><b>Ціль уроку</b>працювати швидко: автодоповнення, історія команд, шляхи і шаблони.</div>
+<table class="cmdtable">
+<tr><td>Tab</td><td>Автодоповнення назви файлу/папки. Почни друкувати й натисни Tab.</td></tr>
+<tr><td>↑ / ↓</td><td>Гортання попередніх команд (історія) — не треба передруковувати.</td></tr>
+<tr><td>clear (Ctrl+L)</td><td>Очистити екран термінала.</td></tr>
+<tr><td>Ctrl + C</td><td>Перервати поточну команду, що «зависла».</td></tr>
+<tr><td>Копіювати / вставити</td><td>У більшості терміналів: Ctrl+Shift+C / Ctrl+Shift+V (у Git Bash — права кнопка миші).</td></tr>
+</table>
+<div class="tdef"><div class="t">Спеціальні позначки шляху</div><div class="d"><code>.</code> — поточна папка; <code>..</code> — на рівень вгору; <code>~</code> — домашня папка; <code>/</code> — роздільник папок (на Windows у багатьох інструментах теж працює <code>/</code>).</div><div class="plain"><b>Простими словами:</b> це «скорочення-адреси». Напр. <code>cd ../data</code> = «вийди на рівень вгору й зайди в data».</div></div>
+<div class="tdef"><div class="t">Шаблон * (зірочка)</div><div class="d">Замінює «будь-які символи». <code>*.tmdl</code> — усі файли з розширенням .tmdl.</div><div class="plain"><b>Простими словами:</b> «усе, що підходить під шаблон». Знадобиться у .gitignore та командах.</div></div>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">cd pd</span><span class="tw-o">↹</span><span class="tw-cm">  ← натисни Tab, термінал сам допише «pdp-report/»</span>
+<span class="tw-p">$</span> <span class="tw-c">ls *.md</span>          <span class="tw-cm"># показати лише файли .md</span>
+<span class="tw-o">README.md</span></div></div>
+<div class="note tip">Якщо у назві папки є пробіл — бери шлях у лапки: <code>cd "My Reports"</code>. Інакше термінал сприйме це як дві окремі назви.</div>
+<div class="qcheck" data-qc="qc_tab"></div>
+<div class="qcheck" data-qc="qc_paths"></div>
+
+</section>
+<section class="lesson show" id="s5" data-n="s5">
+
+<div class="crumb">Термінал і файли</div>
+<h2>Встановлення Git і перший запуск</h2>
+<p class="lead">Перед роботою Git треба встановити й один раз представитися.</p>
+<div class="goalbox"><b>Ціль уроку</b>встановити Git, перевірити версію і представитися системі.</div>
+<h3>1. Встановити</h3>
+<div class="tdef"><div class="t">Звідки взяти Git</div><div class="d">Офіційний сайт <code>git-scm.com</code> — інсталятор для Windows, macOS, Linux. На Windows він приносить ще й «Git Bash» — зручний термінал.</div><div class="plain"><b>Простими словами:</b> завантаж і встанови, як звичайну програму, з налаштуваннями за замовчуванням.</div></div>
+<h3>2. Перевірити</h3>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">git --version</span>
+<span class="tw-o">git version 2.45.0</span>   <span class="tw-cm"># якщо бачиш версію — все встановлено</span></div></div>
+<h3>3. Представитися (один раз)</h3>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">git config --global user.name "Іван Коваленко"</span>
+<span class="tw-p">$</span> <span class="tw-c">git config --global user.email "ivan@company.com"</span></div></div>
+<div class="tdef"><div class="t">Навіщо це</div><div class="d">Ім'я та email підписують кожен твій коміт, щоб в історії було видно авторство.</div><div class="plain"><b>Простими словами:</b> Git «знайомиться» з тобою, щоб підписувати твої збереження. Детальніше — у модулі B, урок «Налаштування: config і .gitattributes».</div></div>
+<div class="note tip">У VS Code відкрий термінал через <code>Ctrl + `</code> і вводь команди прямо там — зручно бачити файли проєкту й термінал поруч.</div>
+<div class="qcheck" data-qc="qc_install"></div>
+
+</section>
+<section class="lesson show" id="s6" data-n="s6">
+
+<div class="crumb">Термінал і файли — перевірка</div>
+<h2>Вправи: термінал і файли</h2>
+<p class="lead">Перевір базу перед переходом до Git. Обери відповідь — побачиш пояснення.</p>
+<div class="goalbox"><b>Ціль уроку</b>закріпити базу термінала перед стартом Git.</div>
+<div class="quiz" data-q="modT"></div>
+
+</section>
+<div class="pager"><a href="00-start.html"><span class="lbl">← попередній модуль</span>Старт</a><a class="nxt" href="02-osnovy.html"><span class="lbl">наступний модуль →</span>Основи Git</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

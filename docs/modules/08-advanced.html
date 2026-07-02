@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Просунуті техніки · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="08-advanced">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html" class="active"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+<div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>git bisect: пошук бага</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Git hooks: автоматизація</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Worktrees: паралельні директорії</span></a>
+<a href="#s3" data-sec="s3" class="ex"><span class="num">04</span><span>Вправи · Модуль G</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+
+<div class="crumb">Модуль G — просунуті техніки</div>
+<h2>git bisect: знайти коміт, що вніс баг</h2>
+<p class="lead">Бінарний пошук по історії: замість перевіряти десятки комітів — лише log₂ кроків.</p>
+<div class="goalbox"><b>Ціль уроку</b>знаходити коміт-винуватець бінарним пошуком.</div>
+<div class="tdef"><div class="t">git bisect</div><div class="d">Ділить діапазон комітів навпіл: ти позначаєш поточний як good чи bad, Git звужує діапазон, доки не знайде перший «поганий» коміт.</div><div class="plain"><b>Простими словами:</b> гра «вгадай число»: Git щоразу ділить навпіл і питає «тут уже зламано?», швидко звужуючи до винного коміту.</div></div>
+<div class="widget"><div class="wtitle">Бінарний пошук винного коміту</div><div class="gplayer" data-p="bisect"></div><div class="glegend"><span><i style="background:#5bd6a8"></i>good (баг відсутній)</span><span><i style="background:#e3697f"></i>bad (баг є)</span><span><i style="background:#f0a35e"></i>невідомо / тест</span></div></div>
+<pre><span class="cmd">git bisect</span> <span class="arg">start</span>
+<span class="cmd">git bisect</span> <span class="arg">bad</span>            <span class="c"># поточний коміт зламаний</span>
+<span class="cmd">git bisect</span> <span class="arg">good a1b2c3d</span>   <span class="c"># старий коміт ще робочий</span>
+<span class="c"># Git робить checkout середнього коміту — тестуєш — і кажеш:</span>
+<span class="cmd">git bisect</span> <span class="arg">good</span>   <span class="c"># або</span>   <span class="cmd">git bisect</span> <span class="arg">bad</span>
+<span class="c"># … повторюєш, доки: "&lt;sha&gt; is the first bad commit"</span>
+<span class="cmd">git bisect</span> <span class="arg">reset</span>          <span class="c"># повернутися на свою гілку</span></pre>
+<div class="note tip"><b>PBIP-сценарій.</b> Звіт «раптом» порахувався інакше — bisect швидко вкаже коміт, де змінилась міра чи зв'язок, навіть серед сотень комітів.</div>
+
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Модуль G — просунуті техніки</div>
+<h2>Git hooks: автоматичні перевірки</h2>
+<p class="lead">Hook — локальний скрипт, що сам спрацьовує на певну подію Git.</p>
+<div class="goalbox"><b>Ціль уроку</b>автоматизувати перевірки перед комітом і пушем.</div>
+<div class="tdef"><div class="t">Git hook</div><div class="d">Скрипт у <code>.git/hooks/</code>, який Git запускає автоматично перед або після події (коміт, push).</div><div class="plain"><b>Простими словами:</b> «правило-автомат»: напр. не дати закомітити зламаний TMDL.</div></div>
+<table class="cmdtable">
+<tr><td>pre-commit</td><td>Перед комітом. Для PBIP: перевірити синтаксис TMDL/JSON, заблокувати секрети.</td></tr>
+<tr><td>commit-msg</td><td>Перевірити формат повідомлення (Conventional Commits).</td></tr>
+<tr><td>pre-push</td><td>Перед push. Напр. запустити Best Practice Analyzer.</td></tr>
+</table>
+<pre><span class="c"># .git/hooks/pre-commit (спрощено)</span>
+<span class="c"># 1) перевірити, що змінені .json валідні; інакше — стоп-коміт</span>
+<span class="c"># 2) перевірити відсутність шаблонів секретів</span></pre>
+<div class="note"><b>Команді.</b> Локальні hooks не потрапляють у <code>.git</code> репозиторію; щоб поширити їх, тримають скрипти в самому репозиторії (напр. папка <code>hooks/</code>) і підключають, або переносять перевірки в CI (Azure Pipelines) на сервері.</div>
+
+<div class="qcheck" data-qc="qc_hooks"></div>
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+
+<div class="crumb">Модуль G — просунуті техніки</div>
+<h2>Worktrees: кілька гілок одночасно на диску</h2>
+<p class="lead">Терміновий hotfix без stash і без переривання поточної роботи.</p>
+<div class="goalbox"><b>Ціль уроку</b>робити терміновий hotfix, не чіпаючи поточну роботу.</div>
+<div class="tdef"><div class="t">git worktree</div><div class="d">Дозволяє мати кілька робочих директорій з одного репозиторію — кожна на своїй гілці одночасно.</div><div class="plain"><b>Простими словами:</b> «друге вікно» того самого проєкту на іншій гілці: правиш hotfix у сусідній папці, не чіпаючи незакомічені зміни в основній.</div></div>
+<pre><span class="cmd">git worktree</span> <span class="arg">add ../project-hotfix hotfix/refresh</span>  <span class="c"># нова папка на гілці hotfix</span>
+<span class="c"># … правиш і комітиш hotfix у ../project-hotfix …</span>
+<span class="cmd">git worktree</span> <span class="arg">list</span>                                <span class="c"># перелік робочих директорій</span>
+<span class="cmd">git worktree</span> <span class="arg">remove ../project-hotfix</span>             <span class="c"># прибрати, коли готово</span></pre>
+<div class="note tip"><b>Альтернатива stash.</b> Замість «згорнути все вбік» — відкрити hotfix в окремій папці; основна директорія з недоробленою фічею лишається недоторканою.</div>
+
+<div class="qcheck" data-qc="qc_worktree"></div>
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+
+<div class="crumb">Модуль G — перевірка</div>
+<h2>Вправи: просунуті техніки</h2>
+<p class="lead">Матеріал модуля G пройдено (bisect, hooks, worktrees, а також add -p з модуля B). Перевір себе.</p>
+<div class="goalbox"><b>Ціль уроку</b>закріпити просунуті техніки.</div>
+<div class="quiz" data-q="modG"></div>
+
+</section>
+<div class="pager"><a href="07-komanda.html"><span class="lbl">← попередній модуль</span>Робота в команді</a><a class="nxt" href="09-glossary.html"><span class="lbl">наступний модуль →</span>Глосарій команд</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

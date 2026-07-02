@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Робота в команді · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="07-komanda">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html" class="active"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+<div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>.gitignore для PBIP</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Стратегія гілок</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Конфлікти у PBIP-файлах</span></a>
+<a href="#s3" data-sec="s3"><span class="num">04</span><span>Базові сценарії: двоє розробників</span></a>
+<a href="#s4" data-sec="s4"><span class="num">05</span><span>Сценарії середнього рівня</span></a>
+<a href="#s5" data-sec="s5"><span class="num">06</span><span>Довідник проблем (1–30)</span></a>
+<a href="#s6" data-sec="s6"><span class="num">07</span><span>Конвенції комітів і гілок</span></a>
+<a href="#s7" data-sec="s7"><span class="num">08</span><span>Робочі процеси: порівняння</span></a>
+<a href="#s8" data-sec="s8"><span class="num">09</span><span>Azure DevOps: pipelines і задачі</span></a>
+<a href="#s9" data-sec="s9"><span class="num">10</span><span>Безпека та контроль доступу</span></a>
+<a href="#s10" data-sec="s10"><span class="num">11</span><span>Робочий процес: merge → деплой</span></a>
+<a href="#s11" data-sec="s11" class="ex"><span class="num">12</span><span>Вправи · Модуль F</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>.gitignore для PBIP</h2>
+<p class="lead">.gitignore — список шляхів, які Git навмисно ігнорує. Для PBIP критично: деякі файли локальні або важкі.</p>
+<div class="goalbox"><b>Ціль уроку</b>тримати репозиторій чистим: що ігнорувати і чому.</div>
+<div class="tdef"><div class="t">.gitignore</div><div class="d">Текстовий файл у репозиторії зі списком шаблонів шляхів, які Git не відстежує й не комітить.</div><div class="plain"><b>Простими словами:</b> «список того, що не зберігати в історії» — тимчасове, важке чи особисте.</div></div>
+<h3>Що Power BI Desktop створює автоматично</h3>
+<pre><span class="c"># Дефолтний .gitignore від Power BI Desktop:</span>
+**/.pbi/localSettings.json
+**/.pbi/cache.abf</pre>
+<p><code>**/</code> = «у будь-якій підпапці».</p>
+<h3>Розширений варіант для команди</h3>
+<pre><span class="c"># Локальний кеш і налаштування Power BI</span>
+**/.pbi/
+*.pbix
+*.pbit
+<span class="c"># Сміття ОС та редакторів</span>
+.DS_Store
+Thumbs.db
+.vscode/</pre>
+<table class="cmdtable">
+<tr><td>cache.abf</td><td>Локальна копія моделі з даними (ABF = Analysis Services Backup). Важка, машинозалежна; спричиняє «type conflict» між ПК.</td></tr>
+<tr><td>localSettings.json</td><td>Налаштування лише для поточного користувача й комп'ютера.</td></tr>
+<tr><td>*.pbix / *.pbit</td><td>Бінарники. У PBIP-проєкті не потрібні в репозиторії.</td></tr>
+</table>
+<div class="note warn"><b>ОБОВ'ЯЗКОВО комітити:</b> <code>.tmdl</code>, вміст <code>definition/</code>, сам <code>.pbip</code> і <code>.gitignore</code>.</div>
+
+<div class="qcheck" data-qc="qc_ignore"></div>
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Стратегія гілок для PBIP-команди</h2>
+<p class="lead">Робоча модель: одна інтеграційна гілка main, feature-гілки, а прод досягається не через гілку, а через робочі області та deployment pipeline.</p>
+<div class="goalbox"><b>Ціль уроку</b>працювати короткими feature-гілками без хаосу.</div>
+<div class="cards">
+<div class="card"><h4>main</h4><p>Інтеграційна гілка. Сюди зливають feature-гілки. Під'єднана до Dev робочої області через Git integration.</p></div>
+<div class="card"><h4>feature/*</h4><p>Гілка під кожну зміну. Від main → merge назад у main після перевірки проєкту в Power BI Desktop.</p></div>
+<div class="card"><h4>Dev / Prod</h4><p>Це робочі області (workspaces), НЕ гілки Git. main синхронізує Dev; deployment pipeline промоутить Dev → Prod.</p></div>
+<div class="card"><h4>hotfix/*</h4><p>Термінове виправлення; так само зливається в main і їде в прод через Dev + pipeline.</p></div>
+</div>
+<div class="tdef"><div class="t">Pull Request (PR) / Merge Request</div><div class="d">Запит на злиття гілки в основну з переглядом колегою перед прийняттям.</div><div class="plain"><b>Простими словами:</b> «прошу влити мою гілку — гляньте перед цим».</div><div class="ex">У цій PBIP-команді детальний review діфів у PR непрактичний (TMDL/JSON-шум, без прев'ю звіту), тож зміни зливають у main напряму; роль бар'єру виконують валідація в Desktop, CI та deployment pipeline. Детальніше — урок «Робочий процес: merge → деплой».</div></div>
+<div class="tdef"><div class="t">CI (Continuous Integration)</div><div class="d">Автоматичні перевірки, що запускаються на сервері при push (напр. валідація моделі, Best Practice Analyzer).</div><div class="plain"><b>Простими словами:</b> «робот-контролер», що перевіряє зміни без участі людини.</div></div>
+<h3>Потік фічі у графі</h3>
+<div class="widget"><div class="wtitle">feature → merge у main</div><div class="gplayer" data-p="branching"></div></div>
+<div class="note tip"><b>Fabric / Power BI Git integration.</b> Гілку <code>main</code> прив'язують до Dev робочої області. Після push у main роблять Update from Git — Dev оновлюється (етап 1). Далі deployment pipeline промоутить Dev → Prod (етап 2).</div>
+
+<div class="order" data-o="or_feature"></div>
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Конфлікти у PBIP-файлах</h2>
+<p class="lead">PBIP діфиться як текст, але має специфіку. Де найчастіше виникають конфлікти й як читати.</p>
+<div class="goalbox"><b>Ціль уроку</b>вирішувати конфлікти TMDL/JSON і валідувати результат.</div>
+<table class="cmdtable">
+<tr><td>tables/*.tmdl</td><td>Дві гілки змінили міри в одній таблиці. Конфлікт у блоці <code>measure</code> чи порядку об'єктів.</td></tr>
+<tr><td>lineageTag</td><td>Регенеровані GUID розійшлися. Лишити будь-який валідний унікальний tag.</td></tr>
+<tr><td>relationships.tmdl</td><td>Паралельно додані зв'язки. Об'єднати обидва блоки <code>relationship</code>.</td></tr>
+<tr><td>PBIR (report JSON)</td><td>Зміни позицій/властивостей візуалів. Гранулярність PBIR зменшує конфлікти.</td></tr>
+</table>
+<div class="note warn"><b>Після вирішення TMDL-конфлікту відкрий проєкт у Power BI Desktop або провалідуй у Tabular Editor.</b> Git перевіряє лише текст, не валідність моделі.</div>
+<h3>Профілактика</h3>
+<ul>
+<li>Короткоживучі feature-гілки.</li>
+<li>Частий rebase на свіжий main, поки гілка маленька.</li>
+<li>Перевірка моделі в Power BI Desktop перед merge у main (бо review діфів у PR непрактичний).</li>
+<li>CI: автозапуск Best Practice Analyzer (Tabular Editor) на <code>.SemanticModel</code> при push.</li>
+</ul>
+
+<div class="qcheck" data-qc="qc_conflict_pbip"></div>
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+
+<div class="crumb">Модуль F — практика</div>
+<h2>Базові сценарії: двоє розробників</h2>
+<p class="lead">Кожен крок супроводжується git-командою та схемою трьох репозиторіїв: ліворуч локальний у <span style="color:var(--new)">Розробника A</span>, по центру — <span style="color:var(--blue)">сервер (хмара)</span>, праворуч — локальний у <span style="color:var(--blue)">Розробника B</span>. Найновіший коміт — угорі. Гортай кроки.</p>
+<div class="goalbox"><b>Ціль уроку</b>відпрацювати чотири типові командні ситуації покроково.</div>
+<div class="sc-legend"><span><i style="background:#f0a35e"></i>спільний / початковий коміт</span><span><i style="background:#5bd6a8"></i>коміт Розробника A</span><span><i style="background:#6cb6ff"></i>коміт Розробника B</span></div>
+<h3>Сценарій 1 — базовий цикл</h3>
+<p>Найфундаментальніше: як один коміт мандрує від A через сервер до B. Це основа, на якій тримаються всі інші сценарії.</p>
+<div class="widget"><div class="wtitle">commit → push → pull</div><div class="scplayer" data-s="basic1"></div></div>
+<h3>Сценарій 2 — паралельна робота, push відхилено</h3>
+<p>Двоє комітять одночасно різні файли. Хто пушить другим — отримує відмову <code>non-fast-forward</code> і робить <code>pull --rebase</code>. Конфлікту немає, бо файли різні.</p>
+<div class="widget"><div class="wtitle">паралельні коміти + pull --rebase</div><div class="scplayer" data-s="parallel"></div></div>
+<h3>Сценарій 3 — конфлікт того самого рядка</h3>
+<p>Найчастіший справжній конфлікт: обидва змінили ту саму міру. Покроково: від відмови до вирішення конфлікту й push.</p>
+<div class="widget"><div class="wtitle">конфлікт у model.tmdl та його вирішення</div><div class="scplayer" data-s="conflict"></div></div>
+<h3>Сценарій 4 — гілка для фічі</h3>
+<p>A створює feature-гілку, пушить її на сервер, B її забирає через fetch і приєднується до роботи в одній гілці.</p>
+<div class="widget"><div class="wtitle">switch -c → push -u → fetch → switch</div><div class="scplayer" data-s="feature"></div></div>
+
+</section>
+<section class="lesson show" id="s4" data-n="s4">
+
+<div class="crumb">Модуль F — практика</div>
+<h2>Сценарії середнього рівня</h2>
+<p class="lead">Складніші ситуації — теж покроково, з командами та тією ж схемою A / сервер / B.</p>
+<div class="goalbox"><b>Ціль уроку</b>відпрацювати складніші командні ситуації.</div>
+<div class="sc-legend"><span><i style="background:#f0a35e"></i>спільний коміт</span><span><i style="background:#5bd6a8"></i>коміт A</span><span><i style="background:#6cb6ff"></i>коміт B</span></div>
+<h3>Сценарій 5 — злиття фічі в main</h3>
+<p>Готову гілку feature зливають у main (локально <code>git merge</code> або кнопкою merge у веб) і пушать; обидва розробники оновлюють свій локальний main. Це стан перед деплоєм у Dev/Prod.</p>
+<div class="widget"><div class="wtitle">PR merge → pull в обох</div><div class="scplayer" data-s="mergepr"></div></div>
+<h3>Сценарій 6 — випадково закомічений cache.abf</h3>
+<p>A зробив <code>git add .</code> і затягнув важкий <code>cache.abf</code> → B отримує type-conflict при відкритті. Прибираємо через <code>git rm --cached</code> + .gitignore.</p>
+<div class="widget"><div class="wtitle">type-conflict через кеш та його усунення</div><div class="scplayer" data-s="cache"></div></div>
+<h3>Сценарій 7 — відновлення після reset --hard</h3>
+<p>A помилково скинув два коміти командою <code>reset --hard</code>. Здається, що робота втрачена — але <code>reflog</code> усе повертає.</p>
+<div class="widget"><div class="wtitle">втрата комітів та відновлення через reflog</div><div class="scplayer" data-s="reflog"></div></div>
+<h3>Сценарій 8 — терміновий hotfix через cherry-pick</h3>
+<p>Треба внести лише один коміт-фікс у prod, не зливаючи всю недороблену гілку. <code>cherry-pick</code> бере рівно один коміт.</p>
+<div class="widget"><div class="wtitle">cherry-pick одного коміту в prod</div><div class="scplayer" data-s="cherry"></div></div>
+
+</section>
+<section class="lesson show" id="s5" data-n="s5">
+
+<div class="crumb">Модуль F — довідник</div>
+<h2>Довідник проблем PBIP-команди (1–30)</h2>
+<p class="lead">Ситуативні кейси з командним розв'язанням крок за кроком. Доповнюють базові сценарії вище. A і B — два розробники.</p>
+<div class="goalbox"><b>Ціль уроку</b>швидко знаходити готове рішення типової проблеми.</div>
+
+<div class="scn"><span class="cat">Конфлікт моделі (TMDL)</span><h4><span class="num">1</span>Дубль lineageTag — модель не відкривається</h4>
+<p><b>Проблема:</b> після merge Power BI Desktop не відкриває проєкт: duplicate lineageTag.</p>
+<p><b>Причина:</b> обидві гілки додали об'єкти; при злитті два отримали однаковий GUID.</p>
+<pre><span class="cmd">git status</span>                      <span class="c"># бачимо конфлікт у tables/Sales.tmdl</span>
+<span class="c"># відкрити файл, замінити ОДИН lineageTag на новий унікальний GUID</span>
+<span class="cmd">git add</span> <span class="arg">tables/Sales.tmdl</span>
+<span class="cmd">git rebase</span> <span class="arg">--continue</span>           <span class="c"># або git commit (для merge)</span></pre>
+<p class="sol"><b>Підсумок:</b> lineageTag має бути унікальним у межах моделі; провалідувати в Tabular Editor.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт моделі</span><h4><span class="num">2</span>Потрібні обидві логіки міри</h4>
+<p><b>Проблема:</b> A зробив суму, B — зважений розрахунок однієї міри; merge дає конфлікт, але обидві версії цінні.</p>
+<p><b>Причина:</b> дві ідеї втиснуто в один об'єкт.</p>
+<pre><span class="c"># у конфліктному блоці лишити ОБИДВІ як дві окремі міри:</span>
+<span class="c">#   measure 'Total Sales'           = SUM(...)</span>
+<span class="c">#   measure 'Total Sales (weighted)' = SUMX(...)</span>
+<span class="cmd">git add</span> <span class="arg">tables/Sales.tmdl</span> && <span class="cmd">git rebase</span> <span class="arg">--continue</span></pre>
+<p class="sol"><b>Підсумок:</b> дві окремі міри замість однієї — конфлікт зникає, обидві логіки збережено.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт моделі</span><h4><span class="num">3</span>Однакова назва нової колонки</h4>
+<p><b>Проблема:</b> A і B додали колонку з однаковою назвою в одну таблицю → конфлікт + дубль.</p>
+<p><b>Причина:</b> неузгоджене іменування.</p>
+<pre><span class="c"># лишити один варіант; якщо потрібні обидві — перейменувати одну</span>
+<span class="cmd">git add</span> <span class="arg">tables/Employee.tmdl</span> && <span class="cmd">git commit</span></pre>
+<p class="sol"><b>Підсумок:</b> узгодити іменування наперед, щоб уникнути повтору.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт моделі</span><h4><span class="num">4</span>Неоднозначні зв'язки після merge</h4>
+<p><b>Проблема:</b> модель попереджає про ambiguous relationships.</p>
+<p><b>Причина:</b> обидва додали зв'язок між тими ж таблицями.</p>
+<pre><span class="c"># у relationships лишити один активний зв'язок, зайвий:</span>
+<span class="c">#   isActive: false   (або видалити блок relationship)</span>
+<span class="cmd">git add</span> <span class="arg">definition/relationships.tmdl</span> && <span class="cmd">git commit</span></pre>
+<p class="sol"><b>Підсумок:</b> між двома таблицями — лише один активний шлях.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт моделі</span><h4><span class="num">5</span>Видалена-vs-змінена таблиця</h4>
+<p><b>Проблема:</b> merge показує «deleted by us / modified by them».</p>
+<p><b>Причина:</b> A видалив таблицю, B у ній щось змінив.</p>
+<pre><span class="cmd">git status</span>                <span class="c"># deleted by us: tables/Old.tmdl</span>
+<span class="c"># А: таблиця не потрібна — перенести зміни в актуальну, прийняти видалення:</span>
+<span class="cmd">git rm</span> <span class="arg">tables/Old.tmdl</span>
+<span class="c"># Б: потрібна — відновити:</span>
+<span class="cmd">git checkout</span> <span class="arg">--theirs tables/Old.tmdl</span> && <span class="cmd">git add</span> <span class="arg">tables/Old.tmdl</span>
+<span class="cmd">git commit</span></pre>
+<p class="sol"><b>Підсумок:</b> свідомо вибрати — видалити чи відновити.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт моделі</span><h4><span class="num">6</span>Конфлікт у model.tmdl (культура / анотації)</h4>
+<p><b>Проблема:</b> конфлікт у службових рядках culture / annotation / списку таблиць.</p>
+<p><b>Причина:</b> обидва пересохранили модель, службові рядки розійшлись.</p>
+<pre><span class="c"># лишити один службовий блок; якщо мінялись таблиці — обєднати посилання</span>
+<span class="cmd">git add</span> <span class="arg">definition/model.tmdl</span> && <span class="cmd">git commit</span></pre>
+<p class="sol"><b>Підсумок:</b> провалідувати модель після злиття.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт моделі</span><h4><span class="num">7</span>Залежна зміна → битий референс</h4>
+<p><b>Проблема:</b> після часткового merge міра B посилається на колонку A, якої ще немає.</p>
+<p><b>Причина:</b> залежні зміни злиті не разом.</p>
+<pre><span class="cmd">git switch</span> <span class="arg">main</span> && <span class="cmd">git pull</span>          <span class="c"># підтягнути колонку (A)</span>
+<span class="cmd">git switch</span> <span class="arg">feature</span> && <span class="cmd">git rebase</span> <span class="arg">main</span>  <span class="c"># тепер міра бачить колонку</span></pre>
+<p class="sol"><b>Підсумок:</b> зливати залежні зміни одним PR або в правильному порядку.</p></div>
+
+<div class="scn"><span class="cat">Кеш / службові файли</span><h4><span class="num">8</span>localSettings.json створює шум</h4>
+<p><b>Проблема:</b> у кожному PR з'являються зміни <code>localSettings.json</code> від іншого розробника.</p>
+<p><b>Причина:</b> персональні налаштування під контролем версій.</p>
+<pre><span class="cmd">git rm</span> <span class="arg">--cached "**/.pbi/localSettings.json"</span>
+<span class="c"># переконатись, що в .gitignore є **/.pbi/</span>
+<span class="cmd">git commit</span> <span class="arg">-m "stop tracking localSettings"</span></pre>
+<p class="sol"><b>Підсумок:</b> персональні налаштування не комітяться.</p></div>
+
+<div class="scn"><span class="cat">Кеш / службові файли</span><h4><span class="num">9</span>*.pbix роздуває репозиторій</h4>
+<p><b>Проблема:</b> хтось закомітив бінарний <code>.pbix</code>; репо важчає з кожним коммітом.</p>
+<p><b>Причина:</b> бінарник зберігається повністю при кожній зміні.</p>
+<pre><span class="cmd">git rm</span> <span class="arg">--cached *.pbix</span>
+<span class="c"># echo "*.pbix" у .gitignore</span>
+<span class="cmd">git commit</span> <span class="arg">-m "ignore pbix"</span>
+<span class="c"># очистити історію (за потреби): git filter-repo --path-glob '*.pbix' --invert-paths</span></pre>
+<p class="sol"><b>Підсумок:</b> бінарники не тримати в репозиторії.</p></div>
+
+<div class="scn"><span class="cat">Кеш / службові файли</span><h4><span class="num">10</span>.gitignore не діє на вже доданий файл</h4>
+<p><b>Проблема:</b> файл у .gitignore, але Git далі показує його зміни.</p>
+<p><b>Причина:</b> .gitignore діє лише на ще НЕ відстежувані файли.</p>
+<pre><span class="cmd">git rm</span> <span class="arg">--cached path/to/file</span>
+<span class="cmd">git commit</span> <span class="arg">-m "apply gitignore"</span></pre>
+<p class="sol"><b>Підсумок:</b> після rm --cached ignore починає діяти.</p></div>
+
+<div class="scn"><span class="cat">Форматування / інструменти</span><h4><span class="num">11</span>Whitespace-churn через різні версії Tabular Editor</h4>
+<p><b>Проблема:</b> у diff сотні «змін» — лише відступи й порядок рядків, логіка та сама.</p>
+<p><b>Причина:</b> A і B серіалізують TMDL різними версіями/налаштуваннями.</p>
+<pre><span class="c"># узгодити версію Tabular Editor і serialization settings у команді</span>
+<span class="c"># один нормалізуючий коміт спільним інструментом:</span>
+<span class="cmd">git add</span> <span class="arg">.</span> && <span class="cmd">git commit</span> <span class="arg">-m "normalize TMDL serialization"</span></pre>
+<p class="sol"><b>Підсумок:</b> однакові налаштування серіалізації прибирають шумні діфи.</p></div>
+
+<div class="scn"><span class="cat">Форматування / інструменти</span><h4><span class="num">12</span>Битий format string через локаль</h4>
+<p><b>Проблема:</b> після merge числові/SVG-міри показують кому замість крапки або некоректний формат.</p>
+<p><b>Причина:</b> у <code>FORMAT()</code> не задано локаль.</p>
+<pre><span class="c"># задати локаль явно:</span>
+<span class="c">#   = FORMAT([Value], "0.00", "en-US")</span>
+<span class="cmd">git add</span> <span class="arg">tables/Sales.tmdl</span> && <span class="cmd">git commit</span> <span class="arg">-m "fix FORMAT locale"</span></pre>
+<p class="sol"><b>Підсумок:</b> для SVG-координат і чисел завжди вказувати "en-US".</p></div>
+
+<div class="scn"><span class="cat">Git-механіка</span><h4><span class="num">13</span>Випадковий detached HEAD</h4>
+<p><b>Проблема:</b> після <code>checkout &lt;sha&gt;</code> зроблено коміти, потім перемкнулись на гілку — коміти «зникли».</p>
+<p><b>Причина:</b> робота велась без гілки (detached HEAD).</p>
+<pre><span class="cmd">git switch</span> <span class="arg">-c feature/save</span>      <span class="c"># закріпити коміти гілкою ДО перемикання</span>
+<span class="c"># якщо вже пізно:</span>
+<span class="cmd">git reflog</span>                       <span class="c"># знайти SHA</span>
+<span class="cmd">git branch</span> <span class="arg">rescue &lt;sha&gt;</span></pre>
+<p class="sol"><b>Підсумок:</b> робота без гілки = ризик загубити коміти.</p></div>
+
+<div class="scn"><span class="cat">Git-механіка</span><h4><span class="num">14</span>Конфлікт-шторм у довгій гілці</h4>
+<p><b>Проблема:</b> гілка жила два тижні; при merge — десятки конфліктів.</p>
+<p><b>Причина:</b> гілка сильно відійшла від main.</p>
+<pre><span class="cmd">git switch</span> <span class="arg">feature</span>
+<span class="cmd">git rebase</span> <span class="arg">main</span>                 <span class="c"># робити ЩОДНЯ, поки гілка маленька</span>
+<span class="c"># велику фічу розбивати на кілька дрібних PR</span></pre>
+<p class="sol"><b>Підсумок:</b> частий rebase не дає історіям сильно розійтись.</p></div>
+
+<div class="scn"><span class="cat">Git-механіка</span><h4><span class="num">15</span>Безлад у комітах перед PR</h4>
+<p><b>Проблема:</b> у гілці 12 хаотичних комітів; review важко читати.</p>
+<p><b>Причина:</b> коміти не причесані перед PR.</p>
+<pre><span class="cmd">git rebase</span> <span class="arg">-i main</span>              <span class="c"># squash/fixup дрібних, reword повідомлень</span>
+<span class="cmd">git push</span> <span class="arg">--force-with-lease</span>     <span class="c"># гілка особиста — безпечно</span></pre>
+<p class="sol"><b>Підсумок:</b> чистий список комітів спрощує review.</p></div>
+
+<div class="scn"><span class="cat">Git-механіка</span><h4><span class="num">16</span>Конфлікт у файлі-вказівнику .pbip</h4>
+<p><b>Проблема:</b> конфлікт у <code>PDP.pbip</code> після того, як обидва пересохранили проєкт.</p>
+<p><b>Причина:</b> службовий JSON-вказівник розійшовся.</p>
+<pre><span class="cmd">git status</span>                <span class="c"># конфлікт у PDP.pbip</span>
+<span class="c"># лишити одну валідну версію; перевірити перелік артефактів (Report + SemanticModel)</span>
+<span class="cmd">git add</span> <span class="arg">PDP.pbip</span> && <span class="cmd">git commit</span></pre>
+<p class="sol"><b>Підсумок:</b> відкрити в Desktop для перевірки після злиття.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт звіту (PBIR)</span><h4><span class="num">17</span>Обидва пересунули той самий візуал</h4>
+<p><b>Проблема:</b> конфлікт у JSON одного візуала (координати/розмір).</p>
+<p><b>Причина:</b> A і B рухали один візуал.</p>
+<pre><span class="cmd">git checkout</span> <span class="arg">--ours &lt;visual.json&gt;</span>   <span class="c"># або виставити позицію вручну в Desktop</span>
+<span class="cmd">git add</span> <span class="arg">&lt;visual.json&gt;</span> && <span class="cmd">git rebase</span> <span class="arg">--continue</span></pre>
+<p class="sol"><b>Підсумок:</b> модульність PBIR ізолює конфлікт одним файлом.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт звіту (PBIR)</span><h4><span class="num">18</span>Обидва додали нову сторінку</h4>
+<p><b>Проблема:</b> конфлікт у списку/порядку сторінок.</p>
+<p><b>Причина:</b> паралельне додавання сторінок.</p>
+<pre><span class="c"># обєднати: лишити обидві сторінки, узгодити порядок</span>
+<span class="cmd">git add</span> <span class="arg">definition/.../pages</span> && <span class="cmd">git commit</span></pre>
+<p class="sol"><b>Підсумок:</b> перевірити навігацію сторінок у Desktop.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт звіту (PBIR)</span><h4><span class="num">19</span>Несподіваний diff після авто-міграції на PBIR</h4>
+<p><b>Проблема:</b> звіт дав великий diff формату після відкриття/збереження у Service.</p>
+<p><b>Причина:</b> автоматична міграція звіту на формат PBIR (за замовч. з 2026).</p>
+<pre><span class="cmd">git add</span> <span class="arg">.</span> && <span class="cmd">git commit</span> <span class="arg">-m "Migrate report to PBIR"</span>  <span class="c"># окремим комітом</span></pre>
+<p class="sol"><b>Підсумок:</b> не змішувати міграцію з логічними змінами.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт звіту (PBIR)</span><h4><span class="num">20</span>Великий бінарний asset роздуває репо</h4>
+<p><b>Проблема:</b> у звіт додано важке зображення; репо росте.</p>
+<p><b>Причина:</b> бінарні asset-и зберігаються повністю.</p>
+<pre><span class="cmd">git lfs</span> <span class="arg">install</span>
+<span class="cmd">git lfs</span> <span class="arg">track "*.png"</span>
+<span class="cmd">git add</span> <span class="arg">.gitattributes</span> && <span class="cmd">git commit</span> <span class="arg">-m "LFS for images"</span></pre>
+<p class="sol"><b>Підсумок:</b> великі бінарники — у Git LFS (окреме сховище).</p></div>
+
+<div class="scn"><span class="cat">Deploy / Fabric / CI</span><h4><span class="num">21</span>Fabric workspace розходиться з гілкою</h4>
+<p><b>Проблема:</b> у Fabric Git integration workspace показує uncommitted changes, що не збігаються з гілкою.</p>
+<p><b>Причина:</b> хтось правив прямо у workspace, оминаючи Git.</p>
+<pre><span class="c"># джерело істини — Git. Або закомітити зміни workspace у гілку,</span>
+<span class="c"># або відкинути їх і зробити Update from Git у Fabric</span>
+<span class="cmd">git pull</span> && <span class="cmd">git push</span></pre>
+<p class="sol"><b>Підсумок:</b> не правити workspace напряму, повз Git.</p></div>
+
+<div class="scn"><span class="cat">Deploy / Fabric / CI</span><h4><span class="num">22</span>Deployment pipeline перезаписав міру з Service</h4>
+<p><b>Проблема:</b> після deploy зникла міра, яку хтось додав напряму в Service.</p>
+<p><b>Причина:</b> джерелом деплою був Git, а зміну зробили повз нього.</p>
+<pre><span class="cmd">git switch</span> <span class="arg">-c fix/restore-measure</span>
+<span class="cmd">git add</span> <span class="arg">tables/Sales.tmdl</span> && <span class="cmd">git commit</span> <span class="arg">-m "restore measure"</span>
+<span class="cmd">git switch</span> <span class="arg">main</span> && <span class="cmd">git merge</span> <span class="arg">fix/restore-measure</span> && <span class="cmd">git push</span>
+<span class="c"># далі в Service: Dev → Update from Git → Deployment pipeline: Dev → Prod</span></pre>
+<p class="sol"><b>Підсумок:</b> усі зміни лише через Git → Dev (sync) → pipeline (Prod), не напряму в Service.</p></div>
+
+<div class="scn"><span class="cat">Deploy / Fabric / CI</span><h4><span class="num">23</span>Втрата партицій incremental refresh після deploy</h4>
+<p><b>Проблема:</b> після Git sync → pipeline → refresh історичні партиції зникли.</p>
+<p><b>Причина:</b> деплой метаданих перезаписав політику/партиції; дані не зберігаються в Git.</p>
+<pre><span class="c"># деплоїти лише МЕТАДАНІ (не дані); перевірити RangeStart / RangeEnd</span>
+<span class="c"># після деплою — повний refresh для перебудови партицій</span>
+<span class="c"># діагностика партицій через XMLA: DAX Studio / Tabular Editor 2</span></pre>
+<p class="sol"><b>Підсумок:</b> партиції перебудувати після deploy; дані поза Git.</p></div>
+
+<div class="scn"><span class="cat">Deploy / Fabric / CI</span><h4><span class="num">24</span>CI падає на Best Practice Analyzer</h4>
+<p><b>Проблема:</b> PR не проходить — CI повертає помилки BPA (іменування мір тощо).</p>
+<p><b>Причина:</b> зміни порушують узгоджені правила якості.</p>
+<pre><span class="c"># виправити локально: Tabular Editor → Best Practice Analyzer</span>
+<span class="cmd">git add</span> <span class="arg">.</span> && <span class="cmd">git commit</span> <span class="arg">-m "fix BPA: measure naming"</span>
+<span class="cmd">git push</span>                       <span class="c"># оновити PR → CI має пройти</span></pre>
+<p class="sol"><b>Підсумок:</b> дотримуватись узгоджених правил якості моделі.</p></div>
+
+<div class="scn"><span class="cat">Deploy / Fabric / CI</span><h4><span class="num">25</span>Зміни в main є, але прод не оновився</h4>
+<p><b>Проблема:</b> feature злито в main і запушено, але у Prod робочій області змін немає.</p>
+<p><b>Причина:</b> пропущено один із двох етапів: або Dev не синхронізовано з Git, або не виконано промоут Dev → Prod.</p>
+<pre><span class="cmd">git log</span> <span class="arg">--oneline -1</span>     <span class="c"># переконатись, що коміт справді в main/origin</span>
+<span class="c"># Power BI Service:</span>
+<span class="c">#   етап 1 — Dev workspace → Update from Git   (підтягнути main)</span>
+<span class="c">#   етап 2 — Deployment pipeline → Deploy: Dev → Prod</span></pre>
+<p class="sol"><b>Підсумок:</b> у прод зміни їдуть лише через ОБИДВА етапи — Git sync у Dev, потім pipeline у Prod.</p></div>
+
+<div class="scn"><span class="cat">Безпека</span><h4><span class="num">26</span>Секрет / рядок підключення в M-виразі</h4>
+<p><b>Проблема:</b> у Power Query (M) чи TMDL потрапив пароль; уже в історії на сервері.</p>
+<p><b>Причина:</b> чутливі дані закомічено в текст.</p>
+<pre><span class="c"># 1) РОТУВАТИ секрет — він скомпрометований</span>
+<span class="c"># 2) видалити з історії:</span>
+<span class="cmd">git filter-repo</span> <span class="arg">--path definition/.../expressions.tmdl --invert-paths</span>
+<span class="cmd">git push</span> <span class="arg">--force-with-lease</span>     <span class="c"># узгодити з командою</span>
+<span class="c"># 3) надалі — параметри / credential store</span></pre>
+<p class="sol"><b>Підсумок:</b> ніколи не зашивати секрети в код.</p></div>
+
+<div class="scn"><span class="cat">Налаштування</span><h4><span class="num">27</span>Git щоразу питає логін і пароль</h4>
+<p><b>Проблема:</b> кожен push/pull через HTTPS вимагає вводити креденшли заново.</p>
+<p><b>Причина:</b> не налаштований credential helper — Git нікуди не зберігає токен.</p>
+<pre><span class="cmd">git config</span> <span class="arg">--global credential.helper manager</span>   <span class="c"># Windows: Git Credential Manager</span>
+<span class="c"># macOS: credential.helper osxkeychain; Linux: store або cache</span>
+<span class="c"># альтернатива — перейти на SSH-ключі (урок «Автентифікація»)</span></pre>
+<p class="sol"><b>Підсумок:</b> токен вводиться один раз — далі його віддає менеджер креденшлів.</p></div>
+
+<div class="scn"><span class="cat">Продуктивність</span><h4><span class="num">28</span>Клонування величезне й повільне</h4>
+<p><b>Проблема:</b> репозиторій з довгою історією та великими asset-ами тягнеться дуже довго.</p>
+<p><b>Причина:</b> clone за замовчуванням забирає ВСЮ історію всіх файлів.</p>
+<pre><span class="cmd">git clone</span> <span class="arg">--depth 1 &lt;url&gt;</span>            <span class="c"># shallow: лише останній стан, без історії</span>
+<span class="cmd">git fetch</span> <span class="arg">--unshallow</span>                <span class="c"># добрати повну історію пізніше, якщо треба</span>
+<span class="cmd">git sparse-checkout</span> <span class="arg">set Reports/PDP</span>  <span class="c"># викачати в робочу папку лише потрібний шлях</span></pre>
+<p class="sol"><b>Підсумок:</b> shallow clone і sparse-checkout дають швидкий старт на великих репозиторіях.</p></div>
+
+<div class="scn"><span class="cat">Історія</span><h4><span class="num">29</span>Помилковий merge у main уже запушено</h4>
+<p><b>Проблема:</b> у main злили гілку, якої там бути не мало; історію переписувати не можна — main спільний.</p>
+<p><b>Причина:</b> merge зроблено не з тієї гілки або зарано.</p>
+<pre><span class="cmd">git log</span> <span class="arg">--oneline --merges -3</span>        <span class="c"># знайти SHA merge-коміту</span>
+<span class="cmd">git revert</span> <span class="arg">-m 1 &lt;merge-sha&gt;</span>          <span class="c"># -m 1 = лишити сторону main, скасувати влиту гілку</span>
+<span class="cmd">git push</span></pre>
+<p class="sol"><b>Підсумок:</b> revert -m 1 безпечно скасовує merge новим комітом. Нюанс: щоб пізніше влити ту саму гілку знову, спершу revert самого revert-коміту.</p></div>
+
+<div class="scn"><span class="cat">Конфлікт звіту (PBIR)</span><h4><span class="num">30</span>Після «безконфліктного» merge зник візуал</h4>
+<p><b>Проблема:</b> merge пройшов без CONFLICT, але у звіті бракує візуала або він зламаний.</p>
+<p><b>Причина:</b> обидва правили сусідні блоки одного page.json; текстовий auto-merge склав синтаксично валідний, але логічно неповний JSON.</p>
+<pre><span class="cmd">git log</span> <span class="arg">-p -- "*/pages/SalesPage/page.json"</span>   <span class="c"># де саме загубився visualContainer</span>
+<span class="cmd">git checkout</span> <span class="arg">&lt;sha&gt; -- &lt;шлях до page.json&gt;</span>     <span class="c"># повернути файл з коміту, де візуал ще був</span>
+<span class="c"># або відтворити візуал у Desktop і закомітити</span></pre>
+<p class="sol"><b>Підсумок:</b> «без конфлікту» ≠ «коректно». Після merge PBIP-звіт завжди відкривають у Desktop для валідації.</p></div>
+
+<div class="qcheck" data-qc="qc_ref30"></div>
+</section>
+<section class="lesson show" id="s6" data-n="s6">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Конвенції повідомлень комітів і назв гілок</h2>
+<p class="lead">Узгоджений формат робить історію читабельною й придатною для автоматизації.</p>
+<div class="goalbox"><b>Ціль уроку</b>писати повідомлення й називати гілки за стандартом команди.</div>
+<div class="tdef"><div class="t">Conventional Commits</div><div class="d">Стандарт повідомлень: <code>&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;</code>, за потреби — тіло й футер.</div><div class="plain"><b>Простими словами:</b> кожен коміт починається з типу зміни й короткого опису — легко читати й навіть будувати changelog автоматично.</div><div class="ex"><code>feat(model): add YTD Sales measure</code></div></div>
+<table class="cmdtable">
+<tr><td>feat</td><td>нова функція (міра, таблиця, сторінка).</td></tr>
+<tr><td>fix</td><td>виправлення помилки (формула, зв'язок).</td></tr>
+<tr><td>refactor</td><td>зміна без зміни поведінки (перейменування, чистка).</td></tr>
+<tr><td>docs</td><td>документація (README, описи).</td></tr>
+<tr><td>chore</td><td>службове (.gitignore, конфіги, оновлення).</td></tr>
+</table>
+<pre><span class="c"># Добре:</span>
+feat(model): add Revenue YoY measure
+fix(report): correct Sales page filter
+<span class="c"># Погано:</span>
+update
+fixes
+wip</pre>
+<div class="tdef"><div class="t">Атомарний коміт</div><div class="d">Один коміт — одна логічна зміна.</div><div class="plain"><b>Простими словами:</b> не змішуй виправлення бага й нову міру в одному коміті — їх важко рев'ювити й відкочувати окремо.</div></div>
+<h3>Назви гілок</h3>
+<pre><span class="c"># Формат: &lt;type&gt;/&lt;short-description&gt;</span>
+feature/add-revenue-metric
+fix/sales-filter
+hotfix/prod-refresh-error
+<span class="c"># Погано: my-branch, test, fix2</span></pre>
+<div class="note tip"><b>Зв'язок із задачами.</b> Додавай ID робочого елемента в коміт чи PR: <code>#123</code> або <code>Closes #123</code> — Azure DevOps автоматично прив'яже зміну до задачі (трасування).</div>
+
+<div class="qcheck" data-qc="qc_conv"></div>
+</section>
+<section class="lesson show" id="s7" data-n="s7">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Робочі процеси: Feature Branch, Gitflow, Trunk-based</h2>
+<p class="lead">Три поширені моделі. Для невеликої BI-команди важлива простота.</p>
+<div class="goalbox"><b>Ціль уроку</b>обрати модель гілкування під розмір команди.</div>
+<div class="cards">
+<div class="card"><h4>Feature Branch</h4><p>Кожна зміна — у власній гілці від main, потім merge назад. Просто, ізольовано. Підходить більшості BI-команд.</p></div>
+<div class="card"><h4>Gitflow</h4><p>Багато довгоживучих гілок (develop, release/*, hotfix/*, feature/*). Потужно, але складно й важко для PBIP-моделей.</p></div>
+<div class="card"><h4>Trunk-based</h4><p>Усі часто зливають у одну гілку (main) маленькими порціями. Мінімум розходжень і конфліктів.</p></div>
+</div>
+<div class="tdef"><div class="t">Чому простіше — краще для PBIP</div><div class="d">PBIP/PBIR-діфи важко рев'ювити у PR, а довгі гілки накопичують складні merge-конфлікти моделі.</div><div class="plain"><b>Простими словами:</b> що менше й коротше гілки, то менше болю з конфліктами TMDL/JSON.</div></div>
+<div class="note tip"><b>Модель цієї команди</b> — близька до Feature Branch / Trunk-based: короткі feature-гілки → merge у main → push → Git sync у Dev → deployment pipeline у Prod. Без важкого PR-review; гейтом якості є валідація в Desktop, CI/BPA і поетапний деплой (урок «Робочий процес: merge → деплой»).</div>
+
+<div class="qcheck" data-qc="qc_flows"></div>
+</section>
+<section class="lesson show" id="s8" data-n="s8">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Azure DevOps: pipelines, задачі, політики</h2>
+<p class="lead">Що дає Azure DevOps навколо Git-репозиторію PBIP.</p>
+<div class="goalbox"><b>Ціль уроку</b>звʼязати репозиторій із задачами та автоматичними перевірками.</div>
+<div class="tdef"><div class="t">Work items (робочі елементи)</div><div class="d">Задачі / баги / User Stories в Azure DevOps з власними ID.</div><div class="plain"><b>Простими словами:</b> «квитки» роботи; згадка ID у коміті прив'язує зміну до задачі для трасування.</div></div>
+<pre><span class="c"># у повідомленні коміту або описі:</span>
+fix(report): correct sales filter   #123
+<span class="c"># Closes #123 / Fixes #456 — автозв'язок із задачею</span></pre>
+<div class="tdef"><div class="t">Azure Pipelines (CI/CD)</div><div class="d">Автоматичні конвеєри, що запускаються на події (push, оновлення гілки) і виконують кроки: валідація, тести, публікація.</div><div class="plain"><b>Простими словами:</b> «робот-складальник» на сервері. Для PBIP: перевірити модель (BPA), за потреби — автоматично опублікувати в Dev workspace.</div></div>
+<pre><span class="c"># azure-pipelines.yml (спрощено)</span>
+trigger:
+  branches: [ main ]
+steps:
+  - script: <span class="arg">"запуск Best Practice Analyzer на .SemanticModel"</span>   <span class="c"># CI-перевірка</span>
+  - script: <span class="arg">"publish до Analytics-DEV"</span>                        <span class="c"># авто-публікація в Dev</span></pre>
+<div class="tdef"><div class="t">Branch policies (політики гілки)</div><div class="d">Правила на захищеній гілці (напр. обов'язкова CI-перевірка перед merge).</div><div class="plain"><b>Простими словами:</b> необов'язковий запобіжник. Ця команда не вимагає рев'ю діфів, але може лишити автоматичну CI-перевірку як умову.</div></div>
+<div class="note"><b>Узгоджено з процесом команди:</b> Azure Pipelines автоматизує CI (BPA) і публікацію в Dev; промоут Dev → Prod — через deployment pipeline; work items дають трасування. PR-review не є обов'язковим гейтом.</div>
+
+<div class="qcheck" data-qc="qc_devops"></div>
+</section>
+<section class="lesson show" id="s9" data-n="s9">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Безпека та контроль доступу</h2>
+<p class="lead">Захист гілок, ролі та головне — секрети поза репозиторієм.</p>
+<div class="goalbox"><b>Ціль уроку</b>захистити main і тримати секрети поза Git.</div>
+<div class="tdef"><div class="t">Branch protection (захист гілки)</div><div class="d">Налаштування, що обмежують прямі зміни захищеної гілки (напр. лише з проходженням CI).</div><div class="plain"><b>Простими словами:</b> «замок» на main, щоб ніхто не пушив туди небезпечне напряму.</div></div>
+<div class="tdef"><div class="t">Рольова модель доступу</div><div class="d">Різні рівні прав: read (перегляд), contribute (коміт у feature-гілки), maintainer/admin (керування).</div><div class="plain"><b>Простими словами:</b> кожен має рівно стільки прав, скільки треба для його ролі.</div></div>
+<h3>Секрети — НІКОЛИ не в Git</h3>
+<div class="tdef"><div class="t">Патерн .env + .env.example</div><div class="d"><code>.env</code> з реальними секретами додають у <code>.gitignore</code>; у репозиторій комітять лише <code>.env.example</code> — шаблон без значень.</div><div class="plain"><b>Простими словами:</b> у Git лежить «бланк» зі списком потрібних ключів, а самі ключі — лише локально.</div></div>
+<pre><span class="c"># .env.example (у Git) — без значень</span>
+PBI_CLIENT_ID=
+PBI_CLIENT_SECRET=
+<span class="c"># .env (у .gitignore) — реальні значення, лише локально</span></pre>
+<div class="tdef"><div class="t">Pre-commit hook для секретів</div><div class="d">Локальний скрипт, що перед комітом шукає шаблони секретів і блокує коміт, якщо знайде.</div><div class="plain"><b>Простими словами:</b> «охоронець», що не дає випадково закомітити пароль.</div></div>
+<div class="note warn"><b>Якщо секрет уже закомічено:</b> 1) негайно <b>ротувати</b> (вважати скомпрометованим); 2) видалити з історії — <code>git filter-repo</code> або BFG Repo-Cleaner; 3) узгоджений <code>push --force-with-lease</code>. Деталі — кейс 26 у довіднику.</div>
+
+<div class="qcheck" data-qc="qc_security"></div>
+</section>
+<section class="lesson show" id="s10" data-n="s10">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Реальний процес: merge у main → деплой у прод</h2>
+<p class="lead">Огляд PBIP/PBIR-діфів у PR/веб-інтерфейсі непрактичний (текстовий TMDL і JSON-шум, без візуального прев'ю звіту), тому команда не робить ставку на PR-review. Зміни швидко зливаються в main, а справжній контроль — це валідація перед злиттям, CI та поетапний deployment pipeline.</p>
+<div class="goalbox"><b>Ціль уроку</b>пройти повний шлях зміни: гілка → main → Dev → Prod.</div>
+<h3>Послідовність</h3>
+<div class="flow">
+  <div class="flow-box"><div class="fb-k">гілка</div><div class="fb-t">feature/*</div><div class="fb-m">робота + перевірка в Desktop</div></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box"><div class="fb-k">гілка</div><div class="fb-t">main</div><div class="fb-m">merge + git push у веб (origin)</div></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box ws"><div class="fb-k">workspace</div><div class="fb-t">Dev</div><div class="fb-m">Update from Git</div><div class="fb-s">етап 1 · Git sync</div></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box ws"><div class="fb-k">workspace</div><div class="fb-t">Prod</div><div class="fb-m">Deployment pipeline</div><div class="fb-s">етап 2 · pipeline</div></div>
+</div>
+<ol>
+<li>Робота у <code>feature/*</code>; перед злиттям проєкт відкривають у Power BI Desktop і перевіряють (модель валідна, міри рахують).</li>
+<li>feature-гілку зливають у <code>main</code> і пушать у веб (Azure DevOps).</li>
+<li><strong>Етап 1 — Git sync:</strong> <code>main</code> під'єднано до Dev робочої області через Git integration. У Power BI Service роблять Update from Git — Dev отримує зміни.</li>
+<li><strong>Етап 2 — Deployment pipeline:</strong> вміст промоутять з Dev у Prod робочу область.</li>
+</ol>
+<h3>Команди</h3>
+<pre><span class="cmd">git switch</span> <span class="arg">feature/okr-summary</span>
+<span class="c"># … правки в TMDL/PBIR, перевірка у Power BI Desktop …</span>
+<span class="cmd">git switch</span> <span class="arg">main</span>
+<span class="cmd">git merge</span> <span class="arg">feature/okr-summary</span>    <span class="c"># локальне злиття у main</span>
+<span class="cmd">git push</span>                          <span class="c"># відправити у веб (origin)</span>
+<span class="c"># далі — не в Git, а в Power BI Service:</span>
+<span class="c">#   етап 1) Dev workspace → Update from Git   (синхронізація)</span>
+<span class="c">#   етап 2) Deployment pipeline: Dev → Prod   (деплой у прод)</span></pre>
+<div class="note"><b>Замість PR-review</b> бар'єрами якості є: перевірка моделі в Desktop перед merge, автоматичний CI/BPA на <code>.SemanticModel</code>, і поетапний деплой — у Prod зміни потрапляють лише після проходження Dev.</div>
+<h3>Чим це відрізняється від класичного PR-флоу</h3>
+<table class="cmdtable">
+<tr><td>Класичний</td><td>feature → PR з review та обговоренням діфів → merge у main.</td></tr>
+<tr><td>Тут</td><td>feature → merge у main (без важкого review діфів) → push → Git sync у Dev → pipeline у Prod.</td></tr>
+</table>
+<div class="note tip"><b>Hotfix:</b> терміновий фікс так само зливають у main і пушать; після Git sync у Dev його промоутять через pipeline у Prod. За потреби — cherry-pick потрібного коміту (Сценарій 8).</div>
+<h3>Підсумок курсу</h3>
+<ul>
+<li><strong>Зони:</strong> working dir → staging (add) → repo (commit) → remote (push).</li>
+<li><strong>Локально vs хмара:</strong> дві окремі копії; fetch/pull забирають, push відправляє; при розбіжності — pull --rebase.</li>
+<li><strong>Гілки:</strong> merge зберігає історію, rebase переписує лінійно.</li>
+<li><strong>Виправлення:</strong> restore (файли), reset (локально), revert (безпечно для спільних), reflog (рятівне коло).</li>
+<li><strong>PBIP:</strong> текст замість бінарника → реальний контроль версій; TMDL (модель), PBIR (звіт), <code>.pbi/</code> → .gitignore.</li>
+<li><strong>Деплой:</strong> main → Dev workspace (Git sync) → Prod workspace (deployment pipeline) — два етапи. Прод не є гілкою Git, це робоча область.</li>
+</ul>
+<div class="note tip"><b>Золоте правило:</b> переписуй історію (amend, reset, rebase) лише поки коміти локальні. У main та у прод зміни їдуть обережно — лише через Dev і pipeline.</div>
+
+<div class="order" data-o="or_deploy"></div>
+</section>
+<section class="lesson show" id="s11" data-n="s11">
+
+<div class="crumb">Модуль F — перевірка</div>
+<h2>Вправи: командна робота та PBIP</h2>
+<p class="lead">Весь матеріал модуля F пройдено (.gitignore, стратегія гілок, конфлікти, базові й середні сценарії, довідник кейсів, процес merge → деплой). Перевір себе.</p>
+<div class="goalbox"><b>Ціль уроку</b>закріпити командні практики.</div>
+<div class="quiz" data-q="modF"></div>
+
+</section>
+<div class="pager"><a href="06-pbip.html"><span class="lbl">← попередній модуль</span>PBIP / PBIR / TMDL</a><a class="nxt" href="08-advanced.html"><span class="lbl">наступний модуль →</span>Просунуті техніки</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

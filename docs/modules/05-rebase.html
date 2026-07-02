@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rebase та історія · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="05-rebase">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html" class="active"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+<div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Що таке rebase</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Interactive rebase</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Конфлікти злиття</span></a>
+<a href="#s3" data-sec="s3" class="ex"><span class="num">04</span><span>Вправи · Модуль D</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+
+<div class="crumb">Модуль D — rebase</div>
+<h2>Що таке rebase</h2>
+<p class="lead">Rebase бере набір комітів і відтворює (replay) їх на новій основі, роблячи історію лінійною. На відміну від merge, що зберігає розгалуження й додає merge-коміт.</p>
+<div class="goalbox"><b>Ціль уроку</b>розуміти, що робить rebase і чим він відрізняється від merge.</div>
+<div class="tdef"><div class="t">rebase (перебазування)</div><div class="d">Перенесення комітів з однієї основи на іншу. Git створює нові коміти з тим самим вмістом, але іншим батьком.</div><div class="plain"><b>Простими словами:</b> «переписати свою гілку так, ніби ти починав її від свіжого стану main».</div></div>
+<div class="tdef"><div class="t">replay (відтворення)</div><div class="d">Повторне накладання змін коміту поверх нової основи зі створенням нового коміту.</div><div class="plain"><b>Простими словами:</b> Git ніби «повторно набирає» твої зміни на новому місці.</div></div>
+<h3>Візуалізація: rebase переносить коміти</h3>
+<div class="widget"><div class="wtitle">До та після rebase</div><div class="gplayer" data-p="rebase"></div></div>
+<h3>Ключовий механізм</h3>
+<p>Rebase <strong>не пересуває</strong> старі коміти — він <strong>створює нові</strong> з тим самим вмістом, але іншим батьком, отже з <strong>новими SHA</strong>. Старі лишаються orphaned і згодом зникають.</p>
+<pre><span class="cmd">git rebase</span> <span class="arg">main</span>          <span class="c"># перенести гілку поверх main</span>
+<span class="cmd">git rebase</span> <span class="arg">-i HEAD~4</span>      <span class="c"># інтерактивно: останні 4 коміти</span>
+<span class="cmd">git rebase</span> <span class="arg">--continue</span>     <span class="c"># після вирішення конфлікту</span>
+<span class="cmd">git rebase</span> <span class="arg">--abort</span>        <span class="c"># скасувати rebase</span></pre>
+<div class="note warn"><b>Золоте правило rebase.</b> Не роби rebase комітів, які вже на сервері й спільні. Rebase — для локальних, ще не опублікованих комітів.</div>
+
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Модуль D — rebase</div>
+<h2>Interactive rebase: крок за кроком</h2>
+<p class="lead">Сценарій: <span style="color:var(--accent)">feature</span> = 4 коміти поверх <span style="color:var(--accent)">main</span> (M). План: B→fixup у A, C→reword, D→drop. Гортай кроки.</p>
+<div class="goalbox"><b>Ціль уроку</b>чистити історію: squash, reword, drop перед публікацією.</div>
+<div class="widget">
+  <div class="rb-status" id="rbStatus"></div>
+  <div class="rb-stage">
+    <div class="rb-col" id="rbTodoCol"><h5>TODO-LIST · план</h5><div id="rbTodo"></div></div>
+    <div class="rb-col"><h5>Активна історія · ланцюг від HEAD</h5><div id="rbGraph"></div></div>
+  </div>
+  <div class="gcap" id="rbExp"></div>
+  <div class="pnav"><button class="ghost" id="rbPrev">← Назад</button><button id="rbNext">Далі →</button><span class="cnt" id="rbCnt"></span></div>
+</div>
+<h3>Дії SourceTree → Git</h3>
+<table class="cmdtable">
+<tr><td>(за замовч.)</td><td><code>pick</code> — застосувати без змін.</td></tr>
+<tr><td>Edit message</td><td><code>reword</code> — зупинитись для зміни повідомлення.</td></tr>
+<tr><td>Squash with previous</td><td><code>squash</code>/<code>fixup</code> — влити в попередній. squash об'єднує повідомлення, fixup відкидає.</td></tr>
+<tr><td>Delete</td><td><code>drop</code> — не відтворювати.</td></tr>
+<tr><td>Move Up/Down</td><td>зміна порядку рядків todo.</td></tr>
+</table>
+
+<div class="qcheck" data-qc="qc_irebase"></div>
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+
+<div class="crumb">Модуль D — rebase</div>
+<h2>Конфлікти злиття</h2>
+<p class="lead">Конфлікт виникає, коли дві гілки змінили ту саму ділянку файлу по-різному. Git не може вирішити сам і передає вибір тобі.</p>
+<div class="goalbox"><b>Ціль уроку</b>спокійно вирішувати конфлікт: маркери, вибір, add, commit.</div>
+<div class="tdef"><div class="t">conflict (конфлікт злиття)</div><div class="d">Ситуація, коли Git не може автоматично об'єднати два набори змін, бо вони чіпають однакові рядки.</div><div class="plain"><b>Простими словами:</b> двоє написали різний текст в одному рядку — Git питає, чий лишити.</div></div>
+<h3>Як виглядає у файлі</h3>
+<pre><span class="out">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+measure 'Total Sales' = SUM(Sales[Amount])
+<span class="out">=======</span>
+measure 'Total Sales' = SUMX(Sales, Sales[Qty] * Sales[Price])
+<span class="out">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/new-calc</span></pre>
+<ul>
+<li>Між <code>&lt;&lt;&lt;</code> і <code>===</code> — версія поточної гілки (HEAD).</li>
+<li>Між <code>===</code> і <code>&gt;&gt;&gt;</code> — версія гілки, яку зливаєш.</li>
+<li>Прибрати маркери, лишити правильний варіант (або поєднати вручну).</li>
+</ul>
+<h3>Процес</h3>
+<pre><span class="cmd">git status</span>              <span class="c"># файли з конфліктами</span>
+<span class="c"># … редагуєш, прибираєш маркери …</span>
+<span class="cmd">git add</span> <span class="arg">model.tmdl</span>      <span class="c"># позначити вирішеним</span>
+<span class="cmd">git commit</span>              <span class="c"># merge; або:</span>
+<span class="cmd">git rebase</span> <span class="arg">--continue</span>   <span class="c"># rebase</span></pre>
+<div class="note"><b>Під час rebase конфлікт спрацьовує покомітно.</b> Переносиш 4 коміти — конфлікт може виникнути до 4 разів. SourceTree: Resolve Conflicts → Continue Rebase.</div>
+
+<div class="order" data-o="or_conflict"></div>
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+
+<div class="crumb">Модуль D — перевірка</div>
+<h2>Вправи: rebase і конфлікти</h2>
+<p class="lead">Матеріал про rebase, interactive rebase і конфлікти пройдено. Перевір себе.</p>
+<div class="goalbox"><b>Ціль уроку</b>закріпити rebase і конфлікти.</div>
+<div class="quiz" data-q="modD"></div>
+
+</section>
+<div class="pager"><a href="04-vypravlennia.html"><span class="lbl">← попередній модуль</span>Виправлення помилок</a><a class="nxt" href="06-pbip.html"><span class="lbl">наступний модуль →</span>PBIP / PBIR / TMDL</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

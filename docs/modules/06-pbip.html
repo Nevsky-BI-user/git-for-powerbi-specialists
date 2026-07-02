@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBIP / PBIR / TMDL · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="06-pbip">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html" class="active"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+<div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Що таке PBIP</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Структура папок PBIP</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>PBIR та TMDL</span></a>
+<a href="#s3" data-sec="s3"><span class="num">04</span><span>Робочий процес PBIP від нуля</span></a>
+<a href="#s4" data-sec="s4"><span class="num">05</span><span>Обмеження PBIP</span></a>
+<a href="#s5" data-sec="s5"><span class="num">06</span><span>Стек 2: Tabular Editor</span></a>
+<a href="#s6" data-sec="s6" class="ex"><span class="num">07</span><span>Вправи · Модуль E</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+
+<div class="crumb">Модуль E — PBIP / PBIR</div>
+<h2>Що таке PBIP</h2>
+<p class="lead">PBIP — збереження звіту й моделі не одним бінарним файлом, а папкою текстових і JSON-файлів. Саме це робить Power BI сумісним із Git.</p>
+<div class="goalbox"><b>Ціль уроку</b>пояснити, чому PBIP-формат робить Power BI сумісним із Git.</div>
+<div class="tdef"><div class="t">Бінарний vs текстовий файл</div><div class="d"><b>Бінарний</b> файл (як .pbix) — суцільний нечитабельний блок байтів. <b>Текстовий</b> — рядки, які можна читати й порівнювати.</div><div class="plain"><b>Простими словами:</b> бінарник — як запечатана коробка (видно лише «змінилась/ні»). Текст — як відкритий зошит (видно кожне слово).</div></div>
+<div class="tdef"><div class="t">PBIP (Power BI Project)</div><div class="d">Формат, у якому Power BI Desktop зберігає проєкт як папку текстових файлів замість одного .pbix.</div><div class="plain"><b>Простими словами:</b> «розпакований» Power BI, де модель і звіт лежать окремими читабельними файлами.</div></div>
+<div class="cards">
+<div class="card"><h4>.pbix</h4><p>Один бінарний файл. Git бачить як суцільний блок: діфи, гілкування, review неможливі.</p></div>
+<div class="card"><h4>PBIP</h4><p>Папка текстових файлів. Кожна міра, таблиця, візуал — окремо й читабельно. Git показує точні зміни.</p></div>
+</div>
+<h3>Як зберегти</h3>
+<p>Power BI Desktop → <strong>File → Save As → «Power BI project files (*.pbip)»</strong>. Desktop створить структуру папок і <code>.gitignore</code> автоматично.</p>
+<div class="note tip"><b>Стан на 2026.</b> Звітна частина PBIP за замовчуванням використовує формат <span class="term">PBIR</span> (нова модульна структура). <code>.pbix</code> лишається основним контейнером і нікуди не зникає — він теж усередині перейшов на PBIR-метадані.</div>
+
+<div class="qcheck" data-qc="qc_pbip_what"></div>
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Модуль E — PBIP / PBIR</div>
+<h2>Структура папок PBIP</h2>
+<p class="lead">Клікай на елементи дерева, щоб побачити призначення кожного файлу й чи треба його комітити.</p>
+<div class="goalbox"><b>Ціль уроку</b>орієнтуватися, де в PBIP лежать модель, звіт і налаштування.</div>
+<div class="widget">
+  <div class="treewrap">
+    <div class="tree" id="tree">
+      <div><span class="tnode" data-k="root"><span class="d">📁 PDP/</span></span></div>
+      <div style="padding-left:18px"><span class="tnode" data-k="pbip"><span class="f">PDP.pbip</span></span></div>
+      <div style="padding-left:18px"><span class="tnode" data-k="report"><span class="d">📁 PDP.Report/</span></span></div>
+      <div style="padding-left:36px"><span class="tnode" data-k="reportdef"><span class="d">📁 definition/</span> <span style="color:var(--dim);font-size:11px">(PBIR JSON)</span></span></div>
+      <div style="padding-left:18px"><span class="tnode" data-k="model"><span class="d">📁 PDP.SemanticModel/</span></span></div>
+      <div style="padding-left:36px"><span class="tnode" data-k="modeldef"><span class="d">📁 definition/</span> <span style="color:var(--dim);font-size:11px">(TMDL)</span></span></div>
+      <div style="padding-left:54px"><span class="tnode" data-k="modeltmdl"><span class="f">model.tmdl</span></span></div>
+      <div style="padding-left:54px"><span class="tnode" data-k="tables"><span class="d">📁 tables/</span> <span class="f">*.tmdl</span></span></div>
+      <div style="padding-left:36px"><span class="tnode" data-k="pbi"><span class="d">📁 .pbi/</span></span></div>
+      <div style="padding-left:54px"><span class="tnode" data-k="cache"><span class="f">cache.abf</span></span></div>
+      <div style="padding-left:54px"><span class="tnode" data-k="local"><span class="f">localSettings.json</span></span></div>
+      <div style="padding-left:18px"><span class="tnode" data-k="gitignore"><span class="f">.gitignore</span></span></div>
+    </div>
+    <div class="tdetail" id="treeDetail"><h4>Обери елемент</h4><p>Натисни на файл або папку зліва.</p></div>
+  </div>
+</div>
+
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+
+<div class="crumb">Модуль E — PBIP / PBIR</div>
+<h2>Формати всередині: PBIR та TMDL</h2>
+<p class="lead">PBIP — це контейнер. Звіт усередині описано форматом PBIR, модель — мовою TMDL.</p>
+<div class="goalbox"><b>Ціль уроку</b>читати формати сторінок звіту (PBIR) і моделі (TMDL).</div>
+<div class="tdef"><div class="t">Семантична модель vs звіт</div><div class="d"><b>Модель</b> — таблиці, зв'язки, міри (логіка й дані). <b>Звіт</b> — сторінки з візуалами, що показують модель.</div><div class="plain"><b>Простими словами:</b> модель — це «кухня й рецепти», звіт — «подача страви на тарілці».</div></div>
+<h3>TMDL — мова опису моделі</h3>
+<div class="tdef"><div class="t">TMDL (Tabular Model Definition Language)</div><div class="d">Текстова мова опису моделі з відступами замість дужок. Людиночитна, чудово діфиться.</div><div class="plain"><b>Простими словами:</b> «модель словами»: рядок за рядком описано кожну таблицю, колонку й міру.</div></div>
+<pre><span class="arg">table</span> Sales
+    <span class="arg">measure</span> 'Total Sales' = SUM(Sales[Amount])
+        formatString: <span class="out">#,0</span>
+        lineageTag: <span class="out">3f9a-...-c21</span>
+
+    <span class="arg">column</span> Amount
+        dataType: <span class="out">double</span></pre>
+<h3>PBIR — формат звіту</h3>
+<div class="tdef"><div class="t">PBIR (Power BI Enhanced Report Format)</div><div class="d">Модульний JSON-опис звіту: сторінки, візуали, закладки — кожне в окремому файлі в <code>definition/</code>.</div><div class="plain"><b>Простими словами:</b> звіт «по деталях»: кожен візуал — окремий файл, тому Git точно бачить, що саме змінилось.</div></div>
+<div class="tdef"><div class="t">lineageTag</div><div class="d">Унікальний GUID, присвоєний кожному об'єкту моделі. Стабілізує його ідентичність між середовищами.</div><div class="plain"><b>Простими словами:</b> «незмінний серійний номер» міри чи таблиці. Паралельна робота двох гілок робить його типовим джерелом конфліктів (модуль F).</div></div>
+<div class="note tip"><b>Інструмент.</b> TMDL зручно редагувати у VS Code (IntelliSense) або Tabular Editor; PBIR JSON — у VS Code з його схемами для перевірки.</div>
+
+<div class="qcheck" data-qc="qc_tmdl_fmt"></div>
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+
+<div class="crumb">Модуль E — PBIP / PBIR</div>
+<h2>Налаштування PBIP-репозиторію з нуля</h2>
+<p class="lead">Покрокова послідовність: від .pbix до спільного репозиторію на сервері.</p>
+<div class="goalbox"><b>Ціль уроку</b>провести проєкт від збереження як PBIP до першого push.</div>
+<h3>Крок 1 — зберегти як PBIP</h3>
+<p>У Power BI Desktop: <strong>File → Save As → «Power BI project files (*.pbip)»</strong>, обери папку. Desktop створить структуру й <code>.gitignore</code>.</p>
+<h3>Крок 2 — увімкнути Git у папці</h3>
+<pre><span class="cmd">cd</span> <span class="arg">C:\Repos\PDP</span>          <span class="c"># перейти в папку проєкту</span>
+<span class="cmd">git init</span>                  <span class="c"># увімкнути контроль версій</span>
+<span class="cmd">git add</span> <span class="arg">.</span>                 <span class="c"># усі файли проєкту у staging</span>
+<span class="cmd">git commit</span> <span class="arg">-m "Початковий стан PDP"</span></pre>
+<h3>Крок 3 — під'єднати сервер і відправити</h3>
+<div class="widget"><div class="wtitle">Що відбувається: локально → сервер</div><div class="gplayer" data-p="clone"></div></div>
+<pre><span class="cmd">git remote</span> <span class="arg">add origin &lt;url&gt;</span>   <span class="c"># під'єднати сервер (Azure DevOps / GitHub)</span>
+<span class="cmd">git push</span> <span class="arg">-u origin main</span>       <span class="c"># відправити перший раз</span></pre>
+<h3>Крок 4 — колега забирає копію</h3>
+<pre><span class="cmd">git clone</span> <span class="arg">&lt;url&gt;</span>            <span class="c"># колега завантажує проєкт собі</span></pre>
+<div class="note"><b>Перевірка перед першим коммітом:</b> виконай <code>git status</code> і переконайся, що <code>cache.abf</code> та <code>localSettings.json</code> НЕ потрапили у список (їх має ховати .gitignore). Якщо вони видні — див. модуль F, кейс про <code>git rm --cached</code>.</div>
+
+</section>
+<section class="lesson show" id="s4" data-n="s4">
+
+<div class="crumb">Модуль E — PBIP / PBIR</div>
+<h2>Обмеження PBIP та коли його не варто застосовувати</h2>
+<p class="lead">Чесний погляд: PBIP чудовий для контролю версій, але має межі.</p>
+<div class="goalbox"><b>Ціль уроку</b>знати межі формату і способи їх обходити.</div>
+<h3>Обмеження</h3>
+<ul>
+<li><strong>Великі моделі.</strong> Дуже великі семантичні моделі дають важкі TMDL-діфи; review ускладнюється.</li>
+<li><strong>Складні merge.</strong> Текстовий merge може дати синтаксично валідний, але логічно зламаний файл (дубль lineageTag, биті зв'язки) — потрібна валідація в Desktop / Tabular Editor.</li>
+<li><strong>Не все у звіті.</strong> Окремі специфічні можливості звіту можуть бути представлені неповно; перевіряй після злиття.</li>
+<li><strong>Бінарні залишки.</strong> Зображення та інші asset-и лишаються бінарними — Git їх не діфить (для великих → Git LFS).</li>
+<li><strong>Дані поза Git.</strong> Дані в репозиторії не зберігаються; партиції / incremental refresh живуть у Service і перебудовуються після деплою.</li>
+</ul>
+<h3>Коли краще НЕ покладатися лише на PBIP</h3>
+<ul>
+<li>Дуже велика модель з інтенсивними паралельними правками одних і тих самих таблиць → розглянути роботу через Tabular Editor (стек 2) з чітким розподілом зон.</li>
+<li>Команда без дисципліни короткоживучих гілок → конфлікти накопичуються; спершу впорядкувати процес.</li>
+</ul>
+<div class="note"><b>Висновок.</b> PBIP лишається основою контролю версій для Power BI; обмеження вирішуються дисципліною (малі гілки, валідація після merge, .gitattributes, LFS для бінарників) та, за потреби, стеком Tabular Editor.</div>
+
+<div class="qcheck" data-qc="qc_limits"></div>
+</section>
+<section class="lesson show" id="s5" data-n="s5">
+
+<div class="crumb">Модуль E — PBIP / PBIR</div>
+<h2>Стек 2: Semantic Model + Tabular Editor</h2>
+<p class="lead">Альтернатива до «PBIP + Power BI Desktop»: модель редагують у Tabular Editor, який дає точніший контроль і автоматичну перевірку якості.</p>
+<div class="goalbox"><b>Ціль уроку</b>редагувати модель у Tabular Editor і перевіряти її BPA.</div>
+<div class="tdef"><div class="t">Tabular Editor</div><div class="d">Окремий інструмент для редагування семантичної моделі (таблиць, мір, зв'язків) на рівні TMDL, поза Power BI Desktop.</div><div class="plain"><b>Простими словами:</b> «редактор моделі під капотом» — швидший і точніший для масових змін мір та метаданих, ніж Desktop.</div></div>
+<div class="tdef"><div class="t">Best Practice Analyzer (BPA)</div><div class="d">Вбудований у Tabular Editor аналізатор, що перевіряє модель за набором правил (іменування, описи, формати, продуктивність).</div><div class="plain"><b>Простими словами:</b> «лінтер моделі» — підсвічує порушення правил ще до коміту чи деплою.</div></div>
+<h3>Робочий цикл стеку 2</h3>
+<pre><span class="cmd">git pull</span>                          <span class="c"># свіжий стан</span>
+<span class="c"># File → Open → Model from Folder → Model/   (відкрити TMDL-папку в Tabular Editor)</span>
+<span class="c"># внести зміни: Measures → New Measure → DAX</span>
+<span class="c"># Tools → Best Practice Analyzer → виправити зауваження</span>
+<span class="c"># Ctrl+S → зміни записуються у .tmdl файли</span>
+<span class="cmd">git add</span> <span class="arg">.</span> && <span class="cmd">git commit</span> <span class="arg">-m "feat(model): YTD Sales measure"</span>
+<span class="cmd">git push</span>                          <span class="c"># далі — Git sync у Dev → deployment pipeline у Prod</span></pre>
+<table class="cmdtable">
+<tr><td>Стек 1</td><td>PBIP + Power BI Desktop. Модель і звіт разом; зручно для звітної частини й загальної розробки.</td></tr>
+<tr><td>Стек 2</td><td>Semantic Model + Tabular Editor. Точний контроль моделі, BPA, масові правки мір; звіт — окремо.</td></tr>
+</table>
+<div class="note tip"><b>На практиці</b> стеки поєднують: звіт правлять у Desktop (PBIP), а складні зміни моделі — у Tabular Editor. Обидва пишуть ті самі <code>.tmdl</code>, тож Git і деплой однакові.</div>
+
+<div class="qcheck" data-qc="qc_te"></div>
+</section>
+<section class="lesson show" id="s6" data-n="s6">
+
+<div class="crumb">Модуль E — перевірка</div>
+<h2>Вправи: PBIP та PBIR</h2>
+<p class="lead">Матеріал про PBIP, структуру папок, TMDL/PBIR і налаштування репозиторію пройдено. Перевір себе.</p>
+<div class="goalbox"><b>Ціль уроку</b>закріпити роботу з PBIP.</div>
+<div class="quiz" data-q="modE"></div>
+
+</section>
+<div class="pager"><a href="05-rebase.html"><span class="lbl">← попередній модуль</span>Rebase та історія</a><a class="nxt" href="07-komanda.html"><span class="lbl">наступний модуль →</span>Робота в команді</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

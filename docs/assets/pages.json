@@ -1,0 +1,134 @@
+[
+ {
+  "slug": "00-start",
+  "title": "Старт",
+  "file": "modules/00-start.html",
+  "count": 1,
+  "lessons": [
+   "Вступ"
+  ]
+ },
+ {
+  "slug": "01-terminal",
+  "title": "Термінал і файли",
+  "file": "modules/01-terminal.html",
+  "count": 7,
+  "lessons": [
+   "Що таке термінал",
+   "Навігація: pwd, cd, ls",
+   "Створення: mkdir, touch, echo",
+   "Копіювання, переміщення, видалення: cp, mv, rm",
+   "Дрібниці, що рятують новачка",
+   "Встановлення Git і перший запуск",
+   "Вправи · Термінал"
+  ]
+ },
+ {
+  "slug": "02-osnovy",
+  "title": "Основи Git",
+  "file": "modules/02-osnovy.html",
+  "count": 5,
+  "lessons": [
+   "Навіщо потрібен Git",
+   "Базові поняття",
+   "Як Git зберігає дані",
+   "Три зони · життєвий цикл",
+   "Вправи · Модуль A"
+  ]
+ },
+ {
+  "slug": "03-komandy",
+  "title": "Щоденні команди",
+  "file": "modules/03-komandy.html",
+  "count": 9,
+  "lessons": [
+   "Перші команди",
+   "Налаштування: config і .gitattributes",
+   "Гілки та злиття",
+   "Під капотом: гілки, HEAD, detached HEAD",
+   "Локальний і хмарний репозиторій",
+   "Автентифікація: SSH і PAT",
+   "Корисні команди",
+   "Поглиблено: add -p, diff, log",
+   "Вправи · Модуль B"
+  ]
+ },
+ {
+  "slug": "04-vypravlennia",
+  "title": "Виправлення помилок",
+  "file": "modules/04-vypravlennia.html",
+  "count": 2,
+  "lessons": [
+   "reset · restore · revert",
+   "Вправи · Модуль C"
+  ]
+ },
+ {
+  "slug": "05-rebase",
+  "title": "Rebase та історія",
+  "file": "modules/05-rebase.html",
+  "count": 4,
+  "lessons": [
+   "Що таке rebase",
+   "Interactive rebase",
+   "Конфлікти злиття",
+   "Вправи · Модуль D"
+  ]
+ },
+ {
+  "slug": "06-pbip",
+  "title": "PBIP / PBIR / TMDL",
+  "file": "modules/06-pbip.html",
+  "count": 7,
+  "lessons": [
+   "Що таке PBIP",
+   "Структура папок PBIP",
+   "PBIR та TMDL",
+   "Робочий процес PBIP від нуля",
+   "Обмеження PBIP",
+   "Стек 2: Tabular Editor",
+   "Вправи · Модуль E"
+  ]
+ },
+ {
+  "slug": "07-komanda",
+  "title": "Робота в команді",
+  "file": "modules/07-komanda.html",
+  "count": 12,
+  "lessons": [
+   ".gitignore для PBIP",
+   "Стратегія гілок",
+   "Конфлікти у PBIP-файлах",
+   "Базові сценарії: двоє розробників",
+   "Сценарії середнього рівня",
+   "Довідник проблем (1–30)",
+   "Конвенції комітів і гілок",
+   "Робочі процеси: порівняння",
+   "Azure DevOps: pipelines і задачі",
+   "Безпека та контроль доступу",
+   "Робочий процес: merge → деплой",
+   "Вправи · Модуль F"
+  ]
+ },
+ {
+  "slug": "08-advanced",
+  "title": "Просунуті техніки",
+  "file": "modules/08-advanced.html",
+  "count": 4,
+  "lessons": [
+   "git bisect: пошук бага",
+   "Git hooks: автоматизація",
+   "Worktrees: паралельні директорії",
+   "Вправи · Модуль G"
+  ]
+ },
+ {
+  "slug": "09-glossary",
+  "title": "Глосарій команд",
+  "file": "modules/09-glossary.html",
+  "count": 1,
+  "lessons": [
+   "Команди Git"
+  ]
+ }
+]
