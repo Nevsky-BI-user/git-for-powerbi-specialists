@@ -36,9 +36,10 @@ docs/
   assets/engine.js      дані (PLAYERS/QUIZ/SCEN/QCHECKS/CSIM/ORDERS/GIT_CMDS) + віджети + пошук + прогрес
   assets/search-index.js  генерується скриптом, руками не правити
   assets/pages.json     мапа сторінок/уроків (використовують scripts/*)
+  version.json          генерується ЛИШЕ в CI (deploy.yml пише SHA коміту) — клієнт полить його і авто-оновлює сторінку; локально файла немає, перевірка мовчки вимкнена
 scripts/qa.mjs          QA-гейт goal-циклу
 scripts/build-search-index.mjs
-.github/workflows/deploy.yml   G7: QA-гейт + деплой docs/ на Pages
+.github/workflows/deploy.yml   G7: QA-гейт + деплой docs/ на Pages + штамп version.json
 ```
 
 Source of truth — файли в `docs/`. Разовий міграційний скрипт зі старої однофайлової версії в репозиторії не зберігається.

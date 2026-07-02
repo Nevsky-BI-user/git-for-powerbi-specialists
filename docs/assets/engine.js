@@ -789,7 +789,50 @@ function initHighlightFromSearch(){
   if(sec){highlightIn(sec,q);const m=sec.querySelector('mark.hl');if(m&&m.scrollIntoView)setTimeout(()=>m.scrollIntoView({block:'center'}),80);}
 }
 
-/* === 15. ІНІЦІАЛІЗАЦІЯ СТОРІНКИ === */
+/* === 15. АВТООНОВЛЕННЯ ПРИ НОВІЙ ВЕРСІЇ === */
+/* CI (deploy.yml) кладе в корінь сайту version.json з SHA коміту.
+   Локально файла немає — перша ж невдала загрузка мовчки вимикає перевірку. */
+const VER_EVERY=5*60*1000,VER_MIN_GAP=60*1000;
+let verBase=null,verLast=0,verDismissed=false;
+function verFetch(){return fetch(sitePrefix()+'version.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);}
+function verReload(){
+  try{
+    const ts=+(sessionStorage.getItem('gfp:upd:ts')||0);
+    if(Date.now()-ts<60000)return;
+    sessionStorage.setItem('gfp:upd:ts',String(Date.now()));
+  }catch(e){}
+  location.reload();
+}
+function verToast(){
+  if(document.getElementById('updToast'))return;
+  const t=document.createElement('div');t.id='updToast';t.className='upd-toast';
+  let left=10;
+  t.innerHTML=`<b>Вийшла нова версія курсу</b><span class="upd-cnt">Сторінка оновиться через <i>${left}</i> с</span><div class="upd-btns"><button class="upd-now">Оновити зараз</button><button class="upd-later">Пізніше</button></div>`;
+  document.body.appendChild(t);
+  const cnt=t.querySelector('.upd-cnt i');
+  const tick=setInterval(()=>{left--;if(cnt)cnt.textContent=String(left);if(left<=0){clearInterval(tick);t.remove();verReload();}},1000);
+  t.querySelector('.upd-now').onclick=()=>{clearInterval(tick);verReload();};
+  t.querySelector('.upd-later').onclick=()=>{clearInterval(tick);verDismissed=true;t.remove();};
+}
+function verCheck(){
+  if(verDismissed||!verBase)return;
+  const now=Date.now();if(now-verLast<VER_MIN_GAP)return;verLast=now;
+  verFetch().then(j=>{
+    if(!j||!j.v||j.v===verBase.v)return;
+    if(document.hidden)verReload();else verToast();
+  });
+}
+function initVersionCheck(){
+  if(typeof fetch!=='function'||location.protocol.indexOf('http')!==0)return;
+  verFetch().then(j=>{
+    if(!j||!j.v)return;
+    verBase=j;verLast=Date.now();
+    setInterval(verCheck,VER_EVERY);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck();});
+  });
+}
+
+/* === 16. ІНІЦІАЛІЗАЦІЯ СТОРІНКИ === */
 function initPage(){
   buildPlayers();buildQuizzes();buildScenarios();
   if(typeof buildTree==='function')buildTree();
@@ -797,7 +840,7 @@ function initPage(){
   if(typeof lcPlace==='function'&&document.getElementById('lcExp'))lcPlace(0);
   if(document.getElementById('glossList'))buildGlossary();
   buildQchecks();buildCsim();buildOrders();
-  initSearch();initCollapse();initProgress();initHighlightFromSearch();
+  initSearch();initCollapse();initProgress();initHighlightFromSearch();initVersionCheck();
 }
 window.__GFP__={PLAYERS:Object.keys(PLAYERS),QUIZ:Object.keys(QUIZ),SCEN:Object.keys(SCEN),QCHECKS:Object.keys(QCHECKS),CSIM:Object.keys(CSIM),ORDERS:Object.keys(ORDERS)};
 document.addEventListener('DOMContentLoaded',initPage);
