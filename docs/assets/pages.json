@@ -63,9 +63,12 @@
   "slug": "04-vypravlennia",
   "title": "Виправлення помилок",
   "file": "modules/04-vypravlennia.html",
-  "count": 2,
+  "count": 5,
   "lessons": [
    "reset · restore · revert",
+   "git revert докладно",
+   "git reflog: рятівне коло",
+   "git commit --amend",
    "Вправи · Модуль C"
   ]
  },

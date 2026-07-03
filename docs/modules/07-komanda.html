@@ -86,19 +86,19 @@ Thumbs.db
 
 <div class="crumb">Модуль F — командна робота</div>
 <h2>Стратегія гілок для PBIP-команди</h2>
-<p class="lead">Робоча модель: одна інтеграційна гілка main, feature-гілки, а прод досягається не через гілку, а через робочі області та deployment pipeline.</p>
+<p class="lead">Робоча модель: одна інтеграційна гілка main, feature-гілки, а публікація йде не через гілку, а через робочу область (Git sync); окремий Prod, якщо він є, досягається через deployment pipeline.</p>
 <div class="goalbox"><b>Ціль уроку</b>працювати короткими feature-гілками без хаосу.</div>
 <div class="cards">
 <div class="card"><h4>main</h4><p>Інтеграційна гілка. Сюди зливають feature-гілки. Під'єднана до Dev робочої області через Git integration.</p></div>
 <div class="card"><h4>feature/*</h4><p>Гілка під кожну зміну. Від main → merge назад у main після перевірки проєкту в Power BI Desktop.</p></div>
-<div class="card"><h4>Dev / Prod</h4><p>Це робочі області (workspaces), НЕ гілки Git. main синхронізує Dev; deployment pipeline промоутить Dev → Prod.</p></div>
-<div class="card"><h4>hotfix/*</h4><p>Термінове виправлення; так само зливається в main і їде в прод через Dev + pipeline.</p></div>
+<div class="card"><h4>Dev / Prod</h4><p>Це робочі області (workspaces), НЕ гілки Git. main синхронізує робочу область; якщо середовищ два, deployment pipeline промоутить Dev → Prod (опційний рівень).</p></div>
+<div class="card"><h4>hotfix/*</h4><p>Термінове виправлення; так само зливається в main і публікується через Git sync (у схемі з Dev/Prod — далі pipeline).</p></div>
 </div>
-<div class="tdef"><div class="t">Pull Request (PR) / Merge Request</div><div class="d">Запит на злиття гілки в основну з переглядом колегою перед прийняттям.</div><div class="plain"><b>Простими словами:</b> «прошу влити мою гілку — гляньте перед цим».</div><div class="ex">У цій PBIP-команді детальний review діфів у PR непрактичний (TMDL/JSON-шум, без прев'ю звіту), тож зміни зливають у main напряму; роль бар'єру виконують валідація в Desktop, CI та deployment pipeline. Детальніше — урок «Робочий процес: merge → деплой».</div></div>
+<div class="tdef"><div class="t">Pull Request (PR) / Merge Request</div><div class="d">Запит на злиття гілки в основну з переглядом колегою перед прийняттям.</div><div class="plain"><b>Простими словами:</b> «прошу влити мою гілку — гляньте перед цим».</div><div class="ex">У цій PBIP-команді детальний review діфів у PR непрактичний (TMDL/JSON-шум, без прев'ю звіту), тож зміни зливають у main напряму; роль бар'єру виконують валідація в Desktop, CI та (за наявності Dev/Prod) deployment pipeline. Детальніше — урок «Робочий процес: merge → деплой».</div></div>
 <div class="tdef"><div class="t">CI (Continuous Integration)</div><div class="d">Автоматичні перевірки, що запускаються на сервері при push (напр. валідація моделі, Best Practice Analyzer).</div><div class="plain"><b>Простими словами:</b> «робот-контролер», що перевіряє зміни без участі людини.</div></div>
 <h3>Потік фічі у графі</h3>
 <div class="widget"><div class="wtitle">feature → merge у main</div><div class="gplayer" data-p="branching"></div></div>
-<div class="note tip"><b>Fabric / Power BI Git integration.</b> Гілку <code>main</code> прив'язують до Dev робочої області. Після push у main роблять Update from Git — Dev оновлюється (етап 1). Далі deployment pipeline промоутить Dev → Prod (етап 2).</div>
+<div class="note tip"><b>Fabric / Power BI Git integration.</b> Гілку <code>main</code> прив'язують до робочої області. Після push у main роблять Update from Git — звіт опубліковано; для звичайної публікації цього достатньо. Команди з окремими Dev і Prod додають другий етап: deployment pipeline промоутить Dev → Prod.</div>
 
 <div class="order" data-o="or_feature"></div>
 </section>
@@ -464,7 +464,7 @@ hotfix/prod-refresh-error
 <div class="card"><h4>Trunk-based</h4><p>Усі часто зливають у одну гілку (main) маленькими порціями. Мінімум розходжень і конфліктів.</p></div>
 </div>
 <div class="tdef"><div class="t">Чому простіше — краще для PBIP</div><div class="d">PBIP/PBIR-діфи важко рев'ювити у PR, а довгі гілки накопичують складні merge-конфлікти моделі.</div><div class="plain"><b>Простими словами:</b> що менше й коротше гілки, то менше болю з конфліктами TMDL/JSON.</div></div>
-<div class="note tip"><b>Модель цієї команди</b> — близька до Feature Branch / Trunk-based: короткі feature-гілки → merge у main → push → Git sync у Dev → deployment pipeline у Prod. Без важкого PR-review; гейтом якості є валідація в Desktop, CI/BPA і поетапний деплой (урок «Робочий процес: merge → деплой»).</div>
+<div class="note tip"><b>Модель цієї команди</b> — близька до Feature Branch / Trunk-based: короткі feature-гілки → merge у main → push → Git sync публікує в робочу область (за потреби — deployment pipeline у Prod). Без важкого PR-review; гейтом якості є валідація в Desktop і CI/BPA (урок «Робочий процес: merge → деплой»).</div>
 
 <div class="qcheck" data-qc="qc_flows"></div>
 </section>
@@ -486,7 +486,7 @@ steps:
   - script: <span class="arg">"запуск Best Practice Analyzer на .SemanticModel"</span>   <span class="c"># CI-перевірка</span>
   - script: <span class="arg">"publish до Analytics-DEV"</span>                        <span class="c"># авто-публікація в Dev</span></pre>
 <div class="tdef"><div class="t">Branch policies (політики гілки)</div><div class="d">Правила на захищеній гілці (напр. обов'язкова CI-перевірка перед merge).</div><div class="plain"><b>Простими словами:</b> необов'язковий запобіжник. Ця команда не вимагає рев'ю діфів, але може лишити автоматичну CI-перевірку як умову.</div></div>
-<div class="note"><b>Узгоджено з процесом команди:</b> Azure Pipelines автоматизує CI (BPA) і публікацію в Dev; промоут Dev → Prod — через deployment pipeline; work items дають трасування. PR-review не є обов'язковим гейтом.</div>
+<div class="note"><b>Узгоджено з процесом команди:</b> Azure Pipelines автоматизує CI (BPA) і публікацію; якщо середовища розділені, промоут Dev → Prod іде через deployment pipeline; work items дають трасування. PR-review не є обов'язковим гейтом.</div>
 
 <div class="qcheck" data-qc="qc_devops"></div>
 </section>
@@ -513,8 +513,9 @@ PBI_CLIENT_SECRET=
 
 <div class="crumb">Модуль F — командна робота</div>
 <h2>Реальний процес: merge у main → деплой у прод</h2>
-<p class="lead">Огляд PBIP/PBIR-діфів у PR/веб-інтерфейсі непрактичний (текстовий TMDL і JSON-шум, без візуального прев'ю звіту), тому команда не робить ставку на PR-review. Зміни швидко зливаються в main, а справжній контроль — це валідація перед злиттям, CI та поетапний deployment pipeline.</p>
-<div class="goalbox"><b>Ціль уроку</b>пройти повний шлях зміни: гілка → main → Dev → Prod.</div>
+<p class="lead">Огляд PBIP/PBIR-діфів у PR/веб-інтерфейсі непрактичний (текстовий TMDL і JSON-шум, без візуального прев'ю звіту), тому команда не робить ставку на PR-review. Зміни швидко зливаються в main, а справжній контроль — це валідація перед злиттям, CI і контрольована публікація через Git sync (за потреби — з окремим Prod через deployment pipeline).</p>
+<div class="goalbox"><b>Ціль уроку</b>пройти повний шлях зміни: гілка → main → робоча область (та опційно Prod).</div>
+<div class="note tip"><b>Звичайна публікація (базовий варіант).</b> Одна робоча область, підключена до <code>main</code>: merge → push → Update from Git — і звіт уже у користувачів. Схема нижче показує розширений варіант з окремими Dev і Prod; якщо у твоєї команди одне середовище — етап 2 просто відсутній.</div>
 <h3>Послідовність</h3>
 <div class="flow">
   <div class="flow-box"><div class="fb-k">гілка</div><div class="fb-t">feature/*</div><div class="fb-m">робота + перевірка в Desktop</div></div>
@@ -523,13 +524,13 @@ PBI_CLIENT_SECRET=
   <div class="flow-arrow">→</div>
   <div class="flow-box ws"><div class="fb-k">workspace</div><div class="fb-t">Dev</div><div class="fb-m">Update from Git</div><div class="fb-s">етап 1 · Git sync</div></div>
   <div class="flow-arrow">→</div>
-  <div class="flow-box ws"><div class="fb-k">workspace</div><div class="fb-t">Prod</div><div class="fb-m">Deployment pipeline</div><div class="fb-s">етап 2 · pipeline</div></div>
+  <div class="flow-box ws"><div class="fb-k">workspace</div><div class="fb-t">Prod</div><div class="fb-m">Deployment pipeline</div><div class="fb-s">етап 2 · опційно</div></div>
 </div>
 <ol>
 <li>Робота у <code>feature/*</code>; перед злиттям проєкт відкривають у Power BI Desktop і перевіряють (модель валідна, міри рахують).</li>
 <li>feature-гілку зливають у <code>main</code> і пушать у веб (Azure DevOps).</li>
-<li><strong>Етап 1 — Git sync:</strong> <code>main</code> під'єднано до Dev робочої області через Git integration. У Power BI Service роблять Update from Git — Dev отримує зміни.</li>
-<li><strong>Етап 2 — Deployment pipeline:</strong> вміст промоутять з Dev у Prod робочу область.</li>
+<li><strong>Етап 1 — Git sync:</strong> <code>main</code> під'єднано до робочої області через Git integration. У Power BI Service роблять Update from Git — область отримує зміни. Якщо середовище одне, публікація на цьому завершена.</li>
+<li><strong>Етап 2 (опційний) — Deployment pipeline:</strong> команди з окремими Dev і Prod промоутять перевірений вміст із Dev у Prod.</li>
 </ol>
 <h3>Команди</h3>
 <pre><span class="cmd">git switch</span> <span class="arg">feature/okr-summary</span>
@@ -538,16 +539,16 @@ PBI_CLIENT_SECRET=
 <span class="cmd">git merge</span> <span class="arg">feature/okr-summary</span>    <span class="c"># локальне злиття у main</span>
 <span class="cmd">git push</span>                          <span class="c"># відправити у веб (origin)</span>
 <span class="c"># далі — не в Git, а в Power BI Service:</span>
-<span class="c">#   етап 1) Dev workspace → Update from Git   (синхронізація)</span>
-<span class="c">#   етап 2) Deployment pipeline: Dev → Prod   (деплой у прод)</span></pre>
+<span class="c">#   етап 1) робоча область → Update from Git   (звіт опубліковано)</span>
+<span class="c">#   етап 2, якщо є Dev/Prod) Deployment pipeline: Dev → Prod</span></pre>
 <div class="note tip"><b>Без термінала.</b> Git-частину цих кроків можна пройти кнопками у Sourcetree: переглянути diff перед комітом, злити feature-гілку в main і зробити Push. Перевірка проєкту перед злиттям — як і раніше, у Power BI Desktop.</div>
 <div class="note"><b>Замість PR-review</b> бар'єрами якості є: перевірка моделі в Desktop перед merge, автоматичний CI/BPA на <code>.SemanticModel</code>, і поетапний деплой — у Prod зміни потрапляють лише після проходження Dev.</div>
 <h3>Чим це відрізняється від класичного PR-флоу</h3>
 <table class="cmdtable">
 <tr><td>Класичний</td><td>feature → PR з review та обговоренням діфів → merge у main.</td></tr>
-<tr><td>Тут</td><td>feature → merge у main (без важкого review діфів) → push → Git sync у Dev → pipeline у Prod.</td></tr>
+<tr><td>Тут</td><td>feature → merge у main (без важкого review діфів) → push → Git sync публікує в робочу область (опційно далі pipeline у Prod).</td></tr>
 </table>
-<div class="note tip"><b>Hotfix:</b> терміновий фікс так само зливають у main і пушать; після Git sync у Dev його промоутять через pipeline у Prod. За потреби — cherry-pick потрібного коміту (Сценарій 8).</div>
+<div class="note tip"><b>Hotfix:</b> терміновий фікс так само зливають у main і пушать; Git sync публікує його в робочу область (у схемі з Dev/Prod — далі промоут через pipeline). За потреби — cherry-pick потрібного коміту (Сценарій 8).</div>
 <h3>Підсумок курсу</h3>
 <ul>
 <li><strong>Зони:</strong> working dir → staging (add) → repo (commit) → remote (push).</li>
@@ -555,9 +556,9 @@ PBI_CLIENT_SECRET=
 <li><strong>Гілки:</strong> merge зберігає історію, rebase переписує лінійно.</li>
 <li><strong>Виправлення:</strong> restore (файли), reset (локально), revert (безпечно для спільних), reflog (рятівне коло).</li>
 <li><strong>PBIP:</strong> текст замість бінарника → реальний контроль версій; TMDL (модель), PBIR (звіт), <code>.pbi/</code> → .gitignore.</li>
-<li><strong>Деплой:</strong> main → Dev workspace (Git sync) → Prod workspace (deployment pipeline) — два етапи. Прод не є гілкою Git, це робоча область.</li>
+<li><strong>Публікація:</strong> main → робоча область (Git sync) — це базовий шлях; окремий Prod через deployment pipeline — опційний другий етап. Прод не є гілкою Git, це робоча область.</li>
 </ul>
-<div class="note tip"><b>Золоте правило:</b> переписуй історію (amend, reset, rebase) лише поки коміти локальні. У main та у прод зміни їдуть обережно — лише через Dev і pipeline.</div>
+<div class="note tip"><b>Золоте правило:</b> переписуй історію (amend, reset, rebase) лише поки коміти локальні. У main зміни їдуть обережно — через merge і push, а до користувачів — через контрольовану публікацію з main.</div>
 
 <div class="order" data-o="or_deploy"></div>
 </section>

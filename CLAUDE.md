@@ -31,7 +31,7 @@ node scripts/qa.mjs              # exit 0 = цілі G1–G6 виконані
 ```
 docs/
   index.html            головна: картки модулів + прогрес
-  modules/NN-slug.html  10 сторінок-модулів, 59 уроків (секції s0..sN)
+  modules/NN-slug.html  10 сторінок-модулів, 62 уроки (секції s0..sN)
   assets/app.css        уся стилізація
   assets/engine.js      дані (PLAYERS/QUIZ/SCEN/QCHECKS/CSIM/ORDERS/GIT_CMDS) + віджети + пошук + прогрес
   assets/search-index.js  генерується скриптом, руками не правити
@@ -48,7 +48,7 @@ Source of truth — файли в `docs/`. Разовий міграційний
 
 - Мова: українська, «простими словами», кожен новий термін — визначення + побутова аналогія + приклад з Power BI.
 - Шаблон уроку: Ціль (`.goalbox`) → пояснення → приклад PBI → інтерактив → міні-перевірка (`.qcheck`) → «Урок пройдено» (donebar додає рушій).
-- **Критичне правило процесу**: командний потік у курсі — `feature/* → merge у main → push → Git sync Dev workspace → deployment pipeline Dev→Prod`. PR-review **не** подається як обов'язковий етап (diff PBIP/PBIR непрактичний для людського рев'ю); Azure DevOps policies/CI(BPA) — опційний автоматичний бар'єр. Не переписувати.
+- **Критичне правило процесу**: командний потік у курсі — `feature/* → merge у main → push → Git sync (Update from Git) публікує в робочу область` — це базова («звичайна») публікація. Deployment pipeline (Dev→Prod) — **опційний** рівень для команд з окремими середовищами, не обов'язкова частина процесу. PR-review **не** подається як обов'язковий етап (diff PBIP/PBIR непрактичний для людського рев'ю); Azure DevOps policies/CI(BPA) — опційний автоматичний бар'єр. Не переписувати.
 - Апострофи в JS-рядках даних — лише всередині template-літералів (backticks).
 
 ## Конвенції віджетів

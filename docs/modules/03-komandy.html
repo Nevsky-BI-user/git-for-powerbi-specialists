@@ -73,7 +73,7 @@
 <tr><td>git add &lt;файл&gt;</td><td>Додати файл у staging.</td></tr>
 <tr><td>git add .</td><td>Усі зміни в поточній папці й нижче.</td></tr>
 <tr><td>git commit -m "…"</td><td>Коміт із повідомленням (-m = message).</td></tr>
-<tr><td>git commit --amend</td><td>Змінити ОСТАННІЙ коміт. Переписує SHA.</td></tr>
+<tr><td>git commit --amend</td><td>Змінити ОСТАННІЙ коміт. Переписує SHA. Докладно — <a href="04-vypravlennia.html#s4">урок у модулі 04</a>.</td></tr>
 </table>
 <div class="note warn"><b>--amend переписує історію.</b> Якщо коміт уже на сервері й спільний — після amend знадобиться <code>push --force-with-lease</code>, що може зламати копії колег.</div>
 <div class="note tip"><b>Те саме кнопками.</b> У VS Code панель Source Control робить це за два кліки: «+» біля файлу — це <code>git add</code>, поле повідомлення і кнопка Commit — це <code>git commit -m</code>. Під капотом виконуються ті самі команди, тому спершу зрозумій їх у терміналі — далі кнопки перестануть бути магією.</div>
@@ -148,7 +148,21 @@
 <pre><span class="cmd">git checkout</span> <span class="arg">a1b2c3d</span>        <span class="c"># перейти на коміт → detached HEAD</span>
 <span class="c"># … зробив коміт X (поки нічий) …</span>
 <span class="cmd">git switch</span> <span class="arg">-c rescue</span>         <span class="c"># закріпити X гілкою rescue — у безпеці</span></pre>
-<div class="note warn"><b>Якщо вже перемкнувся й «втратив» коміт:</b> знайди його SHA в <code>git reflog</code> і створи на ньому гілку: <code>git branch rescue &lt;sha&gt;</code>.</div>
+<h3>Навіщо туди йти свідомо: подивитись стару версію звіту</h3>
+<p>Detached HEAD — не тільки пастка, а й корисний інструмент. Бізнес питає: «а як ця міра рахувалась місяць тому?» Замість шукати стару копію .pbix — подорож у часі:</p>
+<pre><span class="cmd">git log</span> <span class="arg">--oneline --since="1 month ago"</span>   <span class="c"># знайти коміт місячної давнини</span>
+<span class="cmd">git checkout</span> <span class="arg">7f3e21a</span>                     <span class="c"># стати на нього (detached HEAD — це ОК)</span>
+<span class="c"># відкрити .pbip у Power BI Desktop — бачиш звіт таким, яким він був тоді</span>
+<span class="cmd">git switch</span> <span class="arg">main</span>                          <span class="c"># повернутись у сьогодні</span></pre>
+<p>Поки ти лише дивишся й нічого не комітиш — detached HEAD повністю безпечний. Так само можна ставати на тег релізу: <code>git checkout v3.0</code>.</p>
+<h3>Як розпізнати, що ти в detached HEAD</h3>
+<ul>
+<li><strong>Git Bash</strong> пише замість назви гілки SHA у дужках: <code>((7f3e21a…))</code>, а після checkout — попередження <em>You are in 'detached HEAD' state</em>.</li>
+<li><strong>VS Code</strong> показує SHA замість імені гілки в лівому нижньому куті статус-бара.</li>
+<li><strong>Sourcetree</strong> у графі історії не підсвічує жодну гілку як поточну.</li>
+</ul>
+<div class="note warn"><b>Якщо вже перемкнувся й «втратив» коміт:</b> знайди його SHA в <code>git reflog</code> і створи на ньому гілку: <code>git branch rescue &lt;sha&gt;</code>. Покроковий порятунок — в <a href="04-vypravlennia.html#s3">уроці про reflog у модулі 04</a>.</div>
+<div class="qcheck" data-qc="qc_detached"></div>
 
 </section>
 <section class="lesson show" id="s4" data-n="s4">
@@ -232,7 +246,7 @@
 <div class="tdef"><div class="t">reflog (журнал HEAD)</div><div class="d">Показує всі переміщення HEAD за ~90 днів. Рятує після «втрати» комітів через reset/rebase.</div><div class="plain"><b>Простими словами:</b> «чорна скринька» Git — записує кожен твій крок, навіть якщо коміт уже не видно.</div></div>
 <pre><span class="cmd">git reflog</span>                   <span class="c"># історія руху HEAD</span>
 <span class="cmd">git reset</span> <span class="arg">--hard &lt;sha-з-reflog&gt;</span>  <span class="c"># відновити стан</span></pre>
-<div class="note tip"><b>reflog — головне рятівне коло Git.</b> Навіть orphaned-коміти після <code>reset --hard</code> зазвичай ще доступні тут.</div>
+<div class="note tip"><b>reflog — головне рятівне коло Git.</b> Навіть orphaned-коміти після <code>reset --hard</code> зазвичай ще доступні тут. Повний сценарій порятунку крок за кроком — в <a href="04-vypravlennia.html#s3">окремому уроці модуля 04</a>.</div>
 
 </section>
 <section class="lesson show" id="s7" data-n="s7">

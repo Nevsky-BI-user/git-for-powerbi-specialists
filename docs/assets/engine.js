@@ -155,7 +155,7 @@ const QUIZ={
     {q:`Як зменшити кількість конфліктів у команді?`,opts:[`Працювати в одній гілці`,`Короткоживучі feature-гілки + частий rebase на свіжий main`,`Не комітити`,`Вимкнути CI`],correct:1,why:`Маленькі гілки й частий rebase не дають історіям сильно розійтись.`},
     {q:`Терміновий фікс прод-багу треба внести, не зливаючи всю гілку розробки. Як?`,opts:[`git merge всю гілку`,`git cherry-pick потрібного коміту в prod-гілку`,`reset --hard`,`видалити main`],correct:1,why:`cherry-pick переносить лише один потрібний коміт у потрібну гілку.`},
     {q:`Формат Conventional Commits — це...`,opts:[`<type>(<scope>): <subject>, напр. feat(model): add YTD`,`будь-який вільний текст`,`лише номер задачі`,`emoji + опис`],correct:0,why:`Conventional Commits задають структуру: тип, область, короткий опис — історія стає читабельною й машинозчитуваною.`},
-    {q:`Чому ця команда НЕ робить ставку на PR-review як головний бар'єр?`,opts:[`review PBIP/PBIR-діфів непрактичний; бар'єр — валідація + CI + deployment pipeline`,`PR заборонені в Git`,`review нічого не дає`,`бо немає колег`],correct:0,why:`Текстові TMDL/JSON-діфи без прев'ю звіту важко рев'ювити, тож зміни зливають у main, а гейтом є поетапний деплой.`}
+    {q:`Чому ця команда НЕ робить ставку на PR-review як головний бар'єр?`,opts:[`review PBIP/PBIR-діфів непрактичний; бар'єр — валідація в Desktop і CI (та поетапний деплой, якщо він налаштований)`,`PR заборонені в Git`,`review нічого не дає`,`бо немає колег`],correct:0,why:`Текстові TMDL/JSON-діфи без прев'ю звіту важко рев'ювити, тож зміни зливають у main, а гейтом є валідація перед злиттям і контрольована публікація.`}
   ],
   modG:[
     {q:`Що робить <code>git bisect</code>?`,opts:[`Бінарним пошуком знаходить коміт, що вніс баг`,`видаляє гілку`,`зливає дві гілки`,`пушить на сервер`],correct:0,why:`bisect ділить діапазон комітів навпіл; ти позначаєш good/bad, і Git швидко звужує до винного коміту.`},
@@ -631,7 +631,7 @@ const ORDERS={
   or_zones:{title:`Віднови порядок: шлях зміни до сервера`,steps:[`Редагуєш файл у робочій папці`,`git add — зміна у staging`,`git commit — у локальну історію`,`git push — на сервер`]},
   or_feature:{title:`Порядок роботи з фічею (процес команди)`,steps:[`git switch -c feature/x`,`Правки + коміти у гілці`,`git switch main і git pull`,`git merge feature/x`,`git push у main`]},
   or_conflict:{title:`Порядок вирішення конфлікту`,steps:[`git pull → CONFLICT`,`Відкрити файл, прибрати маркери <<< === >>>`,`git add файл`,`git commit`,`git push`]},
-  or_deploy:{title:`Шлях зміни у прод`,steps:[`Merge у main + push`,`Git sync оновлює Dev workspace`,`Deployment pipeline: Dev → Prod`,`Перевірка звіту в Prod`]}
+  or_deploy:{title:`Шлях зміни у прод`,steps:[`Merge у main + push`,`Git sync (Update from Git) оновлює робочу область — звіт опубліковано`,`Опційно: deployment pipeline промоутить Dev → Prod`,`Перевірка звіту після публікації`]}
 };
 
 
@@ -663,15 +663,31 @@ Object.assign(QCHECKS,{
   qc_hosting:{q:`GitHub і Azure DevOps Repos — це...`,opts:[`хостинги Git-репозиторіїв: сервер-сховище і вебінтерфейс поверх того самого Git`,`заміна Git — інша система версій`,`редактори TMDL-файлів`,`аналоги Power BI Service`],correct:0,why:`Обидва зберігають ту саму Git-історію. Різниця — в екосистемі довкола: у компаніях з Microsoft-стеком зазвичай Azure DevOps.`},
   qc_vscode:{q:`Навіщо Power BI-розробнику VS Code?`,opts:[`переглядати diff, правити TMDL/JSON і вирішувати конфлікти у merge-редакторі`,`будувати візуали замість Power BI Desktop`,`оновлювати дані семантичної моделі`,`публікувати звіти у Prod`],correct:0,why:`Модель і звіт у PBIP — це текстові файли, а VS Code — найзручніший інструмент для роботи з текстом і конфліктами.`},
   qc_gui:{q:`Sourcetree зручний тим, що...`,opts:[`показує історію та зміни наочно, а stage, commit і push робляться кнопками`,`замінює Azure DevOps`,`редагує міри DAX`,`сам публікує звіти в Power BI Service`],correct:0,why:`Sourcetree не додає нових можливостей до Git — він показує те саме наочно. Для щоденної рутини це часто швидше за термінал.`},
-  qc_chain:{q:`Правильний ланцюжок доставки зміни у Prod:`,opts:[`Power BI Desktop (PBIP) → commit і push → Git sync Dev workspace → deployment pipeline Dev→Prod`,`кнопка Publish з Desktop одразу в Prod`,`копія .pbix на SharePoint`,`експорт звіту в PDF`],correct:0,why:`Зміна їде через Git: так є історія, відкат і контроль. Publish напряму оминає версіонування.`},
+  qc_chain:{q:`Правильний ланцюжок доставки зміни користувачам:`,opts:[`Power BI Desktop (PBIP) → commit і push → Git sync оновлює робочу область (за потреби далі deployment pipeline у Prod)`,`кнопка Publish з Desktop одразу в Prod`,`копія .pbix на SharePoint`,`експорт звіту в PDF`],correct:0,why:`Зміна їде через Git: так є історія, відкат і контроль. Publish напряму оминає версіонування. Deployment pipeline — опційний рівень для команд з окремими Dev і Prod.`},
   qc_pbip_ignore:{q:`У git status видно cache.abf на 200 МБ. Що робити?`,opts:[`переконатись, що **/.pbi/cache.abf у .gitignore, і не комітити його`,`закомітити — в історії має бути все`,`видалити файл з диска`,`заархівувати і закомітити архів`],correct:0,why:`cache.abf — локальний кеш даних моделі. В історії мають жити лише визначення (текст); кеш перегенерується при відкритті проєкту.`}
 });
 Object.assign(CSIM,{
   cs_gitversion:{t:`Перевір, що Git встановлено: виведи його версію.`,a:['^git --version$'],sol:'git --version'}
 });
+
+/* дані уроків: revert / reflog / amend / detached HEAD */
+Object.assign(QCHECKS,{
+  qc_detached:{q:`Ти зробив <code>git checkout a1b2c3d</code>, щоб глянути стару версію звіту, і випадково закомітив правку. Як не втратити цей коміт?`,opts:[`git switch -c rescue — закріпити коміт новою гілкою, поки не перемкнувся`,`нічого робити не треба — коміт і так у безпеці`,`git reset --hard main`,`закрити термінал і відкрити знову`],correct:0,why:`У detached HEAD новий коміт не належить жодній гілці: перемкнешся — і він осиротіє. Гілка-закладка (switch -c) робить його видимим назавжди.`},
+  qc_revert_deep:{q:`Коміт зі зламаною мірою вже в main і на сервері. Чому саме revert, а не reset?`,opts:[`revert додає новий коміт-скасування і не переписує спільну історію — колеги просто заберуть його через pull`,`revert швидший за reset`,`reset не працює в main`,`різниці немає`],correct:0,why:`reset пересунув би main назад — а колеги вже мають старі коміти, і їхні копії розійдуться з сервером. revert рухає історію лише вперед.`},
+  qc_reflog_deep:{q:`Після <code>git reset --hard</code> зник коміт з готовою сторінкою звіту. Перший крок порятунку?`,opts:[`git reflog — знайти SHA зниклого коміту в журналі переміщень HEAD`,`створити сторінку заново в Power BI Desktop`,`git push --force`,`перевстановити Git`],correct:0,why:`reflog памʼятає кожну позицію HEAD близько 90 днів. Знайшов SHA — і повертаєшся: git reset --hard &lt;sha&gt; або git branch rescue &lt;sha&gt;.`},
+  qc_amend:{q:`Щойно закомітив, але забув один файл, а push ще не робив. Найчистіший спосіб?`,opts:[`git add файл → git commit --amend — файл доїде тим самим комітом`,`ще один коміт з повідомленням "забув файл"`,`git push --force`,`видалити репозиторій і почати заново`],correct:0,why:`--amend переробляє останній коміт (з новим SHA). Поки коміт не запушено — це безпечно й тримає історію чистою.`}
+});
+Object.assign(CSIM,{
+  cs_revert:{t:`Безпечно скасуй коміт <code>a1b2c3d</code> у спільній гілці.`,a:['^git revert a1b2c3d$'],sol:'git revert a1b2c3d'},
+  cs_reflog:{t:`Виведи журнал усіх переміщень HEAD.`,a:['^git reflog$'],sol:'git reflog'},
+  cs_amend:{t:`Додай щойно проіндексований файл до останнього коміту, не змінюючи повідомлення.`,a:['^git commit --amend --no-edit$'],sol:'git commit --amend --no-edit'}
+});
+Object.assign(ORDERS,{
+  or_reflog_rescue:{title:`Порятунок коміту після reset --hard`,steps:[`Помітив: потрібний коміт зник з git log`,`git reflog — знайшов рядок з описом зниклого коміту`,`Скопіював його SHA`,`git branch rescue &lt;sha&gt; — закріпив коміт гілкою`,`Перевірив вміст і злив rescue куди треба`]}
+});
 Object.assign(ORDERS,{
   or_setup:{title:`Розгортання інфраструктури з нуля`,steps:[`Встановити Git (разом із ним зʼявиться Git Bash)`,`git config: вказати імʼя та email`,`Створити репозиторій на GitHub або в Azure DevOps`,`git clone на свій компʼютер`,`Відкрити папку у VS Code і додати репозиторій у Sourcetree`]},
-  or_toolchain:{title:`Шлях однієї зміни: від Power BI Desktop до Prod`,steps:[`Відкрив PBIP у Power BI Desktop, вніс зміну, зберіг`,`Переглянув diff у Sourcetree або VS Code`,`Stage + Commit (кнопкою в Sourcetree або git commit у терміналі)`,`Push в Azure DevOps`,`Git sync підтягнув зміну в Dev workspace`,`Deployment pipeline: Dev → Prod`]}
+  or_toolchain:{title:`Шлях однієї зміни: від Power BI Desktop до користувачів`,steps:[`Відкрив PBIP у Power BI Desktop, вніс зміну, зберіг`,`Переглянув diff у Sourcetree або VS Code`,`Stage + Commit (кнопкою в Sourcetree або git commit у терміналі)`,`Push в Azure DevOps`,`Git sync опублікував зміну в робочій області`,`За потреби: deployment pipeline промоутить Dev → Prod`]}
 });
 
 /* === 11. СИМУЛЯТОР КОМАНД === */
