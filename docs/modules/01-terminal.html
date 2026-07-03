@@ -25,7 +25,7 @@
   <div id="searchResults" class="searchResults"></div>
   <nav id="nav">
     <div class="modlabel">Модулі</div>
-<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
 <a href="../modules/01-terminal.html" class="active"><span class="num">01</span><span>Термінал і файли</span></a>
 <a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
 <a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
@@ -59,7 +59,7 @@
 <span class="tw-p">$</span> <span class="tw-c">git --version</span>
 <span class="tw-o">git version 2.45.0</span></div></div>
 <div class="tdef"><div class="t">Запрошення (prompt)</div><div class="d">Символ на початку рядка (<code>$</code>, <code>&gt;</code> або шлях), після якого вводять команду.</div><div class="plain"><b>Простими словами:</b> це «курсор готовності». Сам символ <code>$</code> друкувати не треба — він уже там.</div></div>
-<div class="note tip">Де відкрити: на Windows — «Git Bash» або вбудований термінал у VS Code; на macOS/Linux — застосунок «Terminal». У VS Code термінал відкривається сполученням <code>Ctrl + `</code> (клавіша під Esc).</div>
+<div class="note tip">Де відкрити: на Windows — «Git Bash» або вбудований термінал у VS Code; на macOS/Linux — застосунок «Terminal». У VS Code термінал відкривається сполученням <code>Ctrl + `</code> (клавіша під Esc). Термінал цього курсу — Git Bash: він ставиться разом із Git, і всі приклади в уроках набрано саме в ньому.</div>
 <div class="qcheck" data-qc="qc_term_what"></div>
 
 </section>
@@ -90,6 +90,7 @@
 <tr><td>cd ~</td><td>Перейти в домашню папку.</td></tr>
 </table>
 <div class="tdef"><div class="t">Абсолютний vs відносний шлях</div><div class="d"><b>Абсолютний</b> — повний шлях від кореня (<code>/home/ivan/projects</code> або <code>C:\Users\Ivan</code>). <b>Відносний</b> — від поточної папки (<code>reports</code>, <code>../data</code>).</div><div class="plain"><b>Простими словами:</b> абсолютний — «повна адреса міста й вулиці»; відносний — «сусідній під'їзд від того місця, де стоїш».</div></div>
+<div class="note tip">Ці команди навігації працюють і у вбудованому терміналі VS Code (<code>Ctrl + `</code>). Практичний сценарій: зберіг звіт із Power BI Desktop у папку проєкту, відкрив цю папку у VS Code — термінал одразу стоїть у ній, і <code>ls</code> покаже файли звіту без жодного <code>cd</code>.</div>
 <div class="qcheck" data-qc="qc_pwd"></div>
 <div class="qcheck" data-qc="qc_cd"></div>
 <div class="qcheck" data-qc="qc_ls"></div>
@@ -123,6 +124,7 @@
 <tr><td>echo "txt" &gt;&gt; file</td><td>Дописати текст у кінець файлу.</td></tr>
 <tr><td>cat file</td><td>Показати вміст файлу.</td></tr>
 </table>
+<div class="note tip">Так стартує реальний проєкт: <code>mkdir sales-report</code> — а далі в Power BI Desktop зберігаєш звіт у цю папку як PBIP-проєкт. Git-репозиторій у ній ти зробиш уже в модулі 02.</div>
 <div class="qcheck" data-qc="qc_mkdir"></div>
 <div class="qcheck" data-qc="qc_touch_echo"></div>
 <h3>Симулятор: спробуй сам</h3>
@@ -188,6 +190,7 @@
 <div class="goalbox"><b>Ціль уроку</b>встановити Git, перевірити версію і представитися системі.</div>
 <h3>1. Встановити</h3>
 <div class="tdef"><div class="t">Звідки взяти Git</div><div class="d">Офіційний сайт <code>git-scm.com</code> — інсталятор для Windows, macOS, Linux. На Windows він приносить ще й «Git Bash» — зручний термінал.</div><div class="plain"><b>Простими словами:</b> завантаж і встанови, як звичайну програму, з налаштуваннями за замовчуванням.</div></div>
+<div class="note tip">Докладніше про встановлення та налаштування — у <a href="00-start.html#s2">модулі 00, урок «Встановлюємо Git і Git Bash»</a>.</div>
 <h3>2. Перевірити</h3>
 <div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">git --version</span>
 <span class="tw-o">git version 2.45.0</span>   <span class="tw-cm"># якщо бачиш версію — все встановлено</span></div></div>
@@ -208,7 +211,7 @@
 <div class="quiz" data-q="modT"></div>
 
 </section>
-<div class="pager"><a href="00-start.html"><span class="lbl">← попередній модуль</span>Старт</a><a class="nxt" href="02-osnovy.html"><span class="lbl">наступний модуль →</span>Основи Git</a></div>
+<div class="pager"><a href="00-start.html"><span class="lbl">← попередній модуль</span>Старт та інструменти</a><a class="nxt" href="02-osnovy.html"><span class="lbl">наступний модуль →</span>Основи Git</a></div>
 </main>
 <script src="../assets/search-index.js"></script>
 <script src="../assets/engine.js"></script>

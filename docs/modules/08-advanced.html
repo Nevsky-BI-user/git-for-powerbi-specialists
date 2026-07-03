@@ -25,7 +25,7 @@
   <div id="searchResults" class="searchResults"></div>
   <nav id="nav">
     <div class="modlabel">Модулі</div>
-<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
 <a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
 <a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
 <a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
@@ -60,6 +60,7 @@
 <span class="c"># … повторюєш, доки: "&lt;sha&gt; is the first bad commit"</span>
 <span class="cmd">git bisect</span> <span class="arg">reset</span>          <span class="c"># повернутися на свою гілку</span></pre>
 <div class="note tip"><b>PBIP-сценарій.</b> Звіт «раптом» порахувався інакше — bisect швидко вкаже коміт, де змінилась міра чи зв'язок, навіть серед сотень комітів.</div>
+<div class="note tip"><b>Як це виглядає на практиці.</b> bisect — територія термінала Git Bash: у Sourcetree такої команди немає. Зате перевірка кожного кроку — звична: Git уже підмінив файли на диску, тож відкриваєш PBIP у Power BI Desktop, дивишся, чи є баг, закриваєш файл і відповідаєш <code>good</code> чи <code>bad</code>.</div>
 
 </section>
 <section class="lesson show" id="s1" data-n="s1">
@@ -77,6 +78,7 @@
 <pre><span class="c"># .git/hooks/pre-commit (спрощено)</span>
 <span class="c"># 1) перевірити, що змінені .json валідні; інакше — стоп-коміт</span>
 <span class="c"># 2) перевірити відсутність шаблонів секретів</span></pre>
+<div class="note tip"><b>Де це писати.</b> Hook — звичайний скрипт: зручно писати й редагувати його у VS Code (з підсвіткою синтаксису), а перш ніж класти в <code>.git/hooks/</code> — прогнати вручну в терміналі Git Bash і переконатися, що він працює.</div>
 <div class="note"><b>Команді.</b> Локальні hooks не потрапляють у <code>.git</code> репозиторію; щоб поширити їх, тримають скрипти в самому репозиторії (напр. папка <code>hooks/</code>) і підключають, або переносять перевірки в CI (Azure Pipelines) на сервері.</div>
 
 <div class="qcheck" data-qc="qc_hooks"></div>
@@ -92,7 +94,7 @@
 <span class="c"># … правиш і комітиш hotfix у ../project-hotfix …</span>
 <span class="cmd">git worktree</span> <span class="arg">list</span>                                <span class="c"># перелік робочих директорій</span>
 <span class="cmd">git worktree</span> <span class="arg">remove ../project-hotfix</span>             <span class="c"># прибрати, коли готово</span></pre>
-<div class="note tip"><b>Альтернатива stash.</b> Замість «згорнути все вбік» — відкрити hotfix в окремій папці; основна директорія з недоробленою фічею лишається недоторканою.</div>
+<div class="note tip"><b>Альтернатива stash.</b> Замість «згорнути все вбік» — відкрити hotfix в окремій папці; основна директорія з недоробленою фічею лишається недоторканою. Команди worktree теж живуть у терміналі Git Bash, а далі все як завжди: PBIP із сусідньої папки відкриваєш у Power BI Desktop, файли правиш у VS Code.</div>
 
 <div class="qcheck" data-qc="qc_worktree"></div>
 </section>

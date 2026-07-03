@@ -1,11 +1,17 @@
 [
  {
   "slug": "00-start",
-  "title": "Старт",
+  "title": "Старт та інструменти",
   "file": "modules/00-start.html",
-  "count": 1,
+  "count": 7,
   "lessons": [
-   "Вступ"
+   "Вступ",
+   "Карта інструментів",
+   "Встановлюємо Git і Git Bash",
+   "GitHub і Azure DevOps Repos",
+   "VS Code",
+   "Sourcetree та інші клієнти",
+   "Уся зв'язка разом"
   ]
  },
  {
@@ -79,7 +85,7 @@
   "slug": "06-pbip",
   "title": "PBIP / PBIR / TMDL",
   "file": "modules/06-pbip.html",
-  "count": 7,
+  "count": 8,
   "lessons": [
    "Що таке PBIP",
    "Структура папок PBIP",
@@ -87,6 +93,7 @@
    "Робочий процес PBIP від нуля",
    "Обмеження PBIP",
    "Стек 2: Tabular Editor",
+   "Що комітити, а що ігнорувати",
    "Вправи · Модуль E"
   ]
  },

@@ -25,7 +25,7 @@
   <div id="searchResults" class="searchResults"></div>
   <nav id="nav">
     <div class="modlabel">Модулі</div>
-<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
 <a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
 <a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
 <a href="../modules/03-komandy.html" class="active"><span class="num">03</span><span>Щоденні команди</span></a>
@@ -76,6 +76,7 @@
 <tr><td>git commit --amend</td><td>Змінити ОСТАННІЙ коміт. Переписує SHA.</td></tr>
 </table>
 <div class="note warn"><b>--amend переписує історію.</b> Якщо коміт уже на сервері й спільний — після amend знадобиться <code>push --force-with-lease</code>, що може зламати копії колег.</div>
+<div class="note tip"><b>Те саме кнопками.</b> У VS Code панель Source Control робить це за два кліки: «+» біля файлу — це <code>git add</code>, поле повідомлення і кнопка Commit — це <code>git commit -m</code>. Під капотом виконуються ті самі команди, тому спершу зрозумій їх у терміналі — далі кнопки перестануть бути магією.</div>
 
 <h3>Симулятор: спробуй сам</h3>
 <div class="csim" data-cs="cs_init"></div>
@@ -166,6 +167,7 @@
 <h4 class="sub">git clone — отримати копію вперше</h4>
 <p>Завантажує весь віддалений репозиторій локально й під'єднує <code>origin</code>.</p>
 <div class="widget"><div class="wtitle">Візуалізація: clone (сервер → твій комп'ютер)</div><div class="gplayer" data-p="clone"></div></div>
+<div class="note tip"><b>Звідки взяти URL.</b> В Azure DevOps на сторінці репозиторію є кнопка Clone: вона показує адресу для <code>git clone</code> (скопіював — і команда готова) і одразу пропонує варіант «Clone in VS Code».</div>
 
 <h4 class="sub">git fetch / git pull — забрати чужі зміни</h4>
 <div class="tdef"><div class="t">fetch vs pull</div><div class="d"><code>fetch</code> завантажує коміти з сервера, але НЕ чіпає твої робочі файли. <code>pull</code> = fetch + одразу merge у поточну гілку.</div><div class="plain"><b>Простими словами:</b> fetch — «подивитись, що нового на сервері». pull — «подивитись і одразу собі забрати».</div></div>
@@ -173,6 +175,7 @@
 
 <h4 class="sub">git push — відправити свої зміни</h4>
 <div class="widget"><div class="wtitle">Візуалізація: push (твій комп'ютер → сервер)</div><div class="gplayer" data-p="remote"></div></div>
+<div class="note tip"><b>Кнопковий еквівалент.</b> У Sourcetree це кнопки Pull і Push на верхній панелі: цифра на Pull показує, скільки чужих комітів чекає на сервері, на Push — скільки твоїх ще не відправлено. Клік виконує той самий <code>git pull</code> чи <code>git push</code>.</div>
 
 <h4 class="sub">Коли двоє пушать одночасно — конфлікт синхронізації</h4>
 <p>Найчастіша ситуація в команді з двох розробників: обидва зробили коміти й намагаються запушити. Хто перший — той пройде. Другому push відхилять.</p>
@@ -252,6 +255,7 @@
 <tr><td>git diff --word-diff</td><td>Підсвічування змінених СЛІВ, а не рядків — зручно для DAX.</td></tr>
 <tr><td>git diff main..feature</td><td>Різниця між двома гілками.</td></tr>
 </table>
+<div class="note tip"><b>Щоденний сценарій.</b> Змінив міру в Power BI Desktop, зберіг PBIP-проєкт — і ще до коміту клікаєш по файлу в Sourcetree: він показує той самий <code>git diff</code>, лише з підсвіткою. Побачив зайве — прибрав; усе чисто — комітиш і пушиш.</div>
 <h3>log — пошук в історії</h3>
 <table class="cmdtable">
 <tr><td>git log --oneline --graph</td><td>Компактна історія з деревом гілок.</td></tr>

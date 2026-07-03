@@ -25,7 +25,7 @@
   <div id="searchResults" class="searchResults"></div>
   <nav id="nav">
     <div class="modlabel">Модулі</div>
-<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
 <a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
 <a href="../modules/02-osnovy.html" class="active"><span class="num">02</span><span>Основи Git</span></a>
 <a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
@@ -62,13 +62,14 @@
 <div class="plain"><b>Простими словами:</b> «розумний журнал змін», що живе прямо в папці проєкту й пам'ятає кожен твій крок.</div></div>
 <h3>Проблема без Git</h3>
 <p>Ручний підхід: <code>report_final.pbix</code>, <code>report_final_v2.pbix</code>, <code>report_final_REALLY_final.pbix</code>. Неможливо побачити різницю, безпечно об'єднати правки двох людей чи зрозуміти, що зламалось і коли.</p>
-<h3>Git ≠ GitHub ≠ SourceTree</h3>
+<h3>Git ≠ GitHub ≠ Sourcetree</h3>
 <p>Ці три речі часто плутають. Вони різні:</p>
 <div class="cards">
 <div class="card"><h4>Git</h4><p>Сама програма контролю версій. Працює локально, без інтернету.</p><div class="ex">Як двигун автомобіля.</div></div>
 <div class="card"><h4>GitHub / Azure DevOps</h4><p>Хмарні сервіси, що зберігають копію репозиторію онлайн для спільної роботи та резервування.</p><div class="ex">Як гараж, де машину бачить уся команда.</div></div>
-<div class="card"><h4>SourceTree</h4><p>Графічна програма (GUI) з кнопками замість команд. Кожна кнопка викликає Git під капотом.</p><div class="ex">Як зручна панель приладів над двигуном.</div></div>
+<div class="card"><h4>Sourcetree</h4><p>Графічна програма (GUI) з кнопками замість команд. Кожна кнопка викликає Git під капотом.</p><div class="ex">Як зручна панель приладів над двигуном.</div></div>
 </div>
+<div class="note tip"><b>Як це виглядає у щоденній роботі.</b> Відкриваєш звіт у Power BI Desktop → зберігаєш → переглядаєш зміни в Sourcetree → комітиш → пушиш у GitHub чи Azure DevOps, а якщо виник конфлікт — вирішуєш його в merge-редакторі VS Code. Усі ці інструменти ти вже налаштував у модулі <a href="00-start.html#s6">00 «Старт та інструменти»</a>.</div>
 <div class="note tip"><b>Для Power BI це критично.</b> Бінарний <code>.pbix</code> Git бачить як один нероздільний блок. Формат <span class="term">PBIP</span> (текст + JSON + TMDL) робить кожну зміну DAX-міри чи візуала видимою. Цьому присвячені модулі E–F.</div>
 
 <div class="qcheck" data-qc="qc_why_git"></div>
@@ -96,7 +97,7 @@
 <div class="plain"><b>Простими словами:</b> те, що зараз «на столі» — поточний стан файлів.</div></div>
 <div class="tdef"><div class="t">Staging Area / Index (зона підготовки)</div>
 <div class="d">Проміжна «коробка». Командою <code>git add</code> ти кладеш туди зміни, які увійдуть у наступний коміт.</div>
-<div class="plain"><b>Простими словами:</b> як кошик у магазині. Спершу складаєш товари (add), потім оплачуєш усе разом (commit).</div>
+<div class="plain"><b>Простими словами:</b> як кошик у магазині. Спершу складаєш товари (add), потім оплачуєш усе разом (commit). У Sourcetree цей кошик — список Staged files, у VS Code — Staged Changes.</div>
 <div class="ex">Змінив 5 файлів, але хочеш закомітити лише 2 пов'язані — кладеш у кошик саме їх.</div></div>
 <div class="tdef"><div class="t">Branch (гілка)</div>
 <div class="d">Рухомий вказівник на коміт; окрема лінія розробки.</div>
@@ -143,6 +144,7 @@
 <div class="tdef"><div class="t">Чотири місця, де «живе» файл</div>
 <div class="d"><b>1) Working Directory</b> — на диску, ти редагуєш. <b>2) Staging</b> — у кошику, готовий до коміту. <b>3) Repository (.git)</b> — закомічено, у локальній історії. <b>4) Remote</b> — на сервері, доступно команді.</div>
 <div class="plain"><b>Простими словами:</b> чернетка на столі → кошик у магазині → куплено й удома → відправлено друзям.</div></div>
+<div class="note tip"><b>Як ці зони виглядають у графічних інструментах.</b> Зберіг звіт у Power BI Desktop (у форматі PBIP) — і змінені файли одразу з'явились у Sourcetree в списку Unstaged files: це і є Working Directory. Натиснув Stage — файл перейшов у список Staged files, тобто <code>git add</code> однією кнопкою. У VS Code ті самі списки звуться Changes та Staged Changes, а «+» біля файлу — той самий <code>git add</code>.</div>
 <div class="widget">
   <div class="wtitle">Інтерактив: рух файлу командами Git</div>
   <div class="zones" id="lcZones">

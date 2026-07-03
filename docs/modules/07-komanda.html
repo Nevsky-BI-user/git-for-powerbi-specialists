@@ -25,7 +25,7 @@
   <div id="searchResults" class="searchResults"></div>
   <nav id="nav">
     <div class="modlabel">Модулі</div>
-<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
 <a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
 <a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
 <a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
@@ -115,6 +115,7 @@ Thumbs.db
 <tr><td>PBIR (report JSON)</td><td>Зміни позицій/властивостей візуалів. Гранулярність PBIR зменшує конфлікти.</td></tr>
 </table>
 <div class="note warn"><b>Після вирішення TMDL-конфлікту відкрий проєкт у Power BI Desktop або провалідуй у Tabular Editor.</b> Git перевіряє лише текст, не валідність моделі.</div>
+<div class="note tip"><b>Інструмент для вирішення.</b> Конфліктний TMDL/JSON відкривай у VS Code: вбудований merge-редактор показує «свою» та «чужу» версії поруч і дає кнопки Accept Current / Accept Incoming / Accept Both — не треба вручну вишукувати маркери <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>.</div>
 <h3>Профілактика</h3>
 <ul>
 <li>Короткоживучі feature-гілки.</li>
@@ -135,11 +136,12 @@ Thumbs.db
 <h3>Сценарій 1 — базовий цикл</h3>
 <p>Найфундаментальніше: як один коміт мандрує від A через сервер до B. Це основа, на якій тримаються всі інші сценарії.</p>
 <div class="widget"><div class="wtitle">commit → push → pull</div><div class="scplayer" data-s="basic1"></div></div>
+<div class="note tip"><b>Ті самі кроки в інструментах.</b> Розробник A вносить зміну і зберігає проєкт у Power BI Desktop, потім у Sourcetree переглядає diff змінених TMDL/JSON-файлів, комітить і натискає Push. Розробник B натискає Pull у Sourcetree — і бачить коміт A в історії та оновлені файли у своєму проєкті.</div>
 <h3>Сценарій 2 — паралельна робота, push відхилено</h3>
 <p>Двоє комітять одночасно різні файли. Хто пушить другим — отримує відмову <code>non-fast-forward</code> і робить <code>pull --rebase</code>. Конфлікту немає, бо файли різні.</p>
 <div class="widget"><div class="wtitle">паралельні коміти + pull --rebase</div><div class="scplayer" data-s="parallel"></div></div>
 <h3>Сценарій 3 — конфлікт того самого рядка</h3>
-<p>Найчастіший справжній конфлікт: обидва змінили ту саму міру. Покроково: від відмови до вирішення конфлікту й push.</p>
+<p>Найчастіший справжній конфлікт: обидва змінили ту саму міру. Покроково: від відмови до вирішення конфлікту й push. На практиці конфліктний <code>model.tmdl</code> відкривають у merge-редакторі VS Code й обирають або поєднують версії кнопками (як саме — урок <a href="#s2">«Конфлікти у PBIP-файлах»</a>).</p>
 <div class="widget"><div class="wtitle">конфлікт у model.tmdl та його вирішення</div><div class="scplayer" data-s="conflict"></div></div>
 <h3>Сценарій 4 — гілка для фічі</h3>
 <p>A створює feature-гілку, пушить її на сервер, B її забирає через fetch і приєднується до роботи в одній гілці.</p>
@@ -538,6 +540,7 @@ PBI_CLIENT_SECRET=
 <span class="c"># далі — не в Git, а в Power BI Service:</span>
 <span class="c">#   етап 1) Dev workspace → Update from Git   (синхронізація)</span>
 <span class="c">#   етап 2) Deployment pipeline: Dev → Prod   (деплой у прод)</span></pre>
+<div class="note tip"><b>Без термінала.</b> Git-частину цих кроків можна пройти кнопками у Sourcetree: переглянути diff перед комітом, злити feature-гілку в main і зробити Push. Перевірка проєкту перед злиттям — як і раніше, у Power BI Desktop.</div>
 <div class="note"><b>Замість PR-review</b> бар'єрами якості є: перевірка моделі в Desktop перед merge, автоматичний CI/BPA на <code>.SemanticModel</code>, і поетапний деплой — у Prod зміни потрапляють лише після проходження Dev.</div>
 <h3>Чим це відрізняється від класичного PR-флоу</h3>
 <table class="cmdtable">

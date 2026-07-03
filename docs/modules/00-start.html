@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Старт · Git for Power BI specialists</title>
+<title>Старт та інструменти · Git for Power BI specialists</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -25,7 +25,7 @@
   <div id="searchResults" class="searchResults"></div>
   <nav id="nav">
     <div class="modlabel">Модулі</div>
-<a href="../modules/00-start.html" class="active"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/00-start.html" class="active"><span class="num">00</span><span>Старт та інструменти</span></a>
 <a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
 <a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
 <a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
@@ -37,6 +37,12 @@
 <a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
 <div class="modlabel">На цій сторінці</div>
 <a href="#s0" data-sec="s0"><span class="num">01</span><span>Вступ</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Карта інструментів</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Встановлюємо Git і Git Bash</span></a>
+<a href="#s3" data-sec="s3"><span class="num">04</span><span>GitHub і Azure DevOps Repos</span></a>
+<a href="#s4" data-sec="s4"><span class="num">05</span><span>VS Code</span></a>
+<a href="#s5" data-sec="s5"><span class="num">06</span><span>Sourcetree та інші клієнти</span></a>
+<a href="#s6" data-sec="s6"><span class="num">07</span><span>Уся зв'язка разом</span></a>
   </nav>
 </aside>
 <button class="reopen" id="reopenBtn">☰ Меню</button>
@@ -62,9 +68,149 @@
 <li><strong>Пошук</strong> угорі ліворуч шукає по всьому курсу.</li>
 <li><strong>Схеми з кнопками «Назад / Далі»</strong> показують процес покроково — гортай їх.</li>
 <li><strong>Міні-вправи</strong> під темами — одразу перевір себе одним кліком. Наприкінці кожного модуля є більші вправи.</li>
+<li><strong>Далі в цьому модулі</strong> — знайомство з інструментами і розгортання робочого місця: Git, Git Bash, GitHub / Azure DevOps, VS Code, Sourcetree.</li>
 </ul>
 <div class="qcheck" data-qc="qc_intro"></div>
 <div class="note tip">Порада: не пропускай модуль «Термінал і файли», навіть якщо здається елементарним. Усі команди Git вводяться там само, і далі весь курс спирається на ці базові навички.</div>
+
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Старт та інструменти</div>
+<h2>Карта інструментів: хто за що відповідає</h2>
+<p class="lead">«Git» у розмовах — це часто ціла екосистема з пʼяти-шести програм. Розкладемо її по поличках, щоб далі не плутатись.</p>
+<div class="goalbox"><b>Ціль уроку</b>розрізняти двигун (Git), сховище (GitHub / Azure DevOps) і клієнти (Git Bash, VS Code, Sourcetree) — і розуміти, де в цій картині Power BI.</div>
+<div class="tdef"><div class="t">Git (двигун)</div><div class="d">Програма без вікон, яка веде історію версій у прихованій папці <code>.git</code>. Усе інше — лише способи натискати на неї.</div><div class="plain"><b>Аналогія:</b> двигун автомобіля. Сам по собі невидимий, але саме він везе.</div></div>
+<div class="tdef"><div class="t">Хостинг репозиторіїв (GitHub, Azure DevOps Repos)</div><div class="d">Сервер, де лежить спільна копія репозиторію, плюс вебінтерфейс: перегляд історії, налаштування доступів, автоматизації.</div><div class="plain"><b>Аналогія:</b> хмарний диск для проєкту + офіс, де команда домовляється про правила.</div></div>
+<div class="tdef"><div class="t">Клієнт Git (Git Bash, VS Code, Sourcetree)</div><div class="d">Програма, через яку ти віддаєш команди двигуну: текстом у терміналі або кнопками у графічному інтерфейсі.</div><div class="plain"><b>Аналогія:</b> кермо і педалі. Обираєш, що зручніше саме тобі, — їде однаково той самий двигун.</div></div>
+<h3>Хто є хто в екосистемі</h3>
+<ul>
+<li><strong>Power BI Desktop</strong> — тут ти редагуєш звіт і модель; у форматі PBIP він зберігає проєкт текстовими файлами, які розуміє Git.</li>
+<li><strong>Git</strong> — рушій версій: коміти, гілки, історія. Працює локально на твоєму компʼютері.</li>
+<li><strong>Git Bash</strong> — термінал для Windows, встановлюється разом із Git. Саме тут вводяться команди з цього курсу.</li>
+<li><strong>GitHub</strong> — найпопулярніший хостинг: особисті проєкти, портфоліо, відкритий код.</li>
+<li><strong>Azure DevOps Repos</strong> — корпоративний хостинг від Microsoft: єдиний вхід компанії, політики гілок, pipelines. Типовий вибір там, де вже є Power BI і Fabric.</li>
+<li><strong>VS Code</strong> — безплатний редактор коду: перегляд diff, правка TMDL/JSON, вирішення конфліктів.</li>
+<li><strong>Sourcetree</strong> — графічний Git-клієнт: історія у вигляді графа, commit і push кнопками.</li>
+<li><strong>Tabular Editor</strong> — просунута робота з семантичною моделлю (детально в модулі 06).</li>
+<li><strong>Fabric Git integration</strong> — міст між репозиторієм і workspace Power BI (детально в модулі 07).</li>
+</ul>
+<div class="note tip">Порада: не намагайся опанувати все одразу. Мінімальний робочий набір: Power BI Desktop + Git + один зручний клієнт (Sourcetree або VS Code). Решта додасться сама.</div>
+<div class="qcheck" data-qc="qc_toolmap"></div>
+
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+
+<div class="crumb">Старт та інструменти</div>
+<h2>Встановлюємо Git і Git Bash</h2>
+<p class="lead">Перший крок розгортання інфраструктури — поставити двигун. Разом із ним безплатно приїде і термінал.</p>
+<div class="goalbox"><b>Ціль уроку</b>встановити Git на Windows, перевірити встановлення і представитись системі.</div>
+<h3>Кроки встановлення</h3>
+<ul>
+<li>Завантаж інсталятор з офіційного сайту <a href="https://git-scm.com" target="_blank" rel="noopener">git-scm.com</a>.</li>
+<li>Запусти і тисни Next: стандартні налаштування підходять. Єдине, на що варто звернути увагу, — пункт про кінці рядків: обери рекомендований <em>Checkout Windows-style, commit Unix-style</em>.</li>
+<li>Після встановлення у меню «Пуск» зʼявиться <strong>Git Bash</strong> — термінал, у якому працюватимеш весь курс.</li>
+</ul>
+<div class="tdef"><div class="t">Git Bash</div><div class="d">Термінал для Windows з Unix-командами (pwd, ls, cd), який іде в комплекті з Git.</div><div class="plain"><b>Простими словами:</b> вікно, куди ти друкуєш команди. На Windows воно дає ті самі команди, що бачать колеги на macOS чи Linux, — тому всі інструкції в інтернеті працюють однаково.</div></div>
+<h3>Перевірка і перше налаштування</h3>
+<pre><span class="c"># чи встановився Git: має вивести номер версії</span>
+<span class="cmd">git --version</span>
+
+<span class="c"># представся: це імʼя та email підписуватимуть кожен твій коміт</span>
+<span class="cmd">git config</span> <span class="arg">--global user.name "Ім'я Прізвище"</span>
+<span class="cmd">git config</span> <span class="arg">--global user.email "you@company.com"</span></pre>
+<div class="note tip">Порада: у корпоративному ноутбуці Git може бути вже встановлений або ставиться через ІТ-відділ. Просто відкрий Git Bash і перевір <code>git --version</code> — якщо версія вивелась, крок виконано.</div>
+<div class="csim" data-cs="cs_gitversion"></div>
+<div class="qcheck" data-qc="qc_gitbash"></div>
+
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+
+<div class="crumb">Старт та інструменти</div>
+<h2>GitHub і Azure DevOps Repos: дім для репозиторію</h2>
+<p class="lead">Git на твоєму компʼютері вже вміє все. Але щоб працювати командою і не втратити роботу разом із ноутбуком, потрібна спільна копія на сервері.</p>
+<div class="goalbox"><b>Ціль уроку</b>зрозуміти, що таке хостинг репозиторіїв, чим GitHub відрізняється від Azure DevOps, і як отримати репозиторій собі на компʼютер.</div>
+<div class="tdef"><div class="t">Віддалений репозиторій (remote)</div><div class="d">Копія репозиторію на сервері хостингу. Ти надсилаєш туди коміти (push) і забираєш чужі (pull).</div><div class="plain"><b>Аналогія:</b> спільна шафа з документами в офісі. Кожен працює за своїм столом (локально), а результат складають у шафу, звідки його бачать усі.</div></div>
+<h3>Який хостинг обрати</h3>
+<ul>
+<li><strong>GitHub</strong> — для особистих проєктів, навчання, портфоліо. Реєструєшся, тиснеш <em>New repository</em>, обираєш private або public — репозиторій готовий за хвилину.</li>
+<li><strong>Azure DevOps Repos</strong> — стандарт у компаніях з Microsoft-стеком: вхід через робочий обліковий запис, політики гілок, pipelines для автоматизації і пряма інтеграція з Fabric (Git sync workspace). Репозиторій створюється в межах проєкту: <em>Project → Repos → New repository</em>.</li>
+</ul>
+<p>Для курсу підійде будь-який: команди Git однакові. Далі в прикладах здебільшого Azure DevOps — бо саме він найчастіше зустрічається в корпоративній роботі з Power BI.</p>
+<h3>Забираємо репозиторій собі</h3>
+<pre><span class="c"># адресу дає кнопка Clone на сайті хостингу</span>
+<span class="cmd">git clone</span> <span class="arg">https://dev.azure.com/org/project/_git/pbi-reports</span></pre>
+<p>Під час першого push або clone хостинг попросить увійти: зазвичай відкриється вікно браузера (за це відповідає Git Credential Manager). Про SSH-ключі та Personal Access Token — окремий урок <a href="03-komandy.html#s5">у модулі 03</a>.</p>
+<div class="qcheck" data-qc="qc_hosting"></div>
+
+</section>
+<section class="lesson show" id="s4" data-n="s4">
+
+<div class="crumb">Старт та інструменти</div>
+<h2>VS Code: редактор із вбудованим Git</h2>
+<p class="lead">PBIP — це текстові файли. А для роботи з текстом потрібен хороший редактор.</p>
+<div class="goalbox"><b>Ціль уроку</b>використовувати VS Code для перегляду змін у PBIP-файлах і вирішення конфліктів.</div>
+<div class="tdef"><div class="t">VS Code (Visual Studio Code)</div><div class="d">Безплатний редактор коду від Microsoft із вбудованою підтримкою Git: панель Source Control, перегляд diff, merge-редактор для конфліктів.</div><div class="plain"><b>Простими словами:</b> «блокнот на стероїдах». Відкриваєш папку PBIP-проєкту — і бачиш, що саме змінилось у моделі, рядок у рядок.</div></div>
+<h3>Що ти робитимеш у VS Code найчастіше</h3>
+<ul>
+<li><strong>Дивитись зміни:</strong> панель Source Control (Ctrl+Shift+G) показує змінені файли; клік по файлу — і бачиш diff: що було ліворуч, що стало праворуч.</li>
+<li><strong>Правити TMDL/JSON:</strong> дрібну правку міри можна зробити прямо в <code>measure.tmdl</code>, не відкриваючи Power BI Desktop.</li>
+<li><strong>Вирішувати конфлікти:</strong> merge-редактор пропонує кнопки <em>Accept Current / Accept Incoming / Accept Both</em> — детально в модулі 05.</li>
+<li><strong>Комітити:</strong> кнопка Commit у тій самій панелі — якщо не хочеться перемикатись у термінал.</li>
+</ul>
+<h3>Корисні розширення</h3>
+<ul>
+<li><strong>TMDL</strong> — підсвітка синтаксису TMDL-файлів семантичної моделі.</li>
+<li><strong>GitLens</strong> — показує біля кожного рядка, хто і коли його змінив.</li>
+</ul>
+<div class="note tip">Не плутай: VS Code і Visual Studio — різні продукти. Для роботи з PBIP потрібен саме легкий VS Code.</div>
+<div class="qcheck" data-qc="qc_vscode"></div>
+
+</section>
+<section class="lesson show" id="s5" data-n="s5">
+
+<div class="crumb">Старт та інструменти</div>
+<h2>Sourcetree та інші графічні клієнти</h2>
+<p class="lead">Команди — це точно і швидко. Але дивитись історію та збирати коміт по файлах часто зручніше мишкою.</p>
+<div class="goalbox"><b>Ціль уроку</b>виконувати щоденний цикл (pull → зміни → commit → push) у графічному клієнті й розуміти, коли GUI зручніший за термінал.</div>
+<div class="tdef"><div class="t">Sourcetree</div><div class="d">Безплатний графічний Git-клієнт від Atlassian: історія комітів у вигляді графа, список змінених файлів, кнопки Stage / Commit / Push / Pull.</div><div class="plain"><b>Аналогія:</b> автоматична коробка передач. Усередині той самий Git, але керування — двома кнопками. Для щоденної рутини цього достатньо.</div></div>
+<h3>Типовий цикл у Sourcetree</h3>
+<ul>
+<li>Зранку — кнопка <strong>Pull</strong>: забрав свіжі зміни колег.</li>
+<li>Попрацював у Power BI Desktop, зберіг PBIP — у Sourcetree одразу видно список змінених файлів і diff кожного.</li>
+<li>Відібрав потрібні файли (<strong>Stage</strong>), написав повідомлення, натиснув <strong>Commit</strong>.</li>
+<li><strong>Push</strong> — зміни поїхали на сервер.</li>
+</ul>
+<h3>Альтернативи</h3>
+<ul>
+<li><strong>GitHub Desktop</strong> — ще простіший, ідеальний у парі з GitHub.</li>
+<li><strong>Fork</strong> — швидкий і охайний клієнт для Windows/macOS.</li>
+<li><strong>Вбудований Source Control у VS Code</strong> — якщо не хочеш ставити окрему програму.</li>
+</ul>
+<div class="note tip">Практичне правило: рутина (подивитись зміни, закомітити, запушити) — у GUI; точні або рідкісні операції (rebase, reflog, bisect) — у терміналі. Курс навчить обох способів.</div>
+<div class="order" data-o="or_setup"></div>
+<div class="qcheck" data-qc="qc_gui"></div>
+
+</section>
+<section class="lesson show" id="s6" data-n="s6">
+
+<div class="crumb">Старт та інструменти</div>
+<h2>Уся зв'язка разом: від звіту до продакшену</h2>
+<p class="lead">Тепер збери всю картину: як одна правка міри проходить крізь усі інструменти — від Power BI Desktop до звіту, який бачить бізнес.</p>
+<div class="goalbox"><b>Ціль уроку</b>бачити повний шлях зміни: Power BI Desktop → Git → Azure DevOps → Dev workspace → Prod — і знати, який інструмент відповідає за кожен крок.</div>
+<h3>Один робочий день — покроково</h3>
+<ul>
+<li><strong>1. Power BI Desktop.</strong> Відкриваю PBIP-проєкт, виправляю міру Sales YTD, зберігаю. Desktop переписує текстові файли у папці проєкту.</li>
+<li><strong>2. Sourcetree (або VS Code).</strong> Бачу, які саме файли змінились, переглядаю diff: у <code>measure.tmdl</code> змінився один рядок DAX.</li>
+<li><strong>3. Коміт.</strong> Stage потрібних файлів → повідомлення <code>fix: correct YTD filter</code> → Commit. Кнопкою в Sourcetree чи командою в Git Bash — результат однаковий.</li>
+<li><strong>4. Push в Azure DevOps.</strong> Зміна тепер на сервері, її бачить уся команда.</li>
+<li><strong>5. Git sync.</strong> Dev workspace у Power BI Service підтягує зміну з гілки — звіт у Dev оновився.</li>
+<li><strong>6. Deployment pipeline.</strong> Після перевірки натискаю Deploy: Dev → Prod. Бізнес бачить виправлений звіт.</li>
+</ul>
+<p>А якщо на кроці 4 сервер відповів, що колега вже змінив той самий файл? Тоді зʼявляється ще один інструмент: <strong>VS Code</strong> відкриває конфліктний файл, я обираю правильну версію в merge-редакторі — і повторюю push. Цьому присвячений модуль 05.</p>
+<div class="note tip">Запамʼятай цей ланцюжок — він повторюватиметься в кожному модулі курсу, щоразу глибше: команди — у модулях 01–03, виправлення помилок — у 04–05, PBIP — у 06, командна робота і деплой — у 07.</div>
+<div class="order" data-o="or_toolchain"></div>
+<div class="qcheck" data-qc="qc_chain"></div>
 
 </section>
 <div class="pager"><a href="../index.html"><span class="lbl">←</span>На головну</a><a class="nxt" href="01-terminal.html"><span class="lbl">наступний модуль →</span>Термінал і файли</a></div>

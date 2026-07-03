@@ -31,7 +31,7 @@ node scripts/qa.mjs              # exit 0 = цілі G1–G6 виконані
 ```
 docs/
   index.html            головна: картки модулів + прогрес
-  modules/NN-slug.html  10 сторінок-модулів, 52 уроки (секції s0..sN)
+  modules/NN-slug.html  10 сторінок-модулів, 59 уроків (секції s0..sN)
   assets/app.css        уся стилізація
   assets/engine.js      дані (PLAYERS/QUIZ/SCEN/QCHECKS/CSIM/ORDERS/GIT_CMDS) + віджети + пошук + прогрес
   assets/search-index.js  генерується скриптом, руками не правити

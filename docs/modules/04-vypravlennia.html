@@ -25,7 +25,7 @@
   <div id="searchResults" class="searchResults"></div>
   <nav id="nav">
     <div class="modlabel">Модулі</div>
-<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
 <a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
 <a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
 <a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
@@ -46,7 +46,7 @@
 
 <div class="crumb">Модуль C — виправлення</div>
 <h2>Скасування змін</h2>
-<p class="lead">Три інструменти для трьох ситуацій. Плутанина між ними — найчастіша причина втрати роботи.</p>
+<p class="lead">Три інструменти для трьох ситуацій. Плутанина між ними — найчастіша причина втрати роботи. Усі три доступні і з Git Bash, і кнопками у Sourcetree чи VS Code — але спершу розберися, що саме робить кожен.</p>
 <div class="goalbox"><b>Ціль уроку</b>обирати правильний інструмент скасування без втрати роботи.</div>
 <div class="tdef"><div class="t">orphaned commit (осиротілий коміт)</div><div class="d">Коміт, на який більше не вказує жодна гілка чи тег. Видимо «зник», але фізично ще лежить у .git деякий час.</div><div class="plain"><b>Простими словами:</b> фотографія, вирвана з альбому — її ще можна знайти в смітнику (reflog), поки не прибрали.</div></div>
 <h3>Як reset рухає вказівник (граф)</h3>
@@ -66,6 +66,7 @@
   </div>
   <div class="wexplain" id="rsExp">Обери режим, щоб побачити які зони він зачіпає.</div>
 </div>
+<div class="note tip"><b>Де це у Sourcetree:</b> правий клік по коміту в графі → «Reset current branch to this commit», у діалозі обираєш режим Soft / Mixed / Hard. Це та сама команда, що й у Git Bash: кнопка не робить її безпечнішою, тож перед Hard так само переконайся, що незакомічені зміни тобі більше не потрібні.</div>
 <table class="cmdtable">
 <tr><td>git restore &lt;файл&gt;</td><td>Відкинути зміни файлу у working dir. Історію не чіпає.</td></tr>
 <tr><td>git restore --staged &lt;файл&gt;</td><td>Прибрати файл зі staging (зміни лишаються).</td></tr>
@@ -74,6 +75,7 @@
 <tr><td>git reset --hard &lt;commit&gt;</td><td><b style="color:var(--drop)">Небезпечно.</b> Усі три зони назад. Незакомічене втрачається.</td></tr>
 <tr><td>git revert &lt;commit&gt;</td><td>НОВИЙ коміт, що скасовує зміни. Безпечно для спільних гілок.</td></tr>
 </table>
+<div class="note tip"><b>Де це у VS Code:</b> «Discard Changes» (іконка ↶ біля файлу в панелі Source Control) — це і є git restore. Типовий сценарій: зіпсував міру у звіті в Power BI Desktop, зберіг PBIP, глянув diff — і одним кліком повернув файл до стану останнього коміту. Огляд самих клієнтів — в <a href="00-start.html#s5">уроці «Sourcetree та інші графічні клієнти»</a>.</div>
 <div class="note warn"><b>reset переписує історію, revert — ні.</b> На спільних гілках (main) — лише revert. reset --hard — локально й усвідомлено.</div>
 
 </section>

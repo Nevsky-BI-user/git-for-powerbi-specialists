@@ -25,7 +25,7 @@
   <div id="searchResults" class="searchResults"></div>
   <nav id="nav">
     <div class="modlabel">Модулі</div>
-<a href="../modules/00-start.html"><span class="num">00</span><span>Старт</span></a>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
 <a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
 <a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
 <a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
@@ -42,7 +42,8 @@
 <a href="#s3" data-sec="s3"><span class="num">04</span><span>Робочий процес PBIP від нуля</span></a>
 <a href="#s4" data-sec="s4"><span class="num">05</span><span>Обмеження PBIP</span></a>
 <a href="#s5" data-sec="s5"><span class="num">06</span><span>Стек 2: Tabular Editor</span></a>
-<a href="#s6" data-sec="s6" class="ex"><span class="num">07</span><span>Вправи · Модуль E</span></a>
+<a href="#s7" data-sec="s7"><span class="num">07</span><span>Що комітити, а що ігнорувати</span></a>
+<a href="#s6" data-sec="s6" class="ex"><span class="num">08</span><span>Вправи · Модуль E</span></a>
   </nav>
 </aside>
 <button class="reopen" id="reopenBtn">☰ Меню</button>
@@ -122,12 +123,13 @@
 <p class="lead">Покрокова послідовність: від .pbix до спільного репозиторію на сервері.</p>
 <div class="goalbox"><b>Ціль уроку</b>провести проєкт від збереження як PBIP до першого push.</div>
 <h3>Крок 1 — зберегти як PBIP</h3>
-<p>У Power BI Desktop: <strong>File → Save As → «Power BI project files (*.pbip)»</strong>, обери папку. Desktop створить структуру й <code>.gitignore</code>.</p>
+<p>У Power BI Desktop: <strong>File → Save As → «Power BI project files (*.pbip)»</strong>, обери папку. Desktop створить структуру й <code>.gitignore</code>. Далі працюєш як звик: відкриваєш <code>.pbip</code>, правиш звіт, тиснеш Ctrl+S — Power BI Desktop перезаписує текстові файли в цій папці, і Git одразу бачить зміни.</p>
 <h3>Крок 2 — увімкнути Git у папці</h3>
 <pre><span class="cmd">cd</span> <span class="arg">C:\Repos\PDP</span>          <span class="c"># перейти в папку проєкту</span>
 <span class="cmd">git init</span>                  <span class="c"># увімкнути контроль версій</span>
 <span class="cmd">git add</span> <span class="arg">.</span>                 <span class="c"># усі файли проєкту у staging</span>
 <span class="cmd">git commit</span> <span class="arg">-m "Початковий стан PDP"</span></pre>
+<div class="note tip"><b>Подивись очима перед комітом.</b> Перш ніж виконати <code>git commit</code>, відкрий папку проєкту в Sourcetree — на вкладці File Status видно список змінених файлів і diff кожного. Те саме у VS Code: панель Source Control (Ctrl+Shift+G), клік по файлу відкриває порівняння. Так ти комітиш усвідомлено, а не «все, що назбиралося».</div>
 <h3>Крок 3 — під'єднати сервер і відправити</h3>
 <div class="widget"><div class="wtitle">Що відбувається: локально → сервер</div><div class="gplayer" data-p="clone"></div></div>
 <pre><span class="cmd">git remote</span> <span class="arg">add origin &lt;url&gt;</span>   <span class="c"># під'єднати сервер (Azure DevOps / GitHub)</span>
@@ -135,6 +137,7 @@
 <h3>Крок 4 — колега забирає копію</h3>
 <pre><span class="cmd">git clone</span> <span class="arg">&lt;url&gt;</span>            <span class="c"># колега завантажує проєкт собі</span></pre>
 <div class="note"><b>Перевірка перед першим коммітом:</b> виконай <code>git status</code> і переконайся, що <code>cache.abf</code> та <code>localSettings.json</code> НЕ потрапили у список (їх має ховати .gitignore). Якщо вони видні — див. модуль F, кейс про <code>git rm --cached</code>.</div>
+<div class="note tip"><b>Щоденний цикл після налаштування.</b> Відкриваєш звіт у Power BI Desktop → вносиш зміни → Ctrl+S → переглядаєш diff у Sourcetree або VS Code → <code>git add .</code> і <code>git commit</code> → <code>git push</code>. Якщо при <code>git pull</code> виникне конфлікт — вирішуєш його у merge-редакторі VS Code; типові конфлікти PBIP розібрано в <a href="07-komanda.html#s2">модулі 07</a>.</div>
 
 </section>
 <section class="lesson show" id="s4" data-n="s4">
@@ -183,6 +186,28 @@
 <div class="note tip"><b>На практиці</b> стеки поєднують: звіт правлять у Desktop (PBIP), а складні зміни моделі — у Tabular Editor. Обидва пишуть ті самі <code>.tmdl</code>, тож Git і деплой однакові.</div>
 
 <div class="qcheck" data-qc="qc_te"></div>
+</section>
+<section class="lesson show" id="s7" data-n="s7">
+
+<div class="crumb">Модуль E — PBIP / PBIR</div>
+<h2>Що комітити, а що ігнорувати: .gitignore для PBIP</h2>
+<p class="lead">Power BI Desktop кладе у папку проєкту не лише «креслення» звіту й моделі, а й локальний кеш даних. В історію Git має потрапляти тільки перше.</p>
+<div class="goalbox"><b>Ціль уроку</b>чітко знати, які файли PBIP належать історії, а які — у .gitignore.</div>
+<div class="tdef"><div class="t">.gitignore</div><div class="d">Текстовий файл у корені репозиторію зі списком шаблонів шляхів, які Git не відстежує й не пропонує комітити.</div><div class="plain"><b>Аналогія:</b> список «не пакувати» під час переїзду: сміття й особисті речі сусіда у вантажівку не їдуть.</div></div>
+<table class="cmdtable">
+<tr><td>Комітити</td><td><code>.pbip</code>, увесь вміст <code>definition/</code> (TMDL і PBIR), <code>.gitignore</code>, <code>.gitattributes</code> — усе, що описує звіт і модель текстом.</td></tr>
+<tr><td>Ігнорувати</td><td><code>**/.pbi/cache.abf</code> — локальний кеш даних (може важити сотні мегабайтів); <code>**/.pbi/localSettings.json</code> — особисті налаштування твого Desktop; <code>*.pbix</code> — бінарні копії поруч із проєктом.</td></tr>
+</table>
+<h3>Готовий .gitignore для PBIP-репозиторію</h3>
+<pre><span class="c"># створюєш файл .gitignore у корені репозиторію (VS Code: File → New File)</span>
+<span class="c"># Power BI Desktop сам пропонує такий вміст під час збереження у PBIP:</span>
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+*.pbix</pre>
+<p>Практична перевірка: відкрий проєкт у Power BI Desktop, збережи й глянь <code>git status</code> у Git Bash (або список змін у Sourcetree). Якщо серед змінених файлів немає <code>cache.abf</code> — .gitignore працює.</p>
+<div class="note warn"><b>Кеш уже закомічено?</b> .gitignore не діє на файли, які Git уже відстежує. Лікується через <code>git rm --cached</code> — покроково у <a href="07-komanda.html#s0">повному уроці про .gitignore в модулі 07</a>, там само — типові кейси команди.</div>
+<div class="qcheck" data-qc="qc_pbip_ignore"></div>
+
 </section>
 <section class="lesson show" id="s6" data-n="s6">
 
