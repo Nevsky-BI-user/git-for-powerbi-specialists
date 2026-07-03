@@ -88,12 +88,14 @@
   "slug": "06-pbip",
   "title": "PBIP / PBIR / TMDL",
   "file": "modules/06-pbip.html",
-  "count": 8,
+  "count": 10,
   "lessons": [
    "Що таке PBIP",
    "Структура папок PBIP",
    "PBIR та TMDL",
+   "Читаємо diff PBIP",
    "Робочий процес PBIP від нуля",
+   "Міграція .pbix і тонкі звіти",
    "Обмеження PBIP",
    "Стек 2: Tabular Editor",
    "Що комітити, а що ігнорувати",
@@ -104,7 +106,7 @@
   "slug": "07-komanda",
   "title": "Робота в команді",
   "file": "modules/07-komanda.html",
-  "count": 12,
+  "count": 15,
   "lessons": [
    ".gitignore для PBIP",
    "Стратегія гілок",
@@ -116,8 +118,11 @@
    "Робочі процеси: порівняння",
    "Azure DevOps: pipelines і задачі",
    "Безпека та контроль доступу",
+   "Fabric Git integration",
    "Робочий процес: merge → деплой",
-   "Вправи · Модуль F"
+   "Дані після публікації",
+   "Вправи · Модуль F",
+   "Практикум: від .pbix до звіту"
   ]
  },
  {

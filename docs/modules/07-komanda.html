@@ -46,8 +46,11 @@
 <a href="#s7" data-sec="s7"><span class="num">08</span><span>Робочі процеси: порівняння</span></a>
 <a href="#s8" data-sec="s8"><span class="num">09</span><span>Azure DevOps: pipelines і задачі</span></a>
 <a href="#s9" data-sec="s9"><span class="num">10</span><span>Безпека та контроль доступу</span></a>
-<a href="#s10" data-sec="s10"><span class="num">11</span><span>Робочий процес: merge → деплой</span></a>
-<a href="#s11" data-sec="s11" class="ex"><span class="num">12</span><span>Вправи · Модуль F</span></a>
+<a href="#s12" data-sec="s12"><span class="num">11</span><span>Fabric Git integration</span></a>
+<a href="#s10" data-sec="s10"><span class="num">12</span><span>Робочий процес: merge → деплой</span></a>
+<a href="#s13" data-sec="s13"><span class="num">13</span><span>Дані після публікації</span></a>
+<a href="#s11" data-sec="s11" class="ex"><span class="num">14</span><span>Вправи · Модуль F</span></a>
+<a href="#s14" data-sec="s14"><span class="num">15</span><span>Практикум: від .pbix до звіту</span></a>
   </nav>
 </aside>
 <button class="reopen" id="reopenBtn">☰ Меню</button>
@@ -243,7 +246,7 @@ Thumbs.db
 <p class="sol"><b>Підсумок:</b> персональні налаштування не комітяться.</p></div>
 
 <div class="scn"><span class="cat">Кеш / службові файли</span><h4><span class="num">9</span>*.pbix роздуває репозиторій</h4>
-<p><b>Проблема:</b> хтось закомітив бінарний <code>.pbix</code>; репо важчає з кожним коммітом.</p>
+<p><b>Проблема:</b> хтось закомітив бінарний <code>.pbix</code>; репо важчає з кожним комітом.</p>
 <p><b>Причина:</b> бінарник зберігається повністю при кожній зміні.</p>
 <pre><span class="cmd">git rm</span> <span class="arg">--cached *.pbix</span>
 <span class="c"># echo "*.pbix" у .gitignore</span>
@@ -509,6 +512,38 @@ PBI_CLIENT_SECRET=
 
 <div class="qcheck" data-qc="qc_security"></div>
 </section>
+<section class="lesson show" id="s12" data-n="s12">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Fabric Git integration: підключаємо робочу область</h2>
+<p class="lead">Фініш усього циклу курсу: merge у main → push → Update from Git. Тут розберемо, де саме в Power BI Service живе ця кнопка і що означають статуси поруч із нею. Це та частина процесу, яку аналітик робить у браузері, а не в терміналі.</p>
+<div class="goalbox"><b>Ціль уроку</b>підключити робочу область до гілки main і впевнено читати статуси панелі Source control.</div>
+<div class="tdef"><div class="t">Fabric Git integration</div><div class="d">Вбудований звʼязок робочої області Power BI / Fabric із гілкою Git-репозиторію: область уміє підтягувати коміти з гілки (Update from Git) і комітити зміни, зроблені в Service, назад у гілку.</div><div class="plain"><b>Простими словами:</b> «підписка» робочої області на гілку — натиснув Update, і область стала такою самою, як main.</div><div class="ex">Гілку <code>main</code> підключають до робочої області; після push у main достатньо натиснути Update from Git — і звіт опубліковано.</div></div>
+<p>Передумови — дві, і обидві поза Git: робоча область має бути на ємності Fabric або Premium (на особистій My workspace чи звичайній Pro-області Git integration недоступна), а адміністратор tenant має дозволити Git integration у налаштуваннях (Admin portal → Tenant settings). Якщо чогось із цього немає — питання не до Git і не до тебе, а до адміністратора.</p>
+<h3>Підключення — робиться один раз</h3>
+<ol>
+<li>Відкрий робочу область → Workspace settings → вкладка Git integration.</li>
+<li>Обери провайдера: Azure DevOps (або GitHub).</li>
+<li>Вкажи організацію, проєкт і репозиторій.</li>
+<li>Обери гілку (<code>main</code>) і папку в репозиторії, де лежить PBIP-проєкт.</li>
+<li>Натисни Connect — область підключено до гілки.</li>
+</ol>
+<h3>Панель Source control</h3>
+<p>Після підключення вгорі робочої області зʼявляється кнопка Source control з лічильником. Вона відкриває панель із двома вкладками: <b>Updates</b> — вхідні коміти з гілки, які ще не застосовані до області (саме тут кнопка Update from Git); <b>Changes</b> — зміни, зроблені безпосередньо в Service, які ще не закомічені в гілку.</p>
+<h3>Статуси елементів</h3>
+<table class="cmdtable">
+<tr><td>Synced</td><td>Елемент збігається з гілкою. Робити нічого не треба.</td></tr>
+<tr><td>Update required</td><td>Гілка попереду: у main є новіший коміт, якого ще немає в області. Натисни Update from Git.</td></tr>
+<tr><td>Uncommitted</td><td>Елемент змінили прямо в Service, і ця зміна ще не потрапила в Git.</td></tr>
+<tr><td>Conflict</td><td>Розійшлись обидва боки: і в гілці новий коміт, і в Service — своя зміна того самого елемента.</td></tr>
+</table>
+<div class="note warn"><b>Правити звіт прямо в Service небажано</b>: джерело правди — Git. Якщо таке все ж сталося, одразу зроби Commit цієї зміни в гілку або Undo; інакше наступна синхронізація перетвориться на Conflict.</div>
+<p>Як цей крок вбудовується у весь ланцюжок — наскрізний сценарій модуля 00: <a href="00-start.html#s6">«Уся звʼязка разом»</a>. Типові проблеми синхронізації — кейси 21, 22 і 25 у <a href="#s5">довіднику проблем</a>.</p>
+
+<div class="order" data-o="or_fabric_connect"></div>
+<div class="qcheck" data-qc="qc_fabric_sync"></div>
+<div class="qcheck" data-qc="qc_ws_uncommitted"></div>
+</section>
 <section class="lesson show" id="s10" data-n="s10">
 
 <div class="crumb">Модуль F — командна робота</div>
@@ -562,6 +597,25 @@ PBI_CLIENT_SECRET=
 
 <div class="order" data-o="or_deploy"></div>
 </section>
+<section class="lesson show" id="s13" data-n="s13">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Дані після публікації: refresh, credentials, gateway</h2>
+<p class="lead">Синхронізація пройшла, а звіт порожній або скаржиться на credentials? Це найтиповіша точка паніки новачка. Спокійно: це не поломка, а очікуваний крок процесу.</p>
+<div class="goalbox"><b>Ціль уроку</b>розуміти, що Git привозить лише визначення, а дані наповнюються через refresh — і вміти пройти кроки credentials → gateway → розклад.</div>
+<p>Ментальна модель: Git привозить «креслення» — визначення моделі та звіту (TMDL і PBIR). Самих ДАНИХ у репозиторії немає і бути не може: таблиці наповнюються вже в Power BI Service, коли датасет виконує refresh і сам іде в джерела. Тому одразу після першої синхронізації звіт цілком законно порожній.</p>
+<h3>Після першої синхронізації датасету</h3>
+<ol>
+<li>Налаштування датасету: Settings → Semantic models → Data source credentials — задай облікові дані кожного джерела (Edit credentials).</li>
+<li>Якщо джерело on-prem — наприклад, SQL Server у локальній мережі компанії — привʼяжи датасет до gateway (див. нижче).</li>
+<li>Запусти refresh разово (Refresh now) і переконайся, що він пройшов без помилок; потім налаштуй розклад (Scheduled refresh).</li>
+</ol>
+<div class="tdef"><div class="t">Gateway (on-premises data gateway)</div><div class="d">Службова програма-міст між хмарою Power BI Service і джерелами даних у локальній мережі: хмара не бачить локальний сервер напряму, тож звертається до gateway, а той уже ходить у джерело.</div><div class="plain"><b>Простими словами:</b> консьєрж, який має ключ від будинку — хмара сама в будинок не заходить, а просить консьєржа винести дані за запитом.</div><div class="ex">Датасет із джерелом SQL Server у локальній мережі: без привʼязки до gateway refresh у Service падатиме, хоча в Power BI Desktop усе працювало.</div></div>
+<p>Якщо середовища розділені (Dev і Prod — окремі робочі області), підключення до джерел розводять параметрами моделі (наприклад, параметр із назвою сервера) та deployment rules у deployment pipeline: під час промоуту Dev → Prod правило підставляє продові значення. Це опційний рівень — якщо середовище одне, цей абзац можна пропустити.</p>
+<div class="note tip"><b>Помилка «credentials required» після синхронізації</b> — не «Git щось зламав», а штатний крок публікації: креслення приїхали, тепер дай Service ключі від джерел. Суміжний випадок із партиціями incremental refresh — кейс 23 у <a href="#s5">довіднику проблем</a>.</div>
+
+<div class="qcheck" data-qc="qc_refresh_creds"></div>
+</section>
 <section class="lesson show" id="s11" data-n="s11">
 
 <div class="crumb">Модуль F — перевірка</div>
@@ -570,6 +624,26 @@ PBI_CLIENT_SECRET=
 <div class="goalbox"><b>Ціль уроку</b>закріпити командні практики.</div>
 <div class="quiz" data-q="modF"></div>
 
+</section>
+<section class="lesson show" id="s14" data-n="s14">
+
+<div class="crumb">Модуль F — командна робота</div>
+<h2>Практикум: від .pbix до опублікованого звіту</h2>
+<p class="lead">Єдиний урок курсу, де все робиться руками на твоїй машині: від тестового .pbix до опублікованого звіту. Виділи 30–60 хвилин і проходь кроки по черзі — після кожного є чекпойнт самоперевірки.</p>
+<div class="goalbox"><b>Ціль уроку</b>пройти повний цикл власноруч: .pbix → PBIP → git init → віддалений репозиторій → feature-гілка → merge → (опційно) публікація через Update from Git.</div>
+<ul>
+<li><strong>1. Save As → PBIP.</strong> Візьми тестовий звіт (.pbix, НЕ робочий) і в Power BI Desktop зроби Save As у формат PBIP у нову порожню папку. ✅ Перевір: поруч зʼявились папки <code>.Report</code> і <code>.SemanticModel</code> та файл <code>.gitignore</code>.</li>
+<li><strong>2. git init.</strong> Відкрий Git Bash у цій папці й виконай <code>git init</code>, потім <code>git status</code>. ✅ Перевір: <code>cache.abf</code> НЕ у списку файлів — отже, .gitignore працює (якщо він там є — повернись до уроку <a href="#s0">«.gitignore для PBIP»</a>).</li>
+<li><strong>3. Перший коміт.</strong> <code>git add .</code> і <code>git commit -m "feat: initial PBIP"</code>. ✅ Перевір: <code>git log --oneline</code> показує рівно один коміт.</li>
+<li><strong>4. Віддалений репозиторій.</strong> Створи приватний репозиторій в Azure DevOps або GitHub, підключи його: <code>git remote add origin …</code>, потім <code>git push -u origin main</code>. ✅ Перевір: файли проєкту видно у веб-інтерфейсі репозиторію.</li>
+<li><strong>5. Feature-гілка.</strong> <code>git switch -c feature/test</code>: зміни одну міру в Power BI Desktop, збережи проєкт і подивись diff у Sourcetree чи VS Code. ✅ Перевір: бачиш свою зміну в <code>tables/*.tmdl</code> і відрізняєш її від технічного шуму (урок <a href="06-pbip.html#s8">«Читаємо diff PBIP»</a>).</li>
+<li><strong>6. Merge у main.</strong> Закоміть зміну в гілці, потім <code>git switch main</code>, <code>git merge feature/test</code>, <code>git push</code>. ✅ Перевір: у веб-інтерфейсі main містить обидва коміти.</li>
+<li><strong>7. (Опційно) Публікація.</strong> Якщо маєш доступ до Fabric-ємності — підключи ТЕСТОВУ робочу область до main (урок <a href="#s12">«Fabric Git integration»</a>) → Update from Git → задай credentials і запусти refresh (урок <a href="#s13">«Дані після публікації»</a>). ✅ Перевір: звіт відкривається й показує дані.</li>
+</ul>
+<div class="note tip"><b>Щось пішло не так?</b> Не панікуй: майже кожну ситуацію вже розібрано в <a href="#s5">довіднику проблем</a>, а команди виправлення — у <a href="04-vypravlennia.html">модулі 04</a>.</div>
+
+<div class="order" data-o="or_capstone"></div>
+<div class="qcheck" data-qc="qc_capstone"></div>
 </section>
 <div class="pager"><a href="06-pbip.html"><span class="lbl">← попередній модуль</span>PBIP / PBIR / TMDL</a><a class="nxt" href="08-advanced.html"><span class="lbl">наступний модуль →</span>Просунуті техніки</a></div>
 </main>

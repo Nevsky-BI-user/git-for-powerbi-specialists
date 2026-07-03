@@ -39,11 +39,13 @@
 <a href="#s0" data-sec="s0"><span class="num">01</span><span>Що таке PBIP</span></a>
 <a href="#s1" data-sec="s1"><span class="num">02</span><span>Структура папок PBIP</span></a>
 <a href="#s2" data-sec="s2"><span class="num">03</span><span>PBIR та TMDL</span></a>
-<a href="#s3" data-sec="s3"><span class="num">04</span><span>Робочий процес PBIP від нуля</span></a>
-<a href="#s4" data-sec="s4"><span class="num">05</span><span>Обмеження PBIP</span></a>
-<a href="#s5" data-sec="s5"><span class="num">06</span><span>Стек 2: Tabular Editor</span></a>
-<a href="#s7" data-sec="s7"><span class="num">07</span><span>Що комітити, а що ігнорувати</span></a>
-<a href="#s6" data-sec="s6" class="ex"><span class="num">08</span><span>Вправи · Модуль E</span></a>
+<a href="#s8" data-sec="s8"><span class="num">04</span><span>Читаємо diff PBIP</span></a>
+<a href="#s3" data-sec="s3"><span class="num">05</span><span>Робочий процес PBIP від нуля</span></a>
+<a href="#s9" data-sec="s9"><span class="num">06</span><span>Міграція .pbix і тонкі звіти</span></a>
+<a href="#s4" data-sec="s4"><span class="num">07</span><span>Обмеження PBIP</span></a>
+<a href="#s5" data-sec="s5"><span class="num">08</span><span>Стек 2: Tabular Editor</span></a>
+<a href="#s7" data-sec="s7"><span class="num">09</span><span>Що комітити, а що ігнорувати</span></a>
+<a href="#s6" data-sec="s6" class="ex"><span class="num">10</span><span>Вправи · Модуль E</span></a>
   </nav>
 </aside>
 <button class="reopen" id="reopenBtn">☰ Меню</button>
@@ -116,6 +118,45 @@
 
 <div class="qcheck" data-qc="qc_tmdl_fmt"></div>
 </section>
+<section class="lesson show" id="s8" data-n="s8">
+
+<div class="crumb">Модуль E — PBIP / PBIR</div>
+<h2>Читаємо diff PBIP: справжні зміни vs шум</h2>
+<p class="lead">Змінив один візуал, натиснув Ctrl+S — а Git показує десятки змінених рядків у кількох файлах. Спокійно: більшість із них — технічний шум. Навчимося за 30 секунд відрізняти одне від одного.</p>
+<div class="goalbox"><b>Ціль уроку</b>за 30 секунд відрізняти в diff справжні зміни від технічного шуму й не комітити наосліп.</div>
+<h3>Чому diff більший за твою правку</h3>
+<p>Power BI Desktop не редагує файли точково. Під час збереження він переписує файли цілком і дорогою перегенеровує службові поля. Тому поруч зі змістовною правкою в diff зʼявляються рядки, яких ти «не писав».</p>
+<div class="tdef"><div class="t">Шум у diff</div><div class="d">Рядки, які змінилися через перегенерацію файлів інструментом, а не через твою свідому правку. Логіки звіту й моделі вони не змінюють.</div><div class="plain"><b>Простими словами:</b> як пил на склі — заважає дивитися, але картини не змінює. Приклад із Power BI: після збереження в diff «змінився» lineageTag міри, хоча її DAX той самий.</div></div>
+<h3>Справжні зміни — те, заради чого й дивимось diff</h3>
+<ul>
+<li><strong>DAX-вираз міри</strong> у <code>.tmdl</code>-файлі: <code>SUM</code> → <code>CALCULATE</code>, новий фільтр, інша колонка.</li>
+<li><strong>Новий стовпець чи звʼязок</strong> у TMDL: додався блок <code>column</code> або <code>relationship</code>.</li>
+<li><strong>Поле чи фільтр візуала</strong> у PBIR JSON: в описі візуала зʼявилась інша міра або інша умова фільтра.</li>
+</ul>
+<h3>Технічний шум — можна не вчитуватися</h3>
+<ul>
+<li><strong>lineageTag</strong> — службовий GUID: Desktop подекуди перегенеровує його при збереженні.</li>
+<li><strong>Координати й розміри візуалів</strong> — <code>x</code>, <code>y</code>, <code>z</code>, <code>width</code>: посунув візуал на піксель — Git уже бачить зміну.</li>
+<li><strong>Порядок властивостей у JSON</strong> — той самий зміст, інша послідовність рядків.</li>
+</ul>
+<h3>Приклад: два фрагменти одного diff</h3>
+<pre><span class="c"># tables/Sales.tmdl — шум: перегенерований GUID, логіка та сама</span>
+- lineageTag: <span class="out">3f9a-72c1-…-c21</span>
++ lineageTag: <span class="out">8e4d-19bb-…-b07</span>
+<span class="c"># tables/Sales.tmdl — зміст: змінився DAX міри, це і є твоя правка</span>
+- measure 'Total Sales' = <span class="out">SUM(Sales[Amount])</span>
++ measure 'Total Sales' = <span class="out">CALCULATE(SUM(Sales[Amount]), USERELATIONSHIP(Dates[Date], Sales[ShipDate]))</span></pre>
+<h3>Правила на щодень</h3>
+<ul>
+<li><strong>Перед комітом дивись список файлів</strong> у Sourcetree (вкладка File Status): чи очікував ти кожен змінений файл.</li>
+<li><strong>Файл змінився, а ти його «не чіпав»</strong> — найпевніше шум перегенерації. Відкрий diff і переконайся, що змістовних правок там немає.</li>
+<li><strong>Комітити одразу після збереження</strong> — менший diff: одна правка = один невеликий читабельний коміт.</li>
+</ul>
+<div class="note tip"><b>Навіщо це вміння.</b> Той самий шум стає джерелом конфліктів, коли дві гілки паралельно перегенеровують ті самі службові поля. Як розвʼязувати такі конфлікти — в уроці <a href="07-komanda.html#s2">«Конфлікти у PBIP-файлах» модуля 07</a>.</div>
+
+<div class="qcheck" data-qc="qc_diff_real"></div>
+<div class="qcheck" data-qc="qc_diff_noise"></div>
+</section>
 <section class="lesson show" id="s3" data-n="s3">
 
 <div class="crumb">Модуль E — PBIP / PBIR</div>
@@ -136,9 +177,39 @@
 <span class="cmd">git push</span> <span class="arg">-u origin main</span>       <span class="c"># відправити перший раз</span></pre>
 <h3>Крок 4 — колега забирає копію</h3>
 <pre><span class="cmd">git clone</span> <span class="arg">&lt;url&gt;</span>            <span class="c"># колега завантажує проєкт собі</span></pre>
-<div class="note"><b>Перевірка перед першим коммітом:</b> виконай <code>git status</code> і переконайся, що <code>cache.abf</code> та <code>localSettings.json</code> НЕ потрапили у список (їх має ховати .gitignore). Якщо вони видні — див. модуль F, кейс про <code>git rm --cached</code>.</div>
+<div class="note"><b>Перевірка перед першим комітом:</b> виконай <code>git status</code> і переконайся, що <code>cache.abf</code> та <code>localSettings.json</code> НЕ потрапили у список (їх має ховати .gitignore). Якщо вони видні — див. модуль F, кейс про <code>git rm --cached</code>.</div>
 <div class="note tip"><b>Щоденний цикл після налаштування.</b> Відкриваєш звіт у Power BI Desktop → вносиш зміни → Ctrl+S → переглядаєш diff у Sourcetree або VS Code → <code>git add .</code> і <code>git commit</code> → <code>git push</code>. Якщо при <code>git pull</code> виникне конфлікт — вирішуєш його у merge-редакторі VS Code; типові конфлікти PBIP розібрано в <a href="07-komanda.html#s2">модулі 07</a>.</div>
 
+</section>
+<section class="lesson show" id="s9" data-n="s9">
+
+<div class="crumb">Модуль E — PBIP / PBIR</div>
+<h2>Міграція наявних .pbix у PBIP і тонкі звіти</h2>
+<p class="lead">Реальний старт — рідко порожній проєкт. Частіше це папка legacy .pbix-файлів, частина з яких уже опублікована в Power BI Service. Переводимо їх у PBIP, нічого не зламавши.</p>
+<div class="goalbox"><b>Ціль уроку</b>перевести наявний .pbix у PBIP, не зламавши опублікований звіт, і розпізнавати тонкі звіти в репозиторії.</div>
+<h3>Крок за кроком: із .pbix у PBIP</h3>
+<ul>
+<li><strong>Крок 1.</strong> Відкрий <code>.pbix</code> у Power BI Desktop.</li>
+<li><strong>Крок 2.</strong> <strong>File → Save As → «Power BI project files (*.pbip)»</strong> — і обери папку репозиторію.</li>
+<li><strong>Крок 3.</strong> Закоміть і відправ:</li>
+</ul>
+<pre><span class="cmd">git add</span> <span class="arg">.</span>
+<span class="cmd">git commit</span> <span class="arg">-m "Міграція звіту: .pbix → PBIP"</span>
+<span class="cmd">git push</span></pre>
+<p>Опублікований звіт при цьому <strong>не ламається</strong>: якщо назви елементів (звіту й семантичної моделі) збігаються, то після підключення робочої області до гілки <strong>Update from Git</strong> оновить наявний звіт, а не створить дубль — посилання користувачів і підписки збережуться.</p>
+<div class="note warn"><b>Куди подіти старий .pbix?</b> Прибери його з робочої папки: в історію він однаково не потрапить (<code>*.pbix</code> уже в .gitignore), а лежачи поруч — плутатиме команду, «яка версія справжня». Поклади в архівну папку поза репозиторієм і тримай там, доки не перевіриш, що PBIP-версія в Service працює як слід.</div>
+<h3>Тонкі звіти: коли моделі всередині немає</h3>
+<div class="tdef"><div class="t">Тонкий звіт (live connection)</div><div class="d">Звіт без власної семантичної моделі: він підключений наживо до спільної моделі, опублікованої окремо.</div><div class="plain"><b>Простими словами:</b> квартира без власної котельні — тепло приходить із міської мережі. Приклад із Power BI: пʼять звітів відділів читають одну спільну модель продажів.</div></div>
+<p>У PBIP такий звіт виглядає незвично: лише папка <code>.Report</code> та файл <code>definition.pbir</code> із посиланням на датасет — папки <code>.SemanticModel</code> немає взагалі. Комітиться й пушиться так само, як звичайний.</p>
+<h3>Спільна модель + N звітів</h3>
+<ul>
+<li><strong>Модель — окремо.</strong> Її зручно вести за стеком 2 (Tabular Editor) — див. <a href="#s5">урок про стек 2</a> на цій сторінці.</li>
+<li><strong>Звіти — окремо.</strong> Кожен тонкий звіт — власна PBIP-папка, маленька й легка для diff.</li>
+<li><strong>Мала команда?</strong> Достатньо одного репозиторію з кількома .pbip поруч: модель і звіти в сусідніх папках.</li>
+</ul>
+
+<div class="qcheck" data-qc="qc_pbix_migrate"></div>
+<div class="qcheck" data-qc="qc_thin_report"></div>
 </section>
 <section class="lesson show" id="s4" data-n="s4">
 

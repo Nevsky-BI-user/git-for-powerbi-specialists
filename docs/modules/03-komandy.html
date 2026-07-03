@@ -275,12 +275,21 @@
 <tr><td>git log --oneline --graph</td><td>Компактна історія з деревом гілок.</td></tr>
 <tr><td>git log --author="Іван"</td><td>Коміти конкретного автора.</td></tr>
 <tr><td>git log -S "Total Sales"</td><td>Коміти, де з'явився або зник рядок із цим текстом (pickaxe).</td></tr>
-<tr><td>git log --follow Tables/Sales.tmdl</td><td>Історія файлу, навіть якщо його перейменовували.</td></tr>
+<tr><td>git log --follow tables/Sales.tmdl</td><td>Історія файлу, навіть якщо його перейменовували.</td></tr>
 <tr><td>git show &lt;sha&gt;</td><td>Повні деталі та зміни конкретного коміту.</td></tr>
 </table>
 <div class="note tip"><b>PBIP-сценарій.</b> <code>git log -S "'Total Sales'"</code> швидко знаходить коміт, де міру додали чи змінили; <code>--word-diff</code> робить зміни в DAX-формулах наочними.</div>
 
 <div class="qcheck" data-qc="qc_addp"></div>
+<h3>git blame: хто і коли змінив цей рядок</h3>
+<div class="tdef"><div class="t">git blame</div><div class="d">Для кожного рядка файлу показує SHA коміту, автора й дату останньої зміни цього рядка.</div><div class="plain"><b>Простими словами:</b> підписи на полях зошита — біля кожного рядка видно, хто його вписав.</div><div class="ex">Бачиш у <code>Sales.tmdl</code> дивний фільтр у мірі — <code>git blame</code> одразу каже, чий це коміт і коли він зʼявився.</div></div>
+<p>Типове розслідування аналітика: «минулого тижня міра рахувала інакше — хто чіпав?»</p>
+<pre><span class="cmd">git blame</span> <span class="arg">tables/Sales.tmdl</span>     <span class="c"># біля кожного рядка: SHA, автор, дата зміни</span>
+<span class="out">7f3e21a (Олена 2026-06-25) SUMX(Sales, Sales[Amount] * (1 - Sales[Discount]))</span>
+<span class="cmd">git log</span> <span class="arg">-p -- tables/Sales.tmdl</span>   <span class="c"># уся історія змін файлу з діфами</span></pre>
+<div class="note tip"><b>Без термінала — те саме в браузері.</b> У веб-інтерфейсі Azure DevOps відкрий файл → History або Annotate (у GitHub — Blame): автора кожного рядка видно одразу в браузері.</div>
+<div class="csim" data-cs="cs_blame"></div>
+<div class="qcheck" data-qc="qc_blame"></div>
 </section>
 <section class="lesson show" id="s8" data-n="s8">
 
