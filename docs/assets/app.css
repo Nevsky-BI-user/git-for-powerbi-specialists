@@ -317,3 +317,21 @@ a.mcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .upd-btns .upd-now{font-family:'JetBrains Mono';font-size:11.5px;font-weight:700;background:var(--accent);color:#fff;border:none;padding:7px 12px;border-radius:8px;cursor:pointer}
 .upd-btns .upd-later{font-family:'JetBrains Mono';font-size:11.5px;background:var(--panel-2);color:var(--muted);border:1px solid var(--line);padding:7px 12px;border-radius:8px;cursor:pointer}
 @keyframes updIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* відео українською (клік-фасад → офіційний embed) */
+.ytvideo{margin:18px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.ytv-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 13px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+.ytv-badge{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+.ytv-ch{font-size:12px;color:var(--muted);text-decoration:none}
+.ytv-ch:hover{color:var(--accent)}
+.ytv-frame{display:block;width:100%;border:none;cursor:pointer;position:relative;aspect-ratio:16/9;background-size:cover;background-position:center;background-color:#1b1f2a;padding:0}
+.ytv-frame::before{content:"";position:absolute;inset:0;background:rgba(15,20,30,.34);transition:.15s}
+.ytv-frame:hover::before{background:rgba(15,20,30,.14)}
+.ytv-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:62px;height:44px;border-radius:11px;background:#ff0000;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.ytv-play::after{content:"";position:absolute;top:50%;left:52%;transform:translate(-50%,-50%);border-style:solid;border-width:9px 0 9px 15px;border-color:transparent transparent transparent #fff}
+.ytv-tc{position:absolute;left:10px;bottom:10px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#fff;background:rgba(15,20,30,.72);border:1px solid rgba(255,255,255,.14);padding:5px 9px;border-radius:7px;max-width:calc(100% - 20px);text-align:left}
+.ytv-cap{font-size:12px;color:var(--muted);padding:9px 13px;line-height:1.5}
+.ytv-cap a{color:var(--accent);text-decoration:none;white-space:nowrap}
+.ytv-cap a:hover{text-decoration:underline}
+.ytv-embed{position:relative;aspect-ratio:16/9;background:#000}
+.ytv-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}

@@ -843,6 +843,45 @@ function initHighlightFromSearch(){
   if(sec){highlightIn(sec,q);const m=sec.querySelector('mark.hl');if(m&&m.scrollIntoView)setTimeout(()=>m.scrollIntoView({block:'center'}),80);}
 }
 
+/* === 14b. ВІДЕО УКРАЇНСЬКОЮ (офіційний embed із таймкодом) ===
+   Джерело: «ПОВНИЙ КУРС по GIT та GITHUB українською» — канал Нікіта Тимошенко (@ion_lab).
+   Розділи (chapters) — авторські, витягнуті з відео. Embed дозволений автором (перевірено oEmbed).
+   Фасад не робить жодного запиту до YouTube, доки користувач не натисне «Дивитись». */
+const YT_VIDEO_ID='9CnZihyYjjA';
+const YT_CHANNEL='Нікіта Тимошенко';
+const YT_CHANNEL_URL='https://www.youtube.com/@ion_lab';
+const YT_TITLE='ПОВНИЙ КУРС по GIT та GITHUB українською';
+const VIDEOS={
+  v_00:{start:232,  label:`Огляд курсу`},
+  v_01:{start:999,  label:`Командний рядок — Git Bash`},
+  v_02:{start:3625, label:`git — Вступ і теорія`},
+  v_03:{start:5217, label:`git — Основні команди`},
+  v_04:{start:8238, label:`git — Відновлення версій`},
+  v_05:{start:18142,label:`Вирішення конфліктів (на прикладі GitHub)`},
+  v_07:{start:12499,label:`github — спільна робота, Pull Request, конфлікти`}
+};
+function ytTC(s){const h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=String(s%60).padStart(2,'0');return h>0?`${h}:${String(m).padStart(2,'0')}:${ss}`:`${m}:${ss}`;}
+function buildVideos(){
+  document.querySelectorAll('.ytvideo').forEach(el=>{
+    if(el.dataset.built)return;el.dataset.built='1';
+    const v=VIDEOS[el.dataset.v];if(!v)return;
+    const tc=ytTC(v.start);
+    const watch=`https://www.youtube.com/watch?v=${YT_VIDEO_ID}&t=${v.start}s`;
+    const thumb=`https://i.ytimg.com/vi/${YT_VIDEO_ID}/hqdefault.jpg`;
+    el.innerHTML=`<div class="ytv-head"><span class="ytv-badge">▶ Відео українською</span><a class="ytv-ch" href="${YT_CHANNEL_URL}" target="_blank" rel="noopener">${YT_CHANNEL}</a></div>`+
+      `<button class="ytv-frame" type="button" style="background-image:url('${thumb}')" aria-label="Відтворити відео з таймкоду ${tc}"><span class="ytv-play"></span><span class="ytv-tc">з ${tc} · ${v.label}</span></button>`+
+      `<div class="ytv-cap">Фрагмент курсу «${YT_TITLE}» — відкриється на таймкоді цієї теми. <a href="${watch}" target="_blank" rel="noopener">Дивитись на YouTube ↗</a></div>`;
+    const btn=el.querySelector('.ytv-frame');
+    btn.addEventListener('click',()=>{
+      const wrap=document.createElement('div');wrap.className='ytv-embed';
+      const ifr=document.createElement('iframe');
+      ifr.src=`https://www.youtube-nocookie.com/embed/${YT_VIDEO_ID}?start=${v.start}&autoplay=1&rel=0`;
+      ifr.title=YT_TITLE;ifr.loading='lazy';ifr.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';ifr.allowFullscreen=true;
+      wrap.appendChild(ifr);btn.replaceWith(wrap);
+    },{once:true});
+  });
+}
+
 /* === 15. АВТООНОВЛЕННЯ ПРИ НОВІЙ ВЕРСІЇ === */
 /* CI (deploy.yml) кладе в корінь сайту version.json з SHA коміту.
    Локально файла немає — перша ж невдала загрузка мовчки вимикає перевірку. */
@@ -893,7 +932,7 @@ function initPage(){
   if(typeof buildRebase==='function')buildRebase();
   if(typeof lcPlace==='function'&&document.getElementById('lcExp'))lcPlace(0);
   if(document.getElementById('glossList'))buildGlossary();
-  buildQchecks();buildCsim();buildOrders();
+  buildQchecks();buildCsim();buildOrders();buildVideos();
   initSearch();initCollapse();initProgress();initHighlightFromSearch();initVersionCheck();
 }
 window.__GFP__={PLAYERS:Object.keys(PLAYERS),QUIZ:Object.keys(QUIZ),SCEN:Object.keys(SCEN),QCHECKS:Object.keys(QCHECKS),CSIM:Object.keys(CSIM),ORDERS:Object.keys(ORDERS)};

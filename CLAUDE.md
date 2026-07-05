@@ -53,7 +53,9 @@ Source of truth — файли в `docs/`. Разовий міграційний
 
 ## Конвенції віджетів
 
-`<div class="gplayer" data-p="key">` покроковий SVG-граф · `<div class="scplayer" data-s="key">` мультирепо-сценарій · `<div class="quiz" data-q="bank">` банк вправ · `<div class="qcheck" data-qc="key">` міні-перевірка · `<div class="csim" data-cs="key">` симулятор команди · `<div class="order" data-o="key">` впорядкування кроків. Дані — у відповідних об'єктах `engine.js`; ключ без даних = FAIL у QA.
+`<div class="gplayer" data-p="key">` покроковий SVG-граф · `<div class="scplayer" data-s="key">` мультирепо-сценарій · `<div class="quiz" data-q="bank">` банк вправ · `<div class="qcheck" data-qc="key">` міні-перевірка · `<div class="csim" data-cs="key">` симулятор команди · `<div class="order" data-o="key">` впорядкування кроків · `<div class="ytvideo" data-v="key">` відео українською (клік-фасад → офіційний `youtube-nocookie` embed із таймкодом; дані у `VIDEOS`, спільний ID/канал у константах `YT_*`). Дані — у відповідних об'єктах `engine.js`; ключ без даних = FAIL у QA.
+
+Правило відео: лише офіційний iframe-embed (не завантажувати/не рехостити); перед додаванням перевіряти дозвіл автора через oEmbed (`youtube.com/oembed?url=…`); авторські таймкоди-розділи тягнути через `yt-dlp --print "%(chapters)j"`; видима атрибуція каналу обов'язкова. Наразі одне джерело — курс «GIT та GITHUB українською» (Нікіта Тимошенко, @ion_lab), прив'язаний до модулів 00–05 і 07; PBIP/advanced (06/08/09) україномовного відео не мають.
 
 Додаючи урок: секція `s{n}` на сторінці + пункт у сайдбар-TOC + лічильник `data-total` картки на `index.html` + запис у `pages.json` + перегенерувати індекс.
 
