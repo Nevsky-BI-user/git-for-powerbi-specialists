@@ -796,7 +796,7 @@ function tlTokens(s){
 function tlNewState(init){
   init=init||{};
   const st={initialized:init.initialized!==false,commits:{},order:[],branches:{},head:null,
-    files:{},stash:[],remote:null,tracking:{},conflict:null,conflictOn:init.conflictOn||null,
+    files:{},stash:[],remote:null,tracking:{},conflict:null,conflictSnap:null,conflictOn:init.conflictOn||null,hadConflict:false,mergeAborted:false,
     cseq:0,mseq:0,brMeta:{main:{lane:0,color:'main'}}};
   Object.keys(init.files||{}).forEach(f=>st.files[f]=init.files[f]);
   if(!st.initialized)return st;
@@ -824,6 +824,17 @@ function tlCurBranch(st){return st.head&&st.head.type==='branch'?st.head.ref:nul
 function tlHeadCommit(st){if(!st.head)return null;return st.head.type==='branch'?tlTip(st,st.head.ref):st.head.id;}
 function tlReach(st,id,set){set=set||new Set();if(!id||set.has(id)||!st.commits[id])return set;set.add(id);st.commits[id].parents.forEach(p=>tlReach(st,p,set));return set;}
 function tlIsAncestor(st,a,b){return a===b||tlReach(st,b).has(a);}
+function tlMergeBase(st,a,b){
+  const ra=tlReach(st,a),rb=tlReach(st,b);
+  let best=null,bi=-1;
+  st.order.forEach((id,i)=>{if(ra.has(id)&&rb.has(id)&&i>bi){bi=i;best=id;}});
+  return best;
+}
+function tlTouchedSince(st,tip,base){
+  const rb=tlReach(st,base),rt=tlReach(st,tip),out=new Set();
+  st.order.forEach(id=>{if(rt.has(id)&&!rb.has(id))st.commits[id].files.forEach(f=>out.add(f));});
+  return out;
+}
 function tlDirtyFiles(st){return Object.keys(st.files).filter(f=>['modified','staged','stagedNew','conflict'].indexOf(st.files[f])>=0);}
 function tlStagedFiles(st){return Object.keys(st.files).filter(f=>st.files[f]==='staged'||st.files[f]==='stagedNew');}
 function tlNewCommit(st,id,msg,parents,color,lane,files){
@@ -875,7 +886,7 @@ function tlHelp(){
     `Команди тренажера:`,
     `  git init | status | add <файл>|. | commit -m "..." | log [--oneline]`,
     `  git branch [<назва>] | switch [-c] <гілка> | checkout [-b] <гілка|коміт>`,
-    `  git merge <гілка> | fetch | pull [--rebase] | push [-u origin <гілка>]`,
+    `  git merge <гілка> [--abort] | fetch | pull [--rebase] | push [-u origin <гілка>]`,
     `  git reset --soft|--mixed|--hard HEAD~1 | revert HEAD | restore [--staged] <файл>`,
     `  git stash [pop]`,
     `Не git: touch <файл> (створити), edit <файл> (змінити), ls, clear, help`
@@ -934,7 +945,7 @@ function tlDoCommit(st,msg){
     st.commits[id]={id,parents:[p1,p2],msg:msg||`Merge branch '${from}'`,color:'merge',lane:st.brMeta[b]?st.brMeta[b].lane:0,known:true,files:fls,br:b};
     st.order.push(id);st.branches[b]=id;
     fls.forEach(f=>st.files[f]='clean');
-    st.conflict=null;
+    st.conflict=null;st.conflictSnap=null;
     return [`[${b} ${id}] ${st.commits[id].msg}`];
   }
   const fls=tlStagedFiles(st);
@@ -972,7 +983,7 @@ function tlRun(st,line){
     if(st.files[f]===undefined)return {out:[`bash: edit: файл '${f}' не знайдено (створи його: touch ${f})`]};
     const s=st.files[f];
     if(s==='conflict'){
-      if(st.conflict)st.conflict.edited=true;
+      if(st.conflict)st.conflict.edited[f]=true;
       return {out:[`(конфліктні маркери у ${f} прибрано — тепер git add ${f})`]};
     }
     if(s==='clean'){st.files[f]='modified';return {out:[`(файл ${f} змінено)`]};}
@@ -1000,8 +1011,9 @@ function tlRun(st,line){
       for(const f of targets){
         const s=st.files[f];
         if(s==='conflict'){
-          if(!st.conflict||!st.conflict.edited){out.push(`підказка: спершу відредагуй файл (edit ${f}), щоб прибрати конфліктні маркери`);continue;}
-          st.files[f]='staged';st.conflict.resolved=true;
+          if(!st.conflict||!st.conflict.edited[f]){out.push(`підказка: спершу відредагуй файл (edit ${f}), щоб прибрати конфліктні маркери`);continue;}
+          st.files[f]='staged';
+          st.conflict.resolved=st.conflict.files.every(cf=>st.files[cf]==='staged');
         }
         else if(s==='untracked')st.files[f]='stagedNew';
         else if(s==='modified')st.files[f]='staged';
@@ -1056,7 +1068,7 @@ function tlRun(st,line){
       let create=false,name=T[2];
       if(name==='-c'||name==='-b'){create=true;name=T[3];}
       if(!name)return {out:[`usage: git ${sub} ${sub==='switch'?'[-c]':'[-b]'} <гілка>`]};
-      const dirty=Object.keys(st.files).some(f=>['modified','staged','stagedNew'].indexOf(st.files[f])>=0);
+      const dirty=Object.keys(st.files).some(f=>['modified','staged','stagedNew','conflict'].indexOf(st.files[f])>=0);
       if(create){
         if(st.branches[name]!==undefined)return {out:[`fatal: a branch named '${name}' already exists`]};
         const tip=tlHeadCommit(st);
@@ -1089,11 +1101,17 @@ function tlRun(st,line){
     }
     case 'merge':{
       const name=T[2];
-      if(!name)return {out:[`usage: git merge <гілка>`]};
+      if(!name)return {out:[`usage: git merge <гілка> | git merge --abort`]};
+      if(name==='--abort'){
+        if(!st.conflict)return {out:[`fatal: There is no merge to abort (MERGE_HEAD missing).`]};
+        Object.keys(st.conflictSnap||{}).forEach(f=>{st.files[f]=st.conflictSnap[f];});
+        st.conflict=null;st.conflictSnap=null;st.mergeAborted=true;
+        return {out:[`(злиття скасовано — файли повернуто до стану перед merge)`]};
+      }
       const b=tlCurBranch(st);
       if(!b)return {out:[`fatal: у detached HEAD мержити не можна — спершу git switch <гілка>`]};
       if(st.branches[name]===undefined)return {out:[`merge: ${name} - not something we can merge`]};
-      if(st.conflict)return {out:[`error: Merging is not possible because you have unmerged files.`]};
+      if(st.conflict)return {out:[`error: Merging is not possible because you have unmerged files.`,`підказка: заверши розвʼязання (add + commit) або git merge --abort`]};
       const tipT=tlTip(st,b),tipF=tlTip(st,name);
       if(!tipF)return {out:[`Already up to date.`]};
       if(tipT===tipF||tlIsAncestor(st,tipF,tipT))return {out:[`Already up to date.`]};
@@ -1101,11 +1119,23 @@ function tlRun(st,line){
         st.branches[b]=tipF;
         return {out:[`Updating ${tipT}..${tipF}`,`Fast-forward`]};
       }
-      if(st.conflictOn&&st.conflictOn.branch===name){
-        const f=st.conflictOn.file;
-        st.files[f]='conflict';
-        st.conflict={file:f,from:name,edited:false,resolved:false};
-        return {out:[`Auto-merging ${f}`,`CONFLICT (content): Merge conflict in ${f}`,`Automatic merge failed; fix conflicts and then commit the result.`,`підказка: edit ${f} → git add ${f} → git commit`]};
+      let confFiles;
+      if(st.conflictOn&&st.conflictOn.branch===name)confFiles=[st.conflictOn.file];
+      else{
+        const base=tlMergeBase(st,tipT,tipF);
+        const tT=tlTouchedSince(st,tipT,base),tF=tlTouchedSince(st,tipF,base);
+        confFiles=[...tT].filter(f=>tF.has(f));
+      }
+      if(confFiles.length){
+        st.conflictSnap={};
+        confFiles.forEach(f=>{st.conflictSnap[f]=st.files[f]||'clean';st.files[f]='conflict';});
+        st.conflict={files:confFiles,from:name,edited:{},resolved:false};
+        st.hadConflict=true;
+        const out=[];
+        confFiles.forEach(f=>{out.push(`Auto-merging ${f}`);out.push(`CONFLICT (content): Merge conflict in ${f}`);});
+        out.push(`Automatic merge failed; fix conflicts and then commit the result.`);
+        out.push(`підказка: для кожного файлу edit → git add, потім git commit (або git merge --abort)`);
+        return {out};
       }
       const id='M'+(++st.mseq);
       st.commits[id]={id,parents:[tipT,tipF],msg:`Merge branch '${name}'`,color:'merge',lane:st.brMeta[b]?st.brMeta[b].lane:0,known:true,files:[],br:b};
@@ -1272,7 +1302,7 @@ function tlRun(st,line){
       return {out:[`git: '${sub}' is not a git command. See 'git --help'.`]};
   }
 }
-const TL_GOAL_KEYS=['initialized','branch','branchAt','branchCommitsAtLeast','commitsOnBranch','headOn','headDetached','commitsAtLeast','commitsExactly','fileStatus','merged','lastCommitParents','lastMsgMatch','pushed','remoteBranch','stashEmpty','noMergeCommits'];
+const TL_GOAL_KEYS=['initialized','branch','branchAt','branchCommitsAtLeast','commitsOnBranch','headOn','headDetached','commitsAtLeast','commitsExactly','fileStatus','merged','lastCommitParents','lastMsgMatch','pushed','remoteBranch','stashEmpty','noMergeCommits','conflictSeen','mergeAborted'];
 function tlCheckGoal(st,goal){
   for(const k of Object.keys(goal)){
     const v=goal[k];
@@ -1281,6 +1311,8 @@ function tlCheckGoal(st,goal){
     else if(k==='branchAt'){for(const b of Object.keys(v))if(st.branches[b]!==v[b])return false;}
     else if(k==='branchCommitsAtLeast'){for(const b of Object.keys(v)){const t=tlTip(st,b);if(!t||tlReach(st,t).size<v[b])return false;}}
     else if(k==='commitsOnBranch'){let n=0;Object.keys(st.commits).forEach(id=>{if(st.commits[id].br===v.branch)n++;});if(n<v.atLeast)return false;}
+    else if(k==='conflictSeen'){if((!!st.hadConflict)!==v)return false;}
+    else if(k==='mergeAborted'){if((!!st.mergeAborted)!==v)return false;}
     else if(k==='headOn'){if(tlCurBranch(st)!==v)return false;}
     else if(k==='headDetached'){if((st.head&&st.head.type==='commit')!==v)return false;}
     else if(k==='commitsAtLeast'){const h=tlHeadCommit(st);if(!h||tlReach(st,h).size<v)return false;}
@@ -1414,11 +1446,19 @@ const TERMLAB={
   tl_merge_conflict:{
     title:`Конфлікт у model.tmdl`,
     task:`Ти і колега змінили ОДНУ й ту саму міру: ти — в main, колега — у <code>feature/new-calc</code>. Спробуй влити гілку, отримай конфлікт у <code>definition/model.tmdl</code> і розвʼяжи його: відредагуй файл, додай у staging і заверши merge комітом.`,
-    init:{commits:[{id:'C1',msg:`базова модель`},{id:'C2',p:['C1'],msg:`твоя версія міри`},{id:'C3',p:['C1'],br:'feature/new-calc',msg:`версія міри колеги`}],branches:{main:'C2','feature/new-calc':'C3'},head:'main',files:{'definition/model.tmdl':'clean'},conflictOn:{branch:'feature/new-calc',file:'definition/model.tmdl'}},
+    init:{commits:[{id:'C1',msg:`базова модель`},{id:'C2',p:['C1'],msg:`твоя версія міри`,files:['definition/model.tmdl']},{id:'C3',p:['C1'],br:'feature/new-calc',msg:`версія міри колеги`,files:['definition/model.tmdl']}],branches:{main:'C2','feature/new-calc':'C3'},head:'main',files:{'definition/model.tmdl':'clean'}},
     goal:{merged:{from:'feature/new-calc',into:'main'},lastCommitParents:2,fileStatus:{'definition/model.tmdl':'clean'}},
     hints:[`Конфлікт — не помилка, а питання: «яку версію лишити?». Відповідаєш ти, редагуючи файл.`,`git merge feature/new-calc → edit definition/model.tmdl → git add definition/model.tmdl → git commit`],
     sol:[`git merge feature/new-calc`,`edit definition/model.tmdl`,`git add definition/model.tmdl`,`git commit`],
     ok:`Конфлікт розвʼязано свідомо: ти сам вирішив, яка формула міри правильна. Це і є суть merge-конфлікту.`},
+  tl_merge_abort:{
+    title:`Merge --abort: конфлікт — не зобовʼязання`,
+    task:`Ти починаєш зливати експериментальну гілку <code>feature/experiment</code> — і отримуєш конфлікт у <code>definition/model.tmdl</code>. Розбиратися з ним зараз не час. Скасуй злиття командою <code>git merge --abort</code> — робоча тека має повернутися до чистого стану, а main лишитися на своєму коміті.`,
+    init:{commits:[{id:'C1',msg:`базова модель`},{id:'C2',p:['C1'],msg:`стабільна версія міри`,files:['definition/model.tmdl']},{id:'C3',p:['C1'],br:'feature/experiment',msg:`експеримент з мірою`,files:['definition/model.tmdl']}],branches:{main:'C2','feature/experiment':'C3'},head:'main',files:{'definition/model.tmdl':'clean'}},
+    goal:{conflictSeen:true,mergeAborted:true,branchAt:{main:'C2'},headOn:'main',fileStatus:{'definition/model.tmdl':'clean'}},
+    hints:[`Спершу спровокуй конфлікт звичайним merge — потім скасуй його.`,`git merge feature/experiment → git merge --abort`],
+    sol:[`git merge feature/experiment`,`git merge --abort`],
+    ok:`Злиття скасовано без сліду: файли чисті, main на місці. Конфлікт можна відкласти — це нормальна робоча опція.`},
   tl_detached_rescue:{
     title:`Порятунок коміту з detached HEAD`,
     task:`Ти перемкнувся на старий коміт «подивитись, як було», зробив там новий коміт C3 — і тепер HEAD відірваний (detached), а C3 не належить жодній гілці. Врятуй його: створи гілку <code>rescue</code> на цьому коміті й повернись на main.`,
@@ -1499,6 +1539,14 @@ const TERMLAB={
     hints:[`Сервер не приймає, бо в нього є коміт, якого немає в тебе. Забери його так, щоб твій коміт «переграв» поверх.`,`git push (відмова) → git pull --rebase → git push`],
     sol:[`git push`,`git pull --rebase`,`git push`],
     ok:`Твій C2 став C2′ поверх коміту колеги — історія лінійна, push пройшов. Стандартна розвʼязка для команд.`},
+  tl_conflict_two_files:{
+    title:`Подвійний конфлікт: модель і візуал одночасно`,
+    task:`Редизайн у гілці <code>feature/redesign</code> зачепив і модель, і сторінку звіту — а в main тим часом змінили ті самі файли. Влий гілку: конфлікт виникне ОДРАЗУ у двох файлах — <code>definition/model.tmdl</code> і <code>report/pages/main/visual.json</code>. Розвʼяжи кожен (edit → add) і заверши злиття комітом.`,
+    init:{commits:[{id:'C1',msg:`база`},{id:'C2',p:['C1'],msg:`правки в main`,files:['definition/model.tmdl','report/pages/main/visual.json']},{id:'C3',p:['C1'],br:'feature/redesign',msg:`редизайн`,files:['definition/model.tmdl','report/pages/main/visual.json']}],branches:{main:'C2','feature/redesign':'C3'},head:'main',files:{'definition/model.tmdl':'clean','report/pages/main/visual.json':'clean'}},
+    goal:{merged:{from:'feature/redesign',into:'main'},lastCommitParents:2,conflictSeen:true,fileStatus:{'definition/model.tmdl':'clean','report/pages/main/visual.json':'clean'}},
+    hints:[`Git перерахує ВСІ конфліктні файли у виводі merge. Кожен розвʼязується окремо: edit → add. Коміт пройде лише коли розвʼязані всі.`,`git merge feature/redesign → edit + add для КОЖНОГО з двох файлів → git commit`],
+    sol:[`git merge feature/redesign`,`edit definition/model.tmdl`,`git add definition/model.tmdl`,`edit report/pages/main/visual.json`,`git add report/pages/main/visual.json`,`git commit`],
+    ok:`Обидва конфлікти розвʼязано, merge-коміт створено. Git не дасть закомітити, поки лишається хоч один нерозвʼязаний файл — тепер ти це бачив на власні очі.`},
   tl_final_capstone:{
     title:`Фінальний бос: повний цикл фічі`,
     task:`Усе разом, як у реальній команді. Репозиторій склоновано з сервера, у тебе змінені <code>report/pages/main/visual.json</code> і <code>definition/model.tmdl</code>. Зроби: гілку <code>feature/report-header</code> → два окремі коміти (спершу visual, потім model) → повернись на main → влий фічу → відправ на сервер. Далі в житті Git sync опублікує зміни в робочу область.`,
