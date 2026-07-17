@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практикум · Основи й коміти · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="pr1-osnovy">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+    <div class="modlabel">Практикум</div>
+<a href="../modules/pr1-osnovy.html" class="active"><span class="num">П1</span><span>Основи й коміти</span></a>
+<a href="../modules/pr2-hilky.html"><span class="num">П2</span><span>Гілки та злиття</span></a>
+<a href="../modules/pr3-vidkat.html"><span class="num">П3</span><span>Скасування і порятунок</span></a>
+<a href="../modules/pr4-remote.html"><span class="num">П4</span><span>Віддалений репозиторій</span></a>
+<a href="../modules/pr5-ekzamen.html"><span class="num">П5</span><span>PBIP-екзамен</span></a>
+    <div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Перший репозиторій PBIP</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Staging під контролем</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Схема: історія як ланцюг</span></a>
+<a href="#s3" data-sec="s3" class="ex"><span class="num">04</span><span>Екзамен-розминка</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+<div class="crumb">Практикум</div>
+<h2>Перший репозиторій для PBIP-проєкту</h2>
+<p class="lead">Три команди — і ваш звіт уже під захистом історії.</p>
+<div class="goalbox"><b>Ціль</b>самостійно, без підказок у коді, пройти шлях git init → git add → git commit на структурі PBIP-проєкту</div>
+<p>Коротке нагадування: PBIP-проєкт — це не «чорна скринька», як .pbix, а звичайні текстові файли. <code>report.pbip</code> — маленький файл-вказівник на частини проєкту, а <code>definition/model.tmdl</code> — текстовий опис моделі: таблиці, міри, звʼязки. Саме тому Git «розуміє» PBIP: він порівнює текст рядок за рядком, як редактор порівнює дві версії документа. Теорію цих кроків ми детально розбирали в <a href="02-osnovy.html">модулі 02</a> — тут лише практика.</p>
+<p>Ланцюжок перших дій завжди той самий: <code>git init</code> створює порожній репозиторій (невидиму теку <code>.git</code>, де житиме вся історія), <code>git add</code> кладе файли у staging — «кошик» майбутнього коміту, а <code>git commit -m "..."</code> фіксує знімок в історії.</p>
+<p>Як працює тренажер нижче: зліва — термінал, у який ви вводите справжні команди Git; справа — жива схема стану репозиторію і чипи файлів, які змінюються залежно від того, де зараз файл — у робочій теці, у staging чи вже в коміті. Якщо застрягли, кнопка <b>Підказка</b> підкаже наступний крок, <b>Показати розвʼязок</b> розкриє всі команди, а <b>Скинути</b> поверне задачу на початок.</p>
+<p>Ситуація: ви щойно зберегли звіт у форматі PBIP і хочете поставити його під контроль версій. Створіть репозиторій і зробіть перший коміт, у який увійдуть обидва файли проєкту.</p>
+<div class="termlab" data-tl="tl_pbip_init"></div>
+<div class="note tip">Пишіть повідомлення коміту так, щоб через місяць ви самі зрозуміли, що це було: «первинна версія звіту продажів» набагато корисніше, ніж «зміни».</div>
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+<div class="crumb">Практикум</div>
+<h2>Staging під контролем: осмислені коміти</h2>
+<p class="lead">Staging — це фільтр між «що я наробив» і «що піде в історію».</p>
+<div class="goalbox"><b>Ціль</b>керувати staging свідомо: окремі коміти для окремих змін і коміт лише частини правок</div>
+<p>За день роботи над звітом у робочій теці накопичується все підряд: виправлена міра, нова таблиця, випадково зачеплений службовий файл. Staging дозволяє не звалювати це в один коміт «усе разом», а розкласти по поличках: <code>git add</code> конкретного файлу кладе в кошик лише його, а <code>git status</code> щоразу чесно показує, що вже в кошику, а що ще ні. Самі команди — у <a href="03-komandy.html">модулі 03</a>.</p>
+<p>Ситуація для першого тренажера: ви змінили міру в <code>definition/model.tmdl</code> і додали нову таблицю Sales. Це дві різні зміни, і в історії вони мають жити окремо — зробіть два осмислені коміти.</p>
+<div class="termlab" data-tl="tl_status_flow"></div>
+<p>Чому це важливо? Дрібні осмислені коміти — це історія, яку можна читати: у <code>git log</code> видно «виправив міру маржі», «додав таблицю Sales», і кожен крок можна окремо переглянути чи відкотити. Один великий коміт «зміни за вівторок» — це валіза без ярликів: коли зламається міра, доведеться перетрушувати все разом.</p>
+<p>Другий тренажер — про вибірковість: закомітити треба лише зміни моделі у <code>model.tmdl</code>, а от <code>diagramLayout.json</code> — службовий файл розкладки діаграми — має лишитися незакоміченим.</p>
+<div class="termlab" data-tl="tl_partial_stage"></div>
+<div class="note warn">Звичка писати <code>git add .</code> «на автоматі» — головний ворог чистої історії: у коміт залітає все підряд, включно з файлами, які ви туди не збиралися класти. Спершу <code>git status</code>, потім — адресний <code>git add</code>.</div>
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+<div class="crumb">Практикум</div>
+<h2>Схема: чому історія — це ланцюг</h2>
+<p class="lead">Кожен коміт тримає за руку попередній — тому історію не можна непомітно переписати.</p>
+<div class="goalbox"><b>Ціль</b>читати схему комітів: хто чий батько і чому історію не можна «редагувати в середині»</div>
+<p>Два терміни простими словами. <b>Батько коміту</b> — це коміт, з якого виріс поточний: кожен новий знімок запамʼятовує, після кого він зʼявився, як сторінка щоденника «знає» попередню сторінку. <b>SHA</b> — унікальний підпис коміту (оті <code>a1b2c3d</code> у <code>git log</code>): він обчислюється і з вмісту коміту, <b>і</b> з підпису його батька. Тому змінити щось «у середині» непомітно неможливо: старий коміт отримав би інший підпис, а отже «зламалися» б підписи всіх його нащадків.</p>
+<p>Пройдіть схему нижче по кроках: спочатку — як коміти шикуються в ланцюг батьків, потім — чому вставити коміт у середину означає перебудувати весь хвіст історії після нього.</p>
+<div class="widget"><div class="wtitle">Ланцюг комітів</div><div class="gplayer" data-p="pr_dag"></div></div>
+<p>Для Power BI це означає просте правило: історія моделі — надійний журнал. Якщо тиждень тому в коміт потрапила міра з помилкою, цей факт не «підправиш заднім числом» — можна лише додати зверху новий коміт із виправленням.</p>
+<div class="qcheck" data-qc="qc_pr_parents"></div>
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+<div class="crumb">Практикум</div>
+<h2>Екзамен-розминка: читаємо вивід Git</h2>
+<p class="lead">Git завжди каже, що станеться далі — треба лише вміти його читати.</p>
+<div class="goalbox"><b>Ціль</b>по чистому виводу git status і git log розуміти, що станеться далі</div>
+<p>Екзаменаційні питання складніші за міні-перевірки в модулях: тут немає переказу теорії — є справжній вивід терміналу, який треба прочитати так, як ви робитимете це в реальній роботі. Дивіться на <code>git status</code> і <code>git log --oneline</code> уважно: кожен рядок — це підказка, що саме Git зробить наступною командою. Не поспішайте з відповіддю, поки не зрозуміли кожен рядок виводу.</p>
+<div class="quiz" data-q="prA"></div>
+</section>
+<div class="pager"><a href="../index.html"><span class="lbl">← на головну</span>Головна курсу</a><a class="nxt" href="pr2-hilky.html"><span class="lbl">наступна частина →</span>Практикум · Гілки та злиття</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

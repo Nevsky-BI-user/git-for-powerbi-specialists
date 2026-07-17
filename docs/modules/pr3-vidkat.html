@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практикум · Скасування і порятунок · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="pr3-vidkat">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+    <div class="modlabel">Практикум</div>
+<a href="../modules/pr1-osnovy.html"><span class="num">П1</span><span>Основи й коміти</span></a>
+<a href="../modules/pr2-hilky.html"><span class="num">П2</span><span>Гілки та злиття</span></a>
+<a href="../modules/pr3-vidkat.html" class="active"><span class="num">П3</span><span>Скасування і порятунок</span></a>
+<a href="../modules/pr4-remote.html"><span class="num">П4</span><span>Віддалений репозиторій</span></a>
+<a href="../modules/pr5-ekzamen.html"><span class="num">П5</span><span>PBIP-екзамен</span></a>
+    <div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Відкат незакомічених</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Reset і revert</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Stash і схема вибору</span></a>
+<a href="#s3" data-sec="s3" class="ex"><span class="num">04</span><span>Екзамен: скасування</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+
+<div class="crumb">Практикум</div>
+<h2>Відкат незакомічених змін</h2>
+<p class="lead">Поки зміна не в коміті, її можна просто відкинути — головне знати, з якої зони ти її прибираєш.</p>
+<div class="goalbox"><b>Ціль</b>скасовувати те, що ще не в історії: зіпсований файл і зайвий файл у staging</div>
+<p>Коротке нагадування: зміна проходить три зони — робоча директорія → staging (<code>git add</code>) → історія (<code>git commit</code>). Поки коміту не було, скасування — це не «переписування історії», а звичайне прибирання: <code>git restore &lt;файл&gt;</code> повертає файл до останньої закоміченої версії, а <code>git restore --staged &lt;файл&gt;</code> лише виймає файл зі staging, не чіпаючи його вміст на диску.</p>
+<p>Для Power BI це щоденні ситуації: покрутив формулу міри в <code>definition/model.tmdl</code>, зберіг PBIP — і зрозумів, що стало гірше. Або машинально зробив <code>git add .</code> і в staging заліз файл, якому в репозиторії взагалі не місце.</p>
+<p>Перша задача: ти експериментував із мірою, коміту ще не було, і треба повернути <code>definition/model.tmdl</code> до останньої закоміченої версії.</p>
+<div class="termlab" data-tl="tl_restore_file"></div>
+<div class="note warn"><b>restore незворотний для незакомічених правок.</b> Git повертає файл з останнього коміту, а твої нові зміни ніде не зберігаються — їх не дістане навіть reflog. Перед <code>git restore</code> переконайся, що ці правки тобі справді не потрібні.</div>
+<p>Друга задача: у staging випадково потрапив <code>cache.abf</code> — кеш даних, який не комітять ніколи. Прибери його зі staging так, щоб файл лишився на диску. А щоб таке не повторювалося, кеш даних узагалі має сидіти в <code>.gitignore</code>.</p>
+<div class="termlab" data-tl="tl_unstage"></div>
+
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+
+<div class="crumb">Практикум</div>
+<h2>Скасувати коміт: reset для своїх, revert для спільних</h2>
+<p class="lead">Одне питання визначає інструмент: чи бачив цей коміт хтось, крім тебе?</p>
+<div class="goalbox"><b>Ціль</b>вибирати правильний інструмент: reset --soft для незапушеного коміту, revert — для запушеного</div>
+<p>Коли зміна вже в історії, скасування працює інакше. <code>git reset</code> пересуває вказівник гілки назад — коміт зникає з історії, а зміни (у режимі <code>--soft</code>) повертаються у staging. <code>git revert</code> нічого не стирає: він додає <b>новий</b> коміт, який скасовує зміни поганого. Теорію з усіма трьома режимами reset розібрано в <a href="04-vypravlennia.html">модулі 04</a>.</p>
+<p>Перший сценарій: ти закомітив зміну моделі з повідомленням «wip» — зарано і з поганим описом. Коміт іще не запушений, тож його можна тихо скасувати, зберігши зміни у staging для нормального коміту.</p>
+<div class="termlab" data-tl="tl_reset_soft"></div>
+<p><strong>Ключове правило вибору:</strong> чи бачив цей коміт хтось інший? Якщо він тільки локальний і на сервер не потрапив — можна <code>reset</code>, ти переписуєш лише власну чернетку. Якщо коміт уже запушено — тільки <code>revert</code>: переписану історію сервер відхилить, а колеги, які встигли її забрати, отримають головний біль.</p>
+<p>Другий сценарій: коміт із заміною формули маржі зламав міру і <b>вже</b> на сервері. Історію переписувати не можна — зроби коміт-скасування і відправ його на сервер.</p>
+<div class="termlab" data-tl="tl_revert_shared"></div>
+
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+
+<div class="crumb">Практикум</div>
+<h2>Stash посеред роботи і схема вибору reset/revert</h2>
+<p class="lead">Термінові фікси не питають, чи зручно тобі зараз — stash дає змогу відкласти незавершене без коміту-огризка.</p>
+<div class="goalbox"><b>Ціль</b>ховати незавершену роботу в stash заради термінового фіксу і впевнено вибирати між reset і revert</div>
+<p><code>git stash</code> — це «кишеня»: він забирає незакомічені зміни з робочої директорії і складає їх окремо, лишаючи файли чистими. Потім <code>git stash pop</code> повертає все як було. Класична причина — треба терміново перемкнутися на іншу гілку, а комітити напівготову роботу не хочеться.</p>
+<p>Сценарій — найдовший у практикумі: ти посеред роботи у <code>feature/kpi-cards</code> із незакоміченими правками, і тут прилітає терміновий фікс міри в main. Спробуй спершу одразу <code>git switch main</code> — побачиш, що Git не пустить із «брудними» файлами. Далі: сховати → перемкнутися → зробити фікс → повернутися → дістати зі stash.</p>
+<div class="note tip"><b>Порада:</b> stash — для незакомічених змін і на короткий час. Якщо робота відкладається на дні — краще закоміть її у своїй feature-гілці: коміт видно в історії, а про stash легко забути.</div>
+<div class="termlab" data-tl="tl_stash_switch"></div>
+<p>І на закріплення — схема вибору між reset і revert. Прокрути три кроки: поганий коміт; що робить із графом <code>reset --hard</code>; що робить <code>revert</code>.</p>
+<div class="widget"><div class="wtitle">Reset проти revert</div><div class="gplayer" data-p="pr_reset_vs_revert"></div></div>
+<p>Тепер перевір себе на робочому сценарії. Памʼятай наш командний потік: feature-гілка → merge у main → push → Git sync публікує main у робочу область — тобто main завжди спільна.</p>
+<div class="qcheck" data-qc="qc_pr_undo_choice"></div>
+
+</section>
+<section class="lesson show" id="s3" data-n="s3">
+
+<div class="crumb">Практикум</div>
+<h2>Екзамен: скасування і порятунок</h2>
+<p class="lead">Три питання без підказок: reflog, режими reset і amend запушеного коміту.</p>
+<div class="goalbox"><b>Ціль</b>читати reflog, знати долю змін у кожному режимі reset і наслідки amend запушеного коміту</div>
+<p>Останній рубіж цієї частини. Згадай: <code>git reflog</code> — журнал усіх переміщень HEAD, рятівний трос після випадкового <code>reset --hard</code>; три режими reset відрізняються долею змін (staging → робоча директорія → ніде); а <code>--amend</code> не «редагує» коміт, а створює новий замість старого.</p>
+<div class="quiz" data-q="prC"></div>
+
+</section>
+<div class="pager"><a href="pr2-hilky.html"><span class="lbl">← попередня частина</span>Практикум · Гілки та злиття</a><a class="nxt" href="pr4-remote.html"><span class="lbl">наступна частина →</span>Практикум · Віддалений репозиторій</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

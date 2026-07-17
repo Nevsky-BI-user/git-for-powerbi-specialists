@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практикум · Гілки та злиття · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="pr2-hilky">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+    <div class="modlabel">Практикум</div>
+<a href="../modules/pr1-osnovy.html"><span class="num">П1</span><span>Основи й коміти</span></a>
+<a href="../modules/pr2-hilky.html" class="active"><span class="num">П2</span><span>Гілки та злиття</span></a>
+<a href="../modules/pr3-vidkat.html"><span class="num">П3</span><span>Скасування і порятунок</span></a>
+<a href="../modules/pr4-remote.html"><span class="num">П4</span><span>Віддалений репозиторій</span></a>
+<a href="../modules/pr5-ekzamen.html"><span class="num">П5</span><span>PBIP-екзамен</span></a>
+    <div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Гілка для фічі</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Два види злиття</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Схема: ff проти merge</span></a>
+<a href="#s3" data-sec="s3"><span class="num">04</span><span>Конфлікт і detached HEAD</span></a>
+<a href="#s4" data-sec="s4" class="ex"><span class="num">05</span><span>Екзамен: гілки</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+
+<section class="lesson show" id="s0" data-n="s0">
+  <div class="crumb">Практикум</div>
+  <h2>Гілка для фічі — не чіпаючи main</h2>
+  <p class="lead">Одна фіча — одна гілка: main лишається чистою і завжди готовою до публікації.</p>
+  <div class="goalbox"><b>Ціль</b>створити фіче-гілку однією командою і закомітити роботу саме в ній</div>
+  <p>Коротке нагадування. У команді Power BI гілка <b>main</b> — це «вітрина»: саме з неї Git sync (Update from Git) публікує звіт у робочу область. Тому в main потрапляють лише готові зміни, а вся жива робота — нові KPI-картки, експерименти з візуалами — живе у гілках <code>feature/*</code>. Потік простий: feature-гілка → merge у main → push → Git sync (докладніше — у <a href="07-komanda.html">модулі 07</a>).</p>
+  <p>Гілка в Git — це не копія проєкту, а легка «закладка» на коміті. Команда <code>git switch -c feature/kpi-cards</code> робить одразу два кроки: <b>створює</b> гілку і <b>перемикає</b> тебе на неї. Далі коміт іде вже в неї, а main стоїть на місці незайманою.</p>
+  <div class="note tip">Незакомічені зміни не зникають при <code>switch -c</code> — вони «переїжджають» разом з тобою в нову гілку. Тож навіть якщо ти почав правити файли до створення гілки, ще не пізно все зробити правильно.</div>
+  <p>Ситуація в тренажері: ти вже підправив <code>visual.json</code> для нових KPI-карток, але досі стоїш на main. Створи гілку <code>feature/kpi-cards</code> і закоміть роботу саме в ній — main не має отримати жодного нового коміту.</p>
+  <div class="termlab" data-tl="tl_branch_kpi"></div>
+</section>
+
+<section class="lesson show" id="s1" data-n="s1">
+  <div class="crumb">Практикум</div>
+  <h2>Два види злиття: fast-forward і merge-коміт</h2>
+  <p class="lead">Команда одна — <code>git merge</code>, а результати бувають два: тихе «перемотування» або новий коміт із двома батьками.</p>
+  <div class="goalbox"><b>Ціль</b>на власних руках відчути різницю: коли merge проходить як fast-forward, а коли створює merge-коміт</div>
+  <p>Нагадування з теорії. Якщо з моменту відгалуження main <b>не зробила жодного власного коміту</b>, то зливати насправді нічого: усі коміти гілки і так лежать «попереду» main. Git просто пересуває мітку main уперед — це і є <b>fast-forward</b>. Нового коміту не зʼявляється, історія лишається однією прямою лінією.</p>
+  <p>Перший тренажер — саме такий випадок: гілка <code>feature/date-table</code> пішла вперед, а main стояла на місці. Виконай злиття і придивись до схеми: <b>жодного нового коміту</b> — main просто «наздоганяє» гілку.</p>
+  <div class="termlab" data-tl="tl_ff_merge"></div>
+  <p>А тепер — <b>та сама команда</b>, але інша ситуація: поки ти працював у своїй гілці, у main зʼявився власний коміт (колега вже влив свою роботу). Історії розійшлися, і «перемотати» мітку вже неможливо — Git створить спеціальний <b>merge-коміт</b>, який зшиває дві лінії докупи.</p>
+  <p>Виконай злиття у другому тренажері й подивись на граф: зʼявиться коміт <b>M1</b> із <b>двома батьками</b> — по одному з кожної гілки.</p>
+  <div class="termlab" data-tl="tl_merge_commit"></div>
+</section>
+
+<section class="lesson show" id="s2" data-n="s2">
+  <div class="crumb">Практикум</div>
+  <h2>Схема: коли можливий fast-forward</h2>
+  <p class="lead">Перш ніж тиснути Enter після <code>git merge</code>, корисно вміти передбачити, що саме станеться.</p>
+  <div class="goalbox"><b>Ціль</b>по схемі гілок передбачати, яким буде злиття — fast-forward чи merge-коміт</div>
+  <p>Правило одне-єдине: fast-forward можливий лише тоді, коли гілка-приймач (зазвичай main) <b>не має власних комітів</b> після точки розгалуження. Є хоч один — Git змушений створити merge-коміт. Прокрути три кроки нижче і подивись на обидві ситуації в русі.</p>
+  <div class="widget"><div class="wtitle">Fast-forward чи merge-коміт?</div><div class="gplayer" data-p="pr_ff_vs_merge"></div></div>
+  <p>Закріпи правило міні-перевіркою — без підглядання у схему.</p>
+  <div class="qcheck" data-qc="qc_pr_ffwhen"></div>
+</section>
+
+<section class="lesson show" id="s3" data-n="s3">
+  <div class="crumb">Практикум</div>
+  <h2>Конфлікт злиття і порятунок із detached HEAD</h2>
+  <p class="lead">Конфлікт — це не аварія, а запитання від Git; а detached HEAD — не пастка, якщо знати дві команди.</p>
+  <div class="goalbox"><b>Ціль</b>розвʼязати merge-конфлікт руками (edit → add → commit) і врятувати коміт із відірваного HEAD</div>
+  <p>Конфлікт злиття виникає, коли дві гілки змінили <b>ті самі рядки</b> одного файлу — наприклад, ту саму міру в <code>definition/model.tmdl</code>. Git не вгадує, чия версія правильна: він зупиняється і <b>питає тебе</b>. Відповідь завжди складається з трьох кроків: відредагувати файл (прибрати маркери конфлікту і залишити правильний текст), <code>git add</code>, <code>git commit</code> — і злиття завершено.</p>
+  <div class="note warn">Слово CONFLICT у терміналі — це питання, а не помилка. Нічого не зламалось і не втратилось: обидві версії рядків лежать у файлі, Git чекає на твоє рішення.</div>
+  <p>Тренажер: ти зливаєш <code>feature/new-calc</code> у main, і Git зупиняється з CONFLICT у <code>model.tmdl</code>. Заверши злиття руками — edit → add → commit — і на графі зʼявиться коміт злиття M1.</p>
+  <div class="termlab" data-tl="tl_merge_conflict"></div>
+  <p>Друга ситуація — <b>detached HEAD</b> («відірвана голова»): це стан, коли ти стоїш не на гілці, а прямо на конкретному коміті, наприклад після <code>git checkout</code> на старий хеш. Коміт, зроблений у такому стані, не належить жодній гілці — і якщо просто перемкнутися геть, він може загубитися (як його шукати потім — розповідає <a href="04-vypravlennia.html">модуль 04</a>).</p>
+  <p>У тренажері цінний коміт уже зроблено у відірваному стані. Постав на нього гілку <code>rescue</code> командою <code>git branch rescue</code> — і спокійно повертайся на main.</p>
+  <div class="termlab" data-tl="tl_detached_rescue"></div>
+</section>
+
+<section class="lesson show" id="s4" data-n="s4">
+  <div class="crumb">Практикум</div>
+  <h2>Екзамен: гілки і злиття</h2>
+  <p class="lead">Три питання на читання графа історії — без підказок і без тренажера під рукою.</p>
+  <div class="goalbox"><b>Ціль</b>читати git log --graph і передбачати поведінку гілок після злиття</div>
+  <p>Тут перевіряється те, що ти щойно робив руками: як виглядає merge-коміт на графі <code>git log --graph</code> і хто його батьки, що стається з фіче-гілкою після злиття, і чим <code>git switch -c</code> відрізняється від <code>git branch</code>. Читай схеми уважно — відповіді у них.</p>
+  <div class="quiz" data-q="prB"></div>
+</section>
+
+<div class="pager"><a href="pr1-osnovy.html"><span class="lbl">← попередня частина</span>Практикум · Основи й коміти</a><a class="nxt" href="pr3-vidkat.html"><span class="lbl">наступна частина →</span>Практикум · Скасування і порятунок</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

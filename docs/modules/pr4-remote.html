@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практикум · Віддалений репозиторій · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="pr4-remote">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+    <div class="modlabel">Практикум</div>
+<a href="../modules/pr1-osnovy.html"><span class="num">П1</span><span>Основи й коміти</span></a>
+<a href="../modules/pr2-hilky.html"><span class="num">П2</span><span>Гілки та злиття</span></a>
+<a href="../modules/pr3-vidkat.html"><span class="num">П3</span><span>Скасування і порятунок</span></a>
+<a href="../modules/pr4-remote.html" class="active"><span class="num">П4</span><span>Віддалений репозиторій</span></a>
+<a href="../modules/pr5-ekzamen.html"><span class="num">П5</span><span>PBIP-екзамен</span></a>
+    <div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Push у хмару</span></a>
+<a href="#s1" data-sec="s1"><span class="num">02</span><span>Fetch і pull</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Відхилений push</span></a>
+<a href="#s3" data-sec="s3" class="ex"><span class="num">04</span><span>Екзамен: синхронізація</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+
+<section class="lesson show" id="s0" data-n="s0">
+<div class="crumb">Практикум</div>
+<h2>Push: відправити роботу на сервер</h2>
+<p class="lead">Коміт без push — це лист, який ти написав, але не надіслав: команда його не бачить.</p>
+<div class="goalbox"><b>Ціль</b>пушити коміти на сервер і публікувати нову гілку з першим push -u</div>
+<p>Сервер (Azure DevOps або GitHub) — це <b>місце зустрічі команди</b>: спільна копія репозиторію, до якої всі пушать і з якої всі забирають зміни. Саме звідти Fabric через Git sync (Update from Git) підтягує оновлення у робочу область. Тому базовий потік такий: робота у <code>feature/*</code> → merge у <code>main</code> → <code>git push</code> → Git sync публікує зміни.</p>
+<p>Поки ти не виконав <code>git push</code>, усі твої коміти живуть лише на твоєму диску. Модель може бути готова, міри пораховані — але для колег і для Fabric нічого не змінилось. <code>git status</code> завжди чесно скаже, наскільки ти попереду сервера: <b>ahead of origin/main by N commits</b>.</p>
+<p>Перша задача: ти зробив локально два коміти зі змінами звіту, а сервер досі бачить лише перший. Подивись <code>git status</code>, потім відправ роботу — на схемі бейдж «сервер» наздожене твою гілку.</p>
+<div class="termlab" data-tl="tl_first_push"></div>
+<p>Друга ситуація — <b>нова гілка</b>. Ти створив <code>feature/refresh-fix</code> локально, але сервер про неї ще нічого не знає, тому простий <code>git push</code> відмовить. Не лякайся: Git у тексті відмови сам підкаже повну команду з <code>-u origin</code>. Спробуй.</p>
+<div class="termlab" data-tl="tl_branch_push"></div>
+<div class="note tip">Прапорець <code>-u</code> (upstream) — це «запамʼятай звʼязок»: Git привʼяже локальну гілку до серверної, і всі наступні рази вистачить короткого <code>git push</code>.</div>
+</section>
+
+<section class="lesson show" id="s1" data-n="s1">
+<div class="crumb">Практикум</div>
+<h2>Fetch і pull: спершу подивитися, потім забрати</h2>
+<p class="lead">Fetch — розвідка без наслідків, pull — розвідка плюс застосування. Звичка розрізняти їх рятує від сюрпризів.</p>
+<div class="goalbox"><b>Ціль</b>розрізняти fetch (безпечна розвідка) і pull (застосувати зміни) та читати стан origin/main</div>
+<p><code>git fetch</code> лише оновлює твоє <b>знання про сервер</b>: мітка <code>origin/main</code> пересувається туди, де реально стоїть сервер, а твої локальні файли й гілки не змінюються ані на байт. Тому fetch безпечний завжди. <code>git pull</code> — це fetch плюс злиття: він і дізнається нове, і застосовує його до твоєї гілки. Якщо власних нових комітів у тебе немає, злиття вироджується у простий fast-forward — гілка просто «доїжджає» вперед.</p>
+<p>Проклацай схему: крок 1 — стан одразу після fetch, крок 2 — що робить pull. Деталі теорії — у <a href="03-komandy.html">модулі 03</a>.</p>
+<div class="widget"><div class="wtitle">Що бачить fetch, що робить pull</div><div class="gplayer" data-p="pr_sync_state"></div></div>
+<div class="qcheck" data-qc="qc_pr_pull_read"></div>
+<p>Тепер руками. Колега запушив коміт із новою таблицею, поки ти працював. Виконай <code>git fetch</code> — побачиш на схемі, що <code>origin/main</code> пішов уперед, а файли ще не змінені. Потім забери зміни собі.</p>
+<div class="termlab" data-tl="tl_fetch_pull"></div>
+</section>
+
+<section class="lesson show" id="s2" data-n="s2">
+<div class="crumb">Практикум</div>
+<h2>Відхилений push: класика командної роботи</h2>
+<p class="lead">«! [rejected] non-fast-forward» — не аварія, а ввічливе «спершу забери чуже, потім віддавай своє».</p>
+<div class="goalbox"><b>Ціль</b>спокійно реагувати на «! [rejected] non-fast-forward»: pull --rebase і повторний push</div>
+<p>Це найчастіша «страшна» відмова Git у командній роботі — побачиш її щотижня. Значить вона просте: <b>на сервері є коміт, якого немає в тебе</b>. Колега встиг запушити раніше, і якби сервер прийняв твій push, робота колеги затерлася б. Відмова — це <b>захист</b>, а не помилка.</p>
+<p>Розвʼязка у два кроки: <code>git pull --rebase</code> забирає коміт колеги і <b>перегра́є</b> твій коміт поверх нього (C2 стане C2′ — той самий зміст, нове місце в історії), а повторний <code>git push</code> уже проходить. Історія залишається лінійною, без зайвого merge-коміту. Як команди домовляються про такі правила — у <a href="07-komanda.html">модулі 07</a>.</p>
+<p>Відтвори сценарій у тренажері: спробуй <code>git push</code>, отримай відмову, виправ ситуацію так, щоб історія лишилась лінійною, і допуш свою міру.</p>
+<div class="termlab" data-tl="tl_push_reject"></div>
+<div class="note warn">Ніколи не «пробивай» відмову через <code>git push --force</code> на спільній гілці: сервер прийме, але коміт колеги буде затерто. Force-push — інструмент для своїх особистих гілок, не для main.</div>
+</section>
+
+<section class="lesson show" id="s3" data-n="s3">
+<div class="crumb">Практикум</div>
+<h2>Екзамен: синхронізація з сервером</h2>
+<p class="lead">Три ситуації з реального робочого дня: відмова push, стан після fetch і вибір між clone та pull.</p>
+<div class="goalbox"><b>Ціль</b>правильно реагувати на відмови push, розуміти безпечність fetch і різницю clone/pull</div>
+<p>Тут без тренажера: читаєш вивід терміналу — обираєш правильну реакцію, як у житті. Якщо якесь питання змусило вагатися, повернись до відповідної секції вище й переграй тренажер ще раз.</p>
+<div class="quiz" data-q="prD"></div>
+</section>
+
+<div class="pager"><a href="pr3-vidkat.html"><span class="lbl">← попередня частина</span>Практикум · Скасування і порятунок</a><a class="nxt" href="pr5-ekzamen.html"><span class="lbl">наступна частина →</span>Практикум · PBIP-екзамен</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

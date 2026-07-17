@@ -145,5 +145,65 @@
   "lessons": [
    "Команди Git"
   ]
+ },
+ {
+  "slug": "pr1-osnovy",
+  "title": "Практикум · Основи й коміти",
+  "file": "modules/pr1-osnovy.html",
+  "count": 4,
+  "lessons": [
+   "Перший репозиторій PBIP",
+   "Staging під контролем",
+   "Схема: історія як ланцюг",
+   "Екзамен-розминка"
+  ]
+ },
+ {
+  "slug": "pr2-hilky",
+  "title": "Практикум · Гілки та злиття",
+  "file": "modules/pr2-hilky.html",
+  "count": 5,
+  "lessons": [
+   "Гілка для фічі",
+   "Два види злиття",
+   "Схема: ff проти merge",
+   "Конфлікт і detached HEAD",
+   "Екзамен: гілки"
+  ]
+ },
+ {
+  "slug": "pr3-vidkat",
+  "title": "Практикум · Скасування і порятунок",
+  "file": "modules/pr3-vidkat.html",
+  "count": 4,
+  "lessons": [
+   "Відкат незакомічених",
+   "Reset і revert",
+   "Stash і схема вибору",
+   "Екзамен: скасування"
+  ]
+ },
+ {
+  "slug": "pr4-remote",
+  "title": "Практикум · Віддалений репозиторій",
+  "file": "modules/pr4-remote.html",
+  "count": 4,
+  "lessons": [
+   "Push у хмару",
+   "Fetch і pull",
+   "Відхилений push",
+   "Екзамен: синхронізація"
+  ]
+ },
+ {
+  "slug": "pr5-ekzamen",
+  "title": "Практикум · PBIP-екзамен",
+  "file": "modules/pr5-ekzamen.html",
+  "count": 3,
+  "lessons": [
+   "Читаємо diff і конфлікти",
+   "Процес команди і Fabric",
+   "Фінальний бос"
+  ]
  }
 ]

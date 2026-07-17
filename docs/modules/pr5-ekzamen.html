@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практикум · PBIP-екзамен · Git for Power BI specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body data-page="pr5-ekzamen">
+<aside>
+  <div class="brand">
+    <div class="k">Інтерактивний курс</div>
+    <h1><a href="../index.html" style="color:inherit;text-decoration:none">GIT for Power BI<br>specialists</a></h1>
+    <div class="progress"><i id="progbar"></i></div>
+    <div class="pgdone" id="pgdone"></div>
+    <button class="collapse-btn" id="collapseBtn">‹ Сховати меню</button>
+  </div>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="Пошук по курсу…" autocomplete="off">
+    <button id="searchClear" title="Очистити">×</button>
+  </div>
+  <div id="searchResults" class="searchResults"></div>
+  <nav id="nav">
+    <div class="modlabel">Модулі</div>
+<a href="../modules/00-start.html"><span class="num">00</span><span>Старт та інструменти</span></a>
+<a href="../modules/01-terminal.html"><span class="num">01</span><span>Термінал і файли</span></a>
+<a href="../modules/02-osnovy.html"><span class="num">02</span><span>Основи Git</span></a>
+<a href="../modules/03-komandy.html"><span class="num">03</span><span>Щоденні команди</span></a>
+<a href="../modules/04-vypravlennia.html"><span class="num">04</span><span>Виправлення помилок</span></a>
+<a href="../modules/05-rebase.html"><span class="num">05</span><span>Rebase та історія</span></a>
+<a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
+<a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
+<a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+    <div class="modlabel">Практикум</div>
+<a href="../modules/pr1-osnovy.html"><span class="num">П1</span><span>Основи й коміти</span></a>
+<a href="../modules/pr2-hilky.html"><span class="num">П2</span><span>Гілки та злиття</span></a>
+<a href="../modules/pr3-vidkat.html"><span class="num">П3</span><span>Скасування і порятунок</span></a>
+<a href="../modules/pr4-remote.html"><span class="num">П4</span><span>Віддалений репозиторій</span></a>
+<a href="../modules/pr5-ekzamen.html" class="active"><span class="num">П5</span><span>PBIP-екзамен</span></a>
+    <div class="modlabel">На цій сторінці</div>
+<a href="#s0" data-sec="s0" class="ex"><span class="num">01</span><span>Читаємо diff і конфлікти</span></a>
+<a href="#s1" data-sec="s1" class="ex"><span class="num">02</span><span>Процес команди і Fabric</span></a>
+<a href="#s2" data-sec="s2"><span class="num">03</span><span>Фінальний бос</span></a>
+  </nav>
+</aside>
+<button class="reopen" id="reopenBtn">☰ Меню</button>
+<main id="main">
+<section class="lesson show" id="s0" data-n="s0">
+<div class="crumb">Практикум</div>
+<h2>Читаємо PBIP-diff і конфлікти</h2>
+<p class="lead">Diff PBIP-проєкту завжди «шумить» — екзамен починається з уміння бачити крізь цей шум.</p>
+<div class="goalbox"><b>Ціль</b>відрізняти змістовні зміни TMDL від технічного шуму і правильно розвʼязувати конфліктні маркери</div>
+<p>Коли Power BI зберігає проєкт у форматі PBIP, у файлах на кшталт <code>definition/model.tmdl</code> поруч зі змістовними речами (формули мір, звʼязки, назви) живуть технічні рядки: <b>lineageTag</b>, <b>ordinal</b>, службові ідентифікатори. Power BI переписує їх сам, і вони регулярно зʼявляються у diff, хоча по суті нічого не змінюють. Хороший коміт-меседж описує <strong>змістовну</strong> зміну — нову умову у формулі DAX, перейменовану міру, доданий звʼязок — а не перший-ліпший рядок, який трапився у виводі <code>git diff</code>.</p>
+<p>Друга навичка — конфліктні маркери. Коли дві гілки змінили один рядок міри, Git вставляє у файл підказки <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code> і <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Розвʼязати конфлікт означає лишити одну робочу версію формули і прибрати <strong>всі</strong> маркери — файл TMDL з маркерами всередині просто зламає модель. Якщо треба освіжити теорію, зазирни в <a href="06-pbip.html">модуль 06</a>.</p>
+<p>І третє — прогноз злиття по <code>git log</code>: діапазон <code>main..feature</code> показує, що є у feature і чого немає в main; зворотний діапазон — навпаки. Пара цих виводів дозволяє ще <em>до</em> команди <code>git merge</code> сказати, буде fast-forward чи merge-коміт.</p>
+<div class="note tip"><b>Порада.</b> Читаючи PBIP-diff, спершу подумки викресли рядки з <code>lineageTag</code> та іншим технічним шумом — а вже потім питай себе: «що тут змінилося насправді?».</div>
+<p>Чотири задачі — на кожну з цих навичок.</p>
+<div class="quiz" data-q="prE1"></div>
+</section>
+<section class="lesson show" id="s1" data-n="s1">
+<div class="crumb">Практикум</div>
+<h2>Процес команди і Fabric Git sync</h2>
+<p class="lead">Повний цикл релізу треба знати напамʼять — саме він повторюється в команді щодня.</p>
+<div class="goalbox"><b>Ціль</b>відтворити повний цикл релізу по памʼяті і правильно діяти в типових ситуаціях Fabric Source control</div>
+<p>Нагадаємо командний потік: робота йде в гілці <code>feature/*</code>, там накопичуються коміти; готову фічу вливаєш у <code>main</code> і робиш <code>git push</code>; далі Git sync (<b>Update from Git</b>) публікує зміни в робочу область Fabric. Це і є базова публікація. Deployment pipeline (Dev→Prod) — <strong>опційний</strong> рівень зверху для команд з окремими середовищами, а не обовʼязкова частина процесу.</p>
+<p>Спершу склади цикл із кроків — без підказок, по памʼяті.</p>
+<div class="order" data-o="pr_or_release"></div>
+<p>Тепер — ситуації з життя. У Fabric на вкладці Source control можуть одночасно горіти «Update required» і «Uncommitted changes»; у PBIP-проєкті треба знати, які файли комітяться, а які лишаються локальними; а іноді в прод потрібен один-єдиний фікс з гілки, де ще лежить недороблена фіча.</p>
+<div class="note warn"><b>Памʼятай принцип.</b> Джерело правди — Git. Ручні правки в обхід репозиторію рано чи пізно розсинхронізують робочу область з історією.</div>
+<div class="quiz" data-q="prE2"></div>
+</section>
+<section class="lesson show" id="s2" data-n="s2">
+<div class="crumb">Практикум</div>
+<h2>Фінальний бос: повний цикл у тренажері</h2>
+<p class="lead">Одна задача, всі команди курсу — від гілки до push, без жодної підказки.</p>
+<div class="goalbox"><b>Ціль</b>без підказок пройти весь цикл: гілка → два коміти → merge → push</div>
+<p>Це найбільша задача курсу. Репозиторій уже склоновано з сервера, у робочій директорії — два змінені файли: <code>report/pages/main/visual.json</code> і <code>definition/model.tmdl</code>. Твоє завдання: створи гілку <code>feature/report-header</code>, зроби два окремі коміти (кожен файл — своїм комітом), повернись на <code>main</code>, влий фічу і запуш на сервер.</p>
+<div class="termlab" data-tl="tl_final_capstone"></div>
+<p>Якщо ти дійшов сюди і переміг боса — вітаємо! Ти пройшов увесь шлях: від першого <code>git init</code> до повного циклу фічі, який команди Power BI повторюють щодня. Гілки, коміти, злиття, конфлікти, push і публікація через Git sync більше не теорія — ти вмієш це руками. Ти готовий до реальної командної роботи з Power BI у Git.</p>
+</section>
+<div class="pager"><a href="pr4-remote.html"><span class="lbl">← попередня частина</span>Практикум · Віддалений репозиторій</a></div>
+</main>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/engine.js"></script>
+</body>
+</html>

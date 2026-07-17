@@ -9,7 +9,7 @@
 | Ціль | Опис | Перевірка |
 |---|---|---|
 | G1 | Кожна сторінка виконується без JS-помилок | `scripts/qa.mjs` (jsdom) |
-| G2 | Кожен `data-p/q/qc/cs/o/s` резолвиться в дані рушія і віджет реально рендериться | `scripts/qa.mjs` |
+| G2 | Кожен `data-p/q/qc/cs/o/s/tl` резолвиться в дані рушія і віджет реально рендериться; кожен termlab-`sol` розв'язує свій `goal` (replay G2c) | `scripts/qa.mjs` |
 | G3 | Пошук працює на кожній сторінці; індекс покриває всі секції; записи індексу валідні | `scripts/qa.mjs` |
 | G4 | Усі внутрішні посилання та якорі валідні | `scripts/qa.mjs` |
 | G5 | Прогрес пишеться в localStorage; картки модулів на головній рендеряться | `scripts/qa.mjs` |
@@ -30,10 +30,11 @@ node scripts/qa.mjs              # exit 0 = цілі G1–G6 виконані
 
 ```
 docs/
-  index.html            головна: картки модулів + прогрес
+  index.html            головна: картки модулів + картки практикуму + прогрес
   modules/NN-slug.html  10 сторінок-модулів, 67 уроків (секції s0..sN)
+  modules/prN-slug.html 5 сторінок практикуму (pr1-osnovy..pr5-ekzamen, 20 секцій задач; лежать у modules/, бо sitePrefix() розпізнає лише цей шлях)
   assets/app.css        уся стилізація
-  assets/engine.js      дані (PLAYERS/QUIZ/SCEN/QCHECKS/CSIM/ORDERS/GIT_CMDS) + віджети + пошук + прогрес
+  assets/engine.js      дані (PLAYERS/QUIZ/SCEN/QCHECKS/CSIM/ORDERS/TERMLAB/GIT_CMDS) + віджети (вкл. termlab-рушій: стан репо, парсер git-команд, goal-DSL) + пошук + прогрес
   assets/search-index.js  генерується скриптом, руками не правити
   assets/pages.json     мапа сторінок/уроків (використовують scripts/*)
   version.json          генерується ЛИШЕ в CI (deploy.yml пише SHA коміту) — клієнт полить його і авто-оновлює сторінку; локально файла немає, перевірка мовчки вимкнена
@@ -53,7 +54,9 @@ Source of truth — файли в `docs/`. Разовий міграційний
 
 ## Конвенції віджетів
 
-`<div class="gplayer" data-p="key">` покроковий SVG-граф · `<div class="scplayer" data-s="key">` мультирепо-сценарій · `<div class="quiz" data-q="bank">` банк вправ · `<div class="qcheck" data-qc="key">` міні-перевірка · `<div class="csim" data-cs="key">` симулятор команди · `<div class="order" data-o="key">` впорядкування кроків · `<div class="ytvideo" data-v="key">` відео українською (клік-фасад → офіційний `youtube-nocookie` embed із таймкодом; дані у `VIDEOS`, спільний ID/канал у константах `YT_*`). Дані — у відповідних об'єктах `engine.js`; ключ без даних = FAIL у QA.
+`<div class="gplayer" data-p="key">` покроковий SVG-граф · `<div class="scplayer" data-s="key">` мультирепо-сценарій · `<div class="quiz" data-q="bank">` банк вправ · `<div class="qcheck" data-qc="key">` міні-перевірка · `<div class="csim" data-cs="key">` симулятор команди · `<div class="order" data-o="key">` впорядкування кроків · `<div class="termlab" data-tl="key">` інтерактивний тренажер терміналу (вільне введення git-команд + жива SVG-схема стану репо) · `<div class="ytvideo" data-v="key">` відео українською (клік-фасад → офіційний `youtube-nocookie` embed із таймкодом; дані у `VIDEOS`, спільний ID/канал у константах `YT_*`). Дані — у відповідних об'єктах `engine.js`; ключ без даних = FAIL у QA.
+
+Правила termlab: задача = `{title, task, init, goal, hints[], sol[], ok}`; `init` — декларативний стан (commits/branches/head/files/remote/tracking/conflictOn); `goal` — лише ключі з `TL_GOAL_KEYS` (невідомий ключ = FAIL G2c); `sol` мусить реально розв'язувати `goal` — QA (G2c) програє його через сам симулятор. Схематична задача — не окремий віджет, а патерн: опис ситуації → `gplayer` з ключем `pr_*` → `qcheck`. Дані termlab-задач не мають суперечити критичному правилу процесу. `engine.js` не розбивати на кілька файлів без правки `loadDom` у `qa.mjs` (він інлайнить лише `search-index.js` + `engine.js`).
 
 Правило відео: лише офіційний iframe-embed (не завантажувати/не рехостити); перед додаванням перевіряти дозвіл автора через oEmbed (`youtube.com/oembed?url=…`); авторські таймкоди-розділи тягнути через `yt-dlp --print "%(chapters)j"`; видима атрибуція каналу обов'язкова. Наразі одне джерело — курс «GIT та GITHUB українською» (Нікіта Тимошенко, @ion_lab), прив'язаний до модулів 00–05 і 07; PBIP/advanced (06/08/09) україномовного відео не мають.
 
@@ -62,6 +65,7 @@ Source of truth — файли в `docs/`. Разовий міграційний
 ## Backlog
 
 - csim/order-покриття у модулях 04–08 (зараз найгустіше в 01/03).
-- Задачі «прочитай diff і знайди проблему» як окремий тип віджета (зараз — через qcheck).
 - Друкована шпаргалка команд (окрема сторінка print-css).
 - Самодіагностика рівня на старті з рекомендацією модуля.
+- termlab: повноцінна симуляція merge-конфліктів (зараз — один скриптований сценарій через `conflictOn`) + більше задач у практикумі.
+- Задачі «прочитай diff» реалізовано в банку `prE1` (pr5-ekzamen); окремий віджет із підсвіткою diff — можливе продовження.
