@@ -335,3 +335,47 @@ a.mcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .ytv-cap a:hover{text-decoration:underline}
 .ytv-embed{position:relative;aspect-ratio:16/9;background:#000}
 .ytv-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+/* === termlab: інтерактивний тренажер терміналу === */
+.termlab{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:15px 17px;margin:18px 0;background:var(--panel)}
+.termlab.solved{border-left-color:var(--new)}
+.termlab .tl-task{font-size:13.5px;margin-bottom:12px}
+.termlab .tl-task::before{content:"Тренажер";display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent);margin-bottom:6px;font-weight:700}
+.termlab.solved-before .tl-task::before{content:"Тренажер · розв'язано раніше";color:var(--new)}
+.termlab .tl-task b{display:block;font-size:14.5px;margin-bottom:5px}
+.termlab .tl-task-text{color:var(--txt);line-height:1.6}
+.termlab .tl-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:13px;align-items:start}
+.termlab .tl-term{margin:0}
+.termlab .tl-scroll{max-height:300px;min-height:120px;overflow-y:auto}
+.termlab .tl-line{white-space:pre-wrap;word-break:break-word}
+.termlab .tl-row{display:flex;gap:8px;align-items:center;padding:9px 15px;border-top:1px solid #2a3040;background:#20242f}
+.termlab .tl-ps{white-space:nowrap;font-size:12px}
+.termlab .tl-inp{flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:13px;background:#1b1f2a;border:1px solid #2a3040;border-radius:7px;padding:7px 10px;color:#e6e9f0}
+.termlab .tl-inp:focus{outline:none;border-color:var(--accent)}
+.termlab .tl-state{display:flex;flex-direction:column;gap:10px}
+.termlab .tl-gwrap{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:12px;overflow-x:auto;min-height:80px}
+.termlab .tl-files-row{display:flex;flex-wrap:wrap;gap:6px}
+.termlab .tl-file{font-family:'JetBrains Mono',monospace;font-size:10.5px;border:1px solid var(--line);border-radius:7px;padding:4px 8px;color:var(--muted);background:var(--panel-2)}
+.termlab .tl-file b{font-weight:700;color:var(--txt);margin-right:6px}
+.termlab .tl-file.st-untracked{border-color:var(--dim);border-style:dashed}
+.termlab .tl-file.st-modified{border-color:#d9a514;color:#a87b00;background:rgba(217,165,20,.07)}
+.termlab .tl-file.st-staged{border-color:var(--blue);color:var(--blue);background:rgba(79,107,237,.07)}
+.termlab .tl-file.st-clean{border-color:var(--new);color:var(--new);background:rgba(14,159,110,.06)}
+.termlab .tl-file.st-conflict{border-color:var(--drop);color:var(--drop);background:rgba(229,72,77,.08)}
+.termlab .tl-badges{display:flex;flex-wrap:wrap;gap:6px}
+.termlab .tl-badge{font-family:'JetBrains Mono',monospace;font-size:10.5px;border:1px dashed var(--line);border-radius:7px;padding:4px 8px;color:var(--dim)}
+.termlab .tl-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.termlab .tl-btns button{font-family:inherit;font-size:12.5px;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+.termlab .tl-btns button:hover{border-color:var(--accent);color:var(--accent)}
+.termlab .tl-fb{font-size:13px;margin-top:10px;min-height:1em;line-height:1.55}
+.termlab .tl-fb.ok{color:var(--new);font-weight:600}
+.termlab .tl-fb.hint{color:var(--muted)}
+.termlab .tl-sol{display:none;margin-top:10px;border-top:1px dashed var(--line);padding-top:10px}
+.termlab .tl-sol.show{display:block}
+.termlab .tl-sol-t{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:6px}
+.termlab .tl-sol code{display:block;margin:3px 0}
+@media(max-width:680px){.termlab .tl-grid{grid-template-columns:1fr}.termlab .tl-scroll{max-height:220px}}
+/* картки практикуму на головній */
+.mcard.pr .mc-num{color:var(--new)}
+.mcard.pr:hover{border-color:var(--new)}
+.mcard.pr .mprog i{background:var(--new)}

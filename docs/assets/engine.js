@@ -780,6 +780,890 @@ function buildOrders(){
   });
 }
 
+/* === 12b. TERMLAB: ІНТЕРАКТИВНИЙ ТРЕНАЖЕР ТЕРМІНАЛУ === */
+const TL_LANE_COLORS=['feature','feat2','hotfix'];
+function tlTokens(s){
+  const out=[];let cur='',q=null;
+  for(const ch of s){
+    if(q){if(ch===q)q=null;else cur+=ch;}
+    else if(ch==='"'||ch==="'")q=ch;
+    else if(/\s/.test(ch)){if(cur){out.push(cur);cur='';}}
+    else cur+=ch;
+  }
+  if(cur)out.push(cur);
+  return {tokens:out,open:!!q};
+}
+function tlNewState(init){
+  init=init||{};
+  const st={initialized:init.initialized!==false,commits:{},order:[],branches:{},head:null,
+    files:{},stash:[],remote:null,tracking:{},conflict:null,conflictOn:init.conflictOn||null,
+    cseq:0,mseq:0,brMeta:{main:{lane:0,color:'main'}}};
+  Object.keys(init.files||{}).forEach(f=>st.files[f]=init.files[f]);
+  if(!st.initialized)return st;
+  const brNames=init.branches?Object.keys(init.branches):['main'];
+  let li=0;
+  brNames.forEach(b=>{if(!st.brMeta[b]){li++;st.brMeta[b]={lane:li,color:TL_LANE_COLORS[(li-1)%TL_LANE_COLORS.length]};}});
+  const defs=init.commits||[{id:'C1',msg:`початкова версія проєкту`}];
+  defs.forEach(c=>{
+    const meta=c.br&&st.brMeta[c.br]?st.brMeta[c.br]:{lane:0,color:'main'};
+    st.commits[c.id]={id:c.id,parents:c.p||[],msg:c.msg||c.id,color:c.col||meta.color,lane:c.lane!=null?c.lane:meta.lane,known:c.known!==false,files:c.files||[]};
+    st.order.push(c.id);
+    const m=c.id.match(/^C(\d+)/);if(m)st.cseq=Math.max(st.cseq,+m[1]);
+  });
+  if(init.branches)Object.keys(init.branches).forEach(b=>st.branches[b]=init.branches[b]);
+  else st.branches.main=defs[defs.length-1].id;
+  const h=init.head||'main';
+  st.head=typeof h==='string'?{type:'branch',ref:h}:{type:'commit',id:h.detached};
+  if(init.remote)st.remote={branches:Object.assign({},init.remote)};
+  if(init.tracking)st.tracking=Object.assign({},init.tracking);
+  else if(st.remote)Object.keys(st.remote.branches).forEach(b=>{const t=st.remote.branches[b];if(st.commits[t]&&st.commits[t].known)st.tracking[b]=t;});
+  return st;
+}
+function tlTip(st,b){return st.branches[b]||null;}
+function tlCurBranch(st){return st.head&&st.head.type==='branch'?st.head.ref:null;}
+function tlHeadCommit(st){if(!st.head)return null;return st.head.type==='branch'?tlTip(st,st.head.ref):st.head.id;}
+function tlReach(st,id,set){set=set||new Set();if(!id||set.has(id)||!st.commits[id])return set;set.add(id);st.commits[id].parents.forEach(p=>tlReach(st,p,set));return set;}
+function tlIsAncestor(st,a,b){return a===b||tlReach(st,b).has(a);}
+function tlDirtyFiles(st){return Object.keys(st.files).filter(f=>['modified','staged','stagedNew','conflict'].indexOf(st.files[f])>=0);}
+function tlStagedFiles(st){return Object.keys(st.files).filter(f=>st.files[f]==='staged'||st.files[f]==='stagedNew');}
+function tlNewCommit(st,id,msg,parents,color,lane,files){
+  st.commits[id]={id,parents,msg,color,lane,known:true,files:files||[]};
+  st.order.push(id);
+  const b=tlCurBranch(st);
+  if(b)st.branches[b]=id;else st.head={type:'commit',id};
+  return id;
+}
+function tlPrompt(st){
+  if(!st.initialized)return `~/PDP$`;
+  const b=tlCurBranch(st);
+  return b?`~/PDP (${b})$`:`~/PDP (HEAD@${st.head?st.head.id:'?'})$`;
+}
+function tlRefsAt(st,id){
+  const refs=[];
+  Object.keys(st.branches).forEach(b=>{if(st.branches[b]===id)refs.push(b);});
+  const hb=tlCurBranch(st);
+  if(hb&&st.branches[hb]===id)refs.splice(refs.indexOf(hb)+1,0,'HEAD');
+  if(st.head&&st.head.type==='commit'&&st.head.id===id)refs.unshift('HEAD');
+  Object.keys(st.tracking).forEach(b=>{if(st.tracking[b]===id)refs.push('origin/'+b);});
+  return refs;
+}
+function tlGraph(st){
+  const reach=new Set();
+  Object.keys(st.branches).forEach(b=>{if(st.branches[b])tlReach(st,st.branches[b],reach);});
+  Object.keys(st.tracking).forEach(b=>{if(st.tracking[b])tlReach(st,st.tracking[b],reach);});
+  const hc=tlHeadCommit(st);if(hc)tlReach(st,hc,reach);
+  const nodes=[];
+  for(let i=st.order.length-1;i>=0;i--){
+    const c=st.commits[st.order[i]];
+    if(!c.known)continue;
+    nodes.push(N(c.id,c.lane,c.color,c.parents.filter(p=>st.commits[p]&&st.commits[p].known),tlRefsAt(st,c.id),!reach.has(c.id)));
+  }
+  return {nodes};
+}
+const TL_ST_LABEL={untracked:`новий`,modified:`змінено`,staged:`у staging`,stagedNew:`у staging`,clean:`закомічено`,conflict:`конфлікт`};
+function tlFilesHtml(st){
+  const fs=Object.keys(st.files);
+  const chips=fs.length?fs.map(f=>{const s=st.files[f];return `<span class="tl-file st-${s==='stagedNew'?'staged':s}"><b>${escapeHTML(f)}</b>${TL_ST_LABEL[s]||s}</span>`;}).join(''):`<span class="tl-file st-none">файлів немає</span>`;
+  let extra='';
+  if(st.stash.length)extra+=`<span class="tl-badge">📦 stash: ${st.stash.length}</span>`;
+  if(st.remote)Object.keys(st.remote.branches).forEach(b=>{extra+=`<span class="tl-badge">☁ сервер: ${b} → ${st.remote.branches[b]}</span>`;});
+  return `<div class="tl-files-row">${chips}</div>`+(extra?`<div class="tl-badges">${extra}</div>`:'');
+}
+const TL_KNOWN_OTHER=['rebase','cherry-pick','blame','diff','tag','remote','clone','config','show','rm','mv','reflog','commit-tree'];
+function tlHelp(){
+  return [
+    `Команди тренажера:`,
+    `  git init | status | add <файл>|. | commit -m "..." | log [--oneline]`,
+    `  git branch [<назва>] | switch [-c] <гілка> | checkout [-b] <гілка|коміт>`,
+    `  git merge <гілка> | fetch | pull [--rebase] | push [-u origin <гілка>]`,
+    `  git reset --soft|--mixed|--hard HEAD~1 | revert HEAD | restore [--staged] <файл>`,
+    `  git stash [pop]`,
+    `Не git: touch <файл> (створити), edit <файл> (змінити), ls, clear, help`
+  ];
+}
+function tlStatusOut(st){
+  const out=[];
+  const b=tlCurBranch(st);
+  if(b)out.push(`On branch ${b}`);
+  else out.push(`HEAD detached at ${st.head.id}`);
+  if(b&&st.remote&&st.tracking[b]){
+    const L=tlTip(st,b),T=st.tracking[b];
+    if(L&&T){
+      const rl=tlReach(st,L),rt=tlReach(st,T);
+      const ahead=[...rl].filter(x=>!rt.has(x)).length,behind=[...rt].filter(x=>!rl.has(x)).length;
+      if(ahead&&behind)out.push(`Your branch and 'origin/${b}' have diverged, ${ahead} and ${behind} commits each.`);
+      else if(ahead)out.push(`Your branch is ahead of 'origin/${b}' by ${ahead} commit${ahead>1?'s':''}.`);
+      else if(behind)out.push(`Your branch is behind 'origin/${b}' by ${behind} commit${behind>1?'s':''}.`);
+      else out.push(`Your branch is up to date with 'origin/${b}'.`);
+    }
+  }
+  const conf=Object.keys(st.files).filter(f=>st.files[f]==='conflict');
+  const staged=Object.keys(st.files).filter(f=>st.files[f]==='staged');
+  const stagedNew=Object.keys(st.files).filter(f=>st.files[f]==='stagedNew');
+  const mod=Object.keys(st.files).filter(f=>st.files[f]==='modified');
+  const untr=Object.keys(st.files).filter(f=>st.files[f]==='untracked');
+  if(conf.length){
+    out.push(`You have unmerged paths.`);
+    out.push(`Unmerged paths:`);
+    conf.forEach(f=>out.push(`        both modified:   ${f}`));
+  }
+  if(staged.length||stagedNew.length){
+    out.push(`Changes to be committed:`);
+    stagedNew.forEach(f=>out.push(`        new file:   ${f}`));
+    staged.forEach(f=>out.push(`        modified:   ${f}`));
+  }
+  if(mod.length){
+    out.push(`Changes not staged for commit:`);
+    mod.forEach(f=>out.push(`        modified:   ${f}`));
+  }
+  if(untr.length){
+    out.push(`Untracked files:`);
+    untr.forEach(f=>out.push(`        ${f}`));
+  }
+  if(!conf.length&&!staged.length&&!stagedNew.length&&!mod.length&&!untr.length)out.push(`nothing to commit, working tree clean`);
+  return out;
+}
+function tlDoCommit(st,msg){
+  if(st.conflict&&!st.conflict.resolved)return [`error: Committing is not possible because you have unmerged files.`];
+  const b=tlCurBranch(st);
+  if(st.conflict&&st.conflict.resolved){
+    const from=st.conflict.from;
+    const id='M'+(++st.mseq);
+    const p1=tlTip(st,b),p2=tlTip(st,from);
+    const fls=tlStagedFiles(st);
+    st.commits[id]={id,parents:[p1,p2],msg:msg||`Merge branch '${from}'`,color:'merge',lane:st.brMeta[b]?st.brMeta[b].lane:0,known:true,files:fls};
+    st.order.push(id);st.branches[b]=id;
+    fls.forEach(f=>st.files[f]='clean');
+    st.conflict=null;
+    return [`[${b} ${id}] ${st.commits[id].msg}`];
+  }
+  const fls=tlStagedFiles(st);
+  if(!fls.length){
+    const mod=Object.keys(st.files).filter(f=>st.files[f]==='modified');
+    return mod.length?[`no changes added to commit (use "git add <файл>")`]:[`nothing to commit, working tree clean`];
+  }
+  if(!msg)return [`підказка: додай повідомлення: git commit -m "опис змін"`];
+  const tip=tlHeadCommit(st);
+  let color='main',lane=0;
+  if(b&&st.brMeta[b]){color=st.brMeta[b].color;lane=st.brMeta[b].lane;}
+  else if(tip&&st.commits[tip]){color=st.commits[tip].color;lane=st.commits[tip].lane;}
+  const id='C'+(++st.cseq);
+  tlNewCommit(st,id,msg,tip?[tip]:[],color,lane,fls);
+  fls.forEach(f=>st.files[f]='clean');
+  return [`[${b||'detached HEAD'} ${id}] ${msg}`,` ${fls.length} file${fls.length>1?'s':''} changed`];
+}
+function tlRun(st,line){
+  const raw=(line||'').trim();
+  if(!raw)return {out:[]};
+  const tk=tlTokens(raw);
+  if(tk.open)return {out:[`помилка: незакриті лапки в команді`]};
+  const T=tk.tokens,c0=T[0];
+  if(c0==='clear')return {out:[],clear:true};
+  if(c0==='help')return {out:tlHelp()};
+  if(c0==='ls'){const fs=Object.keys(st.files);return {out:[fs.length?fs.join('  '):`(порожньо)`]};}
+  if(c0==='touch'){
+    if(!T[1])return {out:[`usage: touch <файл>`]};
+    if(st.files[T[1]]===undefined)st.files[T[1]]='untracked';
+    return {out:[]};
+  }
+  if(c0==='edit'){
+    const f=T[1];
+    if(!f)return {out:[`usage: edit <файл>`]};
+    if(st.files[f]===undefined)return {out:[`bash: edit: файл '${f}' не знайдено (створи його: touch ${f})`]};
+    const s=st.files[f];
+    if(s==='conflict'){
+      if(st.conflict)st.conflict.edited=true;
+      return {out:[`(конфліктні маркери у ${f} прибрано — тепер git add ${f})`]};
+    }
+    if(s==='clean'){st.files[f]='modified';return {out:[`(файл ${f} змінено)`]};}
+    if(s==='staged'||s==='stagedNew'){st.files[f]='modified';return {out:[`(файл ${f} змінено після git add — зміни знову поза staging)`]};}
+    return {out:[`(файл ${f} змінено)`]};
+  }
+  if(c0!=='git')return {out:[`bash: ${c0}: command not found (доступні: git, touch, edit, ls, help, clear)`]};
+  const sub=T[1];
+  if(!sub)return {out:tlHelp()};
+  if(sub!=='init'&&!st.initialized)return {out:[`fatal: not a git repository (or any of the parent directories): .git`,`підказка: спершу git init`]};
+  switch(sub){
+    case 'init':{
+      if(st.initialized)return {out:[`Reinitialized existing Git repository in ~/PDP/.git/`]};
+      st.initialized=true;st.branches={main:null};st.head={type:'branch',ref:'main'};
+      return {out:[`Initialized empty Git repository in ~/PDP/.git/`]};
+    }
+    case 'status':return {out:tlStatusOut(st)};
+    case 'add':{
+      const arg=T[2];
+      if(!arg)return {out:[`Nothing specified, nothing added.`,`підказка: git add <файл> або git add .`]};
+      const all=arg==='.'||arg==='-A'||arg==='--all';
+      const targets=all?Object.keys(st.files):[arg];
+      if(!all&&st.files[arg]===undefined)return {out:[`fatal: pathspec '${arg}' did not match any files`]};
+      const out=[];
+      for(const f of targets){
+        const s=st.files[f];
+        if(s==='conflict'){
+          if(!st.conflict||!st.conflict.edited){out.push(`підказка: спершу відредагуй файл (edit ${f}), щоб прибрати конфліктні маркери`);continue;}
+          st.files[f]='staged';st.conflict.resolved=true;
+        }
+        else if(s==='untracked')st.files[f]='stagedNew';
+        else if(s==='modified')st.files[f]='staged';
+      }
+      return {out};
+    }
+    case 'commit':{
+      const mi=T.indexOf('-m');
+      let msg=null;
+      if(mi>=0){msg=T[mi+1];if(!msg)return {out:[`error: після -m має бути повідомлення в лапках`]};}
+      return {out:tlDoCommit(st,msg)};
+    }
+    case 'log':{
+      const hc=tlHeadCommit(st);
+      if(!hc)return {out:[`fatal: your current branch '${tlCurBranch(st)||'main'}' does not have any commits yet`]};
+      const reach=tlReach(st,hc);
+      const ids=st.order.filter(id=>reach.has(id)).reverse();
+      const oneline=T.indexOf('--oneline')>=0;
+      const out=[];
+      ids.forEach(id=>{
+        const c=st.commits[id];
+        const refs=tlRefsAt(st,id);
+        const hb=tlCurBranch(st);
+        let decStr='';
+        if(refs.length){
+          const parts=refs.filter(r=>r!=='HEAD');
+          if(refs.indexOf('HEAD')>=0)decStr=hb?`HEAD -> ${hb}${parts.filter(p=>p!==hb).length?', '+parts.filter(p=>p!==hb).join(', '):''}`:`HEAD${parts.length?', '+parts.join(', '):''}`;
+          else decStr=parts.join(', ');
+        }
+        if(oneline)out.push(`${id} ${decStr?'('+decStr+') ':''}${c.msg}`);
+        else{out.push(`commit ${id}${decStr?' ('+decStr+')':''}`);out.push(`Author: Ти <ty@company.ua>`);out.push(``);out.push(`    ${c.msg}`);out.push(``);}
+      });
+      return {out};
+    }
+    case 'branch':{
+      const name=T[2];
+      if(!name){
+        const out=[];const cur=tlCurBranch(st);
+        if(!cur)out.push(`* (HEAD detached at ${st.head.id})`);
+        Object.keys(st.branches).forEach(b=>out.push((b===cur?'* ':'  ')+b));
+        return {out};
+      }
+      if(name.charAt(0)==='-')return {out:[`підказка: у тренажері підтримується лише git branch [<назва>]`]};
+      if(st.branches[name]!==undefined)return {out:[`fatal: a branch named '${name}' already exists`]};
+      const tip=tlHeadCommit(st);
+      if(!tip)return {out:[`fatal: not a valid object name: 'main'`]};
+      st.branches[name]=tip;
+      if(!st.brMeta[name]){const li=Math.max(...Object.keys(st.brMeta).map(b=>st.brMeta[b].lane))+1;st.brMeta[name]={lane:li,color:TL_LANE_COLORS[(li-1)%TL_LANE_COLORS.length]};}
+      return {out:[]};
+    }
+    case 'switch':case 'checkout':{
+      let create=false,name=T[2];
+      if(name==='-c'||name==='-b'){create=true;name=T[3];}
+      if(!name)return {out:[`usage: git ${sub} ${sub==='switch'?'[-c]':'[-b]'} <гілка>`]};
+      const dirty=Object.keys(st.files).some(f=>['modified','staged','stagedNew'].indexOf(st.files[f])>=0);
+      if(create){
+        if(st.branches[name]!==undefined)return {out:[`fatal: a branch named '${name}' already exists`]};
+        const tip=tlHeadCommit(st);
+        if(!tip)return {out:[`fatal: not a valid object name: 'main'`]};
+        st.branches[name]=tip;
+        if(!st.brMeta[name]){const li=Math.max(...Object.keys(st.brMeta).map(b=>st.brMeta[b].lane))+1;st.brMeta[name]={lane:li,color:TL_LANE_COLORS[(li-1)%TL_LANE_COLORS.length]};}
+        st.head={type:'branch',ref:name};
+        return {out:[`Switched to a new branch '${name}'`]};
+      }
+      if(st.branches[name]!==undefined){
+        if(tlCurBranch(st)===name)return {out:[`Already on '${name}'`]};
+        if(dirty&&st.branches[name]!==tlHeadCommit(st))return {out:[
+          `error: Your local changes to the following files would be overwritten by checkout:`,
+          ...tlDirtyFiles(st).map(f=>`        ${f}`),
+          `Please commit your changes or stash them before you switch branches.`,
+          `підказка: git stash — тимчасово сховати зміни`]};
+        st.head={type:'branch',ref:name};
+        return {out:[`Switched to branch '${name}'`]};
+      }
+      if(sub==='checkout'&&st.commits[name]&&st.commits[name].known){
+        if(dirty&&name!==tlHeadCommit(st))return {out:[
+          `error: Your local changes would be overwritten by checkout.`,
+          `Please commit your changes or stash them before you switch.`]};
+        st.head={type:'commit',id:name};
+        return {out:[`Note: switching to '${name}'.`,``,`You are in 'detached HEAD' state. Експериментуй вільно;`,`щоб зберегти коміти звідси — створи гілку: git branch <назва>`]};
+      }
+      return {out:sub==='switch'
+        ?[`fatal: invalid reference: ${name}`,`підказка: створити нову гілку — git switch -c ${name}`]
+        :[`error: pathspec '${name}' did not match any file(s) known to git`]};
+    }
+    case 'merge':{
+      const name=T[2];
+      if(!name)return {out:[`usage: git merge <гілка>`]};
+      const b=tlCurBranch(st);
+      if(!b)return {out:[`fatal: у detached HEAD мержити не можна — спершу git switch <гілка>`]};
+      if(st.branches[name]===undefined)return {out:[`merge: ${name} - not something we can merge`]};
+      if(st.conflict)return {out:[`error: Merging is not possible because you have unmerged files.`]};
+      const tipT=tlTip(st,b),tipF=tlTip(st,name);
+      if(!tipF)return {out:[`Already up to date.`]};
+      if(tipT===tipF||tlIsAncestor(st,tipF,tipT))return {out:[`Already up to date.`]};
+      if(tlIsAncestor(st,tipT,tipF)){
+        st.branches[b]=tipF;
+        return {out:[`Updating ${tipT}..${tipF}`,`Fast-forward`]};
+      }
+      if(st.conflictOn&&st.conflictOn.branch===name){
+        const f=st.conflictOn.file;
+        st.files[f]='conflict';
+        st.conflict={file:f,from:name,edited:false,resolved:false};
+        return {out:[`Auto-merging ${f}`,`CONFLICT (content): Merge conflict in ${f}`,`Automatic merge failed; fix conflicts and then commit the result.`,`підказка: edit ${f} → git add ${f} → git commit`]};
+      }
+      const id='M'+(++st.mseq);
+      st.commits[id]={id,parents:[tipT,tipF],msg:`Merge branch '${name}'`,color:'merge',lane:st.brMeta[b]?st.brMeta[b].lane:0,known:true,files:[]};
+      st.order.push(id);st.branches[b]=id;
+      return {out:[`Merge made by the 'ort' strategy.`]};
+    }
+    case 'fetch':{
+      if(!st.remote)return {out:[`fatal: 'origin' does not appear to be a git repository`]};
+      const out=[];
+      Object.keys(st.remote.branches).forEach(b=>{
+        const rt=st.remote.branches[b];
+        tlReach(st,rt).forEach(id=>{if(st.commits[id])st.commits[id].known=true;});
+        if(st.tracking[b]!==rt){
+          if(!out.length)out.push(`From origin`);
+          out.push(`   ${st.tracking[b]||'···'}..${rt}  ${b} -> origin/${b}`);
+          st.tracking[b]=rt;
+        }
+      });
+      if(!out.length)out.push(`(нових комітів на сервері немає)`);
+      return {out};
+    }
+    case 'pull':{
+      if(!st.remote)return {out:[`fatal: 'origin' does not appear to be a git repository`]};
+      const b=tlCurBranch(st);
+      if(!b)return {out:[`fatal: у detached HEAD робити pull не можна`]};
+      const rt=st.remote.branches[b];
+      if(rt===undefined)return {out:[`fatal: на origin немає гілки '${b}'`]};
+      tlReach(st,rt).forEach(id=>{if(st.commits[id])st.commits[id].known=true;});
+      st.tracking[b]=rt;
+      const L=tlTip(st,b);
+      if(L===rt||tlIsAncestor(st,rt,L))return {out:[`Already up to date.`]};
+      if(tlIsAncestor(st,L,rt)){
+        st.branches[b]=rt;
+        return {out:[`Updating ${L}..${rt}`,`Fast-forward`]};
+      }
+      if(T.indexOf('--rebase')>=0){
+        const rl=tlReach(st,L),rr=tlReach(st,rt);
+        const localOnly=st.order.filter(id=>rl.has(id)&&!rr.has(id));
+        localOnly.forEach(id=>{st.order.splice(st.order.indexOf(id),1);});
+        let base=rt;
+        const copies=[];
+        localOnly.forEach(id=>{
+          const c=st.commits[id];delete st.commits[id];
+          const nid=id+`'`;
+          st.commits[nid]={id:nid,parents:[base],msg:c.msg,color:'rebased',lane:c.lane,known:true,files:c.files};
+          st.order.push(nid);copies.push(nid);base=nid;
+        });
+        st.branches[b]=base;
+        return {out:[`Successfully rebased and updated refs/heads/${b}.`,`(${localOnly.length} твоїх комітів переграно поверх серверних: ${copies.join(', ')})`]};
+      }
+      return {out:[`fatal: Need to specify how to reconcile divergent branches.`,`підказка: git pull --rebase — переграти твої коміти поверх серверних`]};
+    }
+    case 'push':{
+      if(!st.remote)return {out:[`fatal: у цій задачі віддаленого репозиторію немає`]};
+      const b=tlCurBranch(st);
+      if(!b)return {out:[`fatal: у detached HEAD робити push не можна`]};
+      const L=tlTip(st,b);
+      if(!L)return {out:[`error: unable to push: гілка ${b} порожня`]};
+      const R=st.remote.branches[b];
+      if(R===undefined){
+        const hasU=T.indexOf('-u')>=0||T.indexOf('--set-upstream')>=0;
+        if(hasU){
+          st.remote.branches[b]=L;st.tracking[b]=L;
+          return {out:[`To origin`,` * [new branch]      ${b} -> ${b}`,`branch '${b}' set up to track 'origin/${b}'.`]};
+        }
+        return {out:[`fatal: The current branch ${b} has no upstream branch.`,`To push the current branch and set the remote as upstream, use`,``,`    git push -u origin ${b}`]};
+      }
+      if(R===L)return {out:[`Everything up-to-date`]};
+      if(tlIsAncestor(st,R,L)){
+        st.remote.branches[b]=L;st.tracking[b]=L;
+        return {out:[`To origin`,`   ${R}..${L}  ${b} -> ${b}`]};
+      }
+      return {out:[`To origin`,` ! [rejected]        ${b} -> ${b} (non-fast-forward)`,`error: failed to push some refs to 'origin'`,`hint: Updates were rejected because the remote contains work that you do not have locally.`,`підказка: git pull --rebase, потім git push`]};
+    }
+    case 'reset':{
+      const b=tlCurBranch(st);
+      if(!b)return {out:[`fatal: у detached HEAD reset у тренажері недоступний`]};
+      let mode='--mixed',target=null;
+      for(let i=2;i<T.length;i++){
+        if(T[i]==='--soft'||T[i]==='--mixed'||T[i]==='--hard')mode=T[i];
+        else target=T[i];
+      }
+      if(!target)return {out:[`usage: git reset --soft|--mixed|--hard HEAD~1`]};
+      let newTip=null;
+      const m=target.match(/^HEAD~(\d+)$/);
+      if(m){
+        let cur=tlTip(st,b);
+        for(let k=0;k<+m[1];k++){
+          if(!cur||!st.commits[cur]||!st.commits[cur].parents.length)return {out:[`fatal: ambiguous argument '${target}': історія коротша`]};
+          cur=st.commits[cur].parents[0];
+        }
+        newTip=cur;
+      }else if(st.commits[target]&&st.commits[target].known)newTip=target;
+      else return {out:[`fatal: ambiguous argument '${target}': unknown revision`]};
+      const oldTip=tlTip(st,b);
+      const ro=tlReach(st,oldTip),rn=tlReach(st,newTip);
+      const undone=st.order.filter(id=>ro.has(id)&&!rn.has(id));
+      st.branches[b]=newTip;
+      const out=[];
+      const touched=[];
+      undone.forEach(id=>st.commits[id].files.forEach(f=>{if(touched.indexOf(f)<0)touched.push(f);}));
+      if(mode==='--soft'){
+        touched.forEach(f=>st.files[f]='staged');
+        out.push(`(HEAD тепер на ${newTip}; зміни з відкочених комітів — у staging)`);
+      }else if(mode==='--mixed'){
+        touched.forEach(f=>st.files[f]='modified');
+        if(touched.length){out.push(`Unstaged changes after reset:`);touched.forEach(f=>out.push(`M\t${f}`));}
+        else out.push(`(HEAD тепер на ${newTip})`);
+      }else{
+        touched.forEach(f=>st.files[f]='clean');
+        Object.keys(st.files).forEach(f=>{if(st.files[f]==='modified'||st.files[f]==='staged')st.files[f]='clean';});
+        out.push(`HEAD is now at ${newTip} ${st.commits[newTip]?st.commits[newTip].msg:''}`);
+      }
+      if(undone.length)out.push(`(коміти ${undone.join(', ')} осиротіли — на схемі стали пунктирними)`);
+      return {out};
+    }
+    case 'revert':{
+      if(T[2]!=='HEAD')return {out:[`підказка: у тренажері підтримується лише git revert HEAD`]};
+      const tip=tlHeadCommit(st);
+      if(!tip)return {out:[`fatal: bad revision 'HEAD'`]};
+      const c=st.commits[tip];
+      if(c.parents.length>1)return {out:[`error: commit ${tip} is a merge but no -m option was given.`]};
+      const b=tlCurBranch(st);
+      let color='main',lane=0;
+      if(b&&st.brMeta[b]){color=st.brMeta[b].color;lane=st.brMeta[b].lane;}
+      const id='C'+(++st.cseq);
+      tlNewCommit(st,id,`Revert "${c.msg}"`,[tip],color,lane,c.files.slice());
+      return {out:[`[${b||'detached HEAD'} ${id}] Revert "${c.msg}"`]};
+    }
+    case 'restore':{
+      const stagedFlag=T[2]==='--staged';
+      const f=stagedFlag?T[3]:T[2];
+      if(!f)return {out:[`usage: git restore [--staged] <файл>`]};
+      const s=st.files[f];
+      if(s===undefined)return {out:[`error: pathspec '${f}' did not match any file(s) known to git`]};
+      if(stagedFlag){
+        if(s==='staged'){st.files[f]='modified';return {out:[]};}
+        if(s==='stagedNew'){st.files[f]='untracked';return {out:[]};}
+        return {out:[`(файл ${f} і так не у staging)`]};
+      }
+      if(s==='modified'){st.files[f]='clean';return {out:[`(незакомічені зміни у ${f} відкинуто)`]};}
+      if(s==='staged'||s==='stagedNew')return {out:[`підказка: файл у staging — спершу git restore --staged ${f}`]};
+      if(s==='untracked')return {out:[`error: pathspec '${f}' did not match any file(s) known to git`]};
+      return {out:[`(у ${f} немає змін)`]};
+    }
+    case 'stash':{
+      if(T[2]==='pop'){
+        if(!st.stash.length)return {out:[`No stash entries found.`]};
+        const sn=st.stash.pop();
+        Object.keys(sn.files).forEach(f=>st.files[f]='modified');
+        return {out:[`Dropped refs/stash@{0}`]};
+      }
+      if(T[2]&&T[2]!=='push')return {out:[`підказка: у тренажері підтримується git stash і git stash pop`]};
+      const dirty=Object.keys(st.files).filter(f=>['modified','staged','stagedNew'].indexOf(st.files[f])>=0);
+      if(!dirty.length)return {out:[`No local changes to save`]};
+      const snap={files:{}};
+      dirty.forEach(f=>{snap.files[f]=st.files[f];st.files[f]='clean';});
+      st.stash.push(snap);
+      const b=tlCurBranch(st),tip=tlHeadCommit(st);
+      return {out:[`Saved working directory and index state WIP on ${b||'HEAD'}: ${tip||''} ${tip&&st.commits[tip]?st.commits[tip].msg:''}`]};
+    }
+    default:
+      if(TL_KNOWN_OTHER.indexOf(sub)>=0)return {out:[`Команда git ${sub} існує, але в цьому тренажері вона не потрібна.`,`Список доступних команд: help`]};
+      return {out:[`git: '${sub}' is not a git command. See 'git --help'.`]};
+  }
+}
+const TL_GOAL_KEYS=['initialized','branch','branchAt','branchCommitsAtLeast','headOn','headDetached','commitsAtLeast','commitsExactly','fileStatus','merged','lastCommitParents','lastMsgMatch','pushed','remoteBranch','stashEmpty','noMergeCommits'];
+function tlCheckGoal(st,goal){
+  for(const k of Object.keys(goal)){
+    const v=goal[k];
+    if(k==='initialized'){if(st.initialized!==v)return false;}
+    else if(k==='branch'){if(st.branches[v]===undefined)return false;}
+    else if(k==='branchAt'){for(const b of Object.keys(v))if(st.branches[b]!==v[b])return false;}
+    else if(k==='branchCommitsAtLeast'){for(const b of Object.keys(v)){const t=tlTip(st,b);if(!t||tlReach(st,t).size<v[b])return false;}}
+    else if(k==='headOn'){if(tlCurBranch(st)!==v)return false;}
+    else if(k==='headDetached'){if((st.head&&st.head.type==='commit')!==v)return false;}
+    else if(k==='commitsAtLeast'){const h=tlHeadCommit(st);if(!h||tlReach(st,h).size<v)return false;}
+    else if(k==='commitsExactly'){const h=tlHeadCommit(st);if((h?tlReach(st,h).size:0)!==v)return false;}
+    else if(k==='fileStatus'){for(const f of Object.keys(v)){const s=st.files[f];const want=v[f];if(want==='staged'){if(s!=='staged'&&s!=='stagedNew')return false;}else if(s!==want)return false;}}
+    else if(k==='merged'){const tf=tlTip(st,v.from),ti=tlTip(st,v.into);if(!tf||!ti||!tlIsAncestor(st,tf,ti))return false;}
+    else if(k==='lastCommitParents'){const h=tlHeadCommit(st);if(!h||st.commits[h].parents.length!==v)return false;}
+    else if(k==='lastMsgMatch'){const h=tlHeadCommit(st);if(!h||!new RegExp(v).test(st.commits[h].msg))return false;}
+    else if(k==='pushed'){const b=typeof v==='string'?v:tlCurBranch(st);if(!b||!st.remote||st.remote.branches[b]===undefined||st.remote.branches[b]!==st.branches[b])return false;}
+    else if(k==='remoteBranch'){if(!st.remote||st.remote.branches[v]===undefined)return false;}
+    else if(k==='stashEmpty'){if((st.stash.length===0)!==v)return false;}
+    else if(k==='noMergeCommits'){const h=tlHeadCommit(st);if(h){const r=tlReach(st,h);for(const id of r)if(st.commits[id].parents.length>1)return false;}}
+    else return false; // невідомий ключ goal-DSL — задача некоректна
+  }
+  return true;
+}
+function buildTermlab(){
+  document.querySelectorAll('.termlab').forEach(el=>{
+    if(el.dataset.built)return;el.dataset.built='1';
+    const key=el.dataset.tl,t=TERMLAB[key];
+    if(!t){el.innerHTML=`<div class="tl-task">Задачу не знайдено</div>`;return;}
+    el.innerHTML=`<div class="tl-task"><b>${t.title}</b><div class="tl-task-text">${t.task}</div></div>
+      <div class="tl-grid">
+        <div class="term-win tl-term"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">PBIP — Git Bash</span></div>
+          <div class="tw-body tl-scroll"></div>
+          <div class="tl-row"><span class="tw-p tl-ps"></span><input class="tl-inp" type="text" spellcheck="false" autocomplete="off" placeholder="команда + Enter (help — список)"></div></div>
+        <div class="tl-state"><div class="tl-gwrap"></div><div class="tl-files"></div></div>
+      </div>
+      <div class="tl-btns"><button class="tl-hint ghost">Підказка</button><button class="tl-show ghost">Показати розв'язок</button><button class="tl-reset ghost">Скинути</button></div>
+      <div class="tl-sol"></div><div class="tl-fb"></div>`;
+    const scroll=el.querySelector('.tl-scroll'),inp=el.querySelector('.tl-inp'),ps=el.querySelector('.tl-ps'),
+      gwrap=el.querySelector('.tl-gwrap'),filesEl=el.querySelector('.tl-files'),fb=el.querySelector('.tl-fb'),sol=el.querySelector('.tl-sol');
+    let st=tlNewState(t.init),hintIdx=0,hist=[],histPos=-1,solved=false;
+    function paint(){
+      gwrap.innerHTML=drawGraph(tlGraph(st));
+      filesEl.innerHTML=tlFilesHtml(st);
+      ps.textContent=tlPrompt(st);
+    }
+    function print(html){const d=document.createElement('div');d.className='tl-line';d.innerHTML=html;scroll.appendChild(d);scroll.scrollTop=scroll.scrollHeight;}
+    function exec(line){
+      if(!line.trim())return;
+      print(`<span class="tw-p">${escapeHTML(tlPrompt(st))}</span> <span class="tw-c">${escapeHTML(line)}</span>`);
+      const res=tlRun(st,line);
+      if(res.clear)scroll.innerHTML='';
+      (res.out||[]).forEach(l=>print(`<span class="tw-o">${escapeHTML(l)}</span>`));
+      paint();
+      hist.push(line);histPos=hist.length;
+      if(!solved&&tlCheckGoal(st,t.goal)){
+        solved=true;
+        fb.className='tl-fb ok';fb.innerHTML=`✔ ${t.ok||`Задачу розв'язано!`}`;
+        el.classList.add('solved');
+        lsSet('gfp:tl:'+key,'1');
+      }
+    }
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){exec(inp.value);inp.value='';}
+      else if(e.key==='ArrowUp'){if(histPos>0){histPos--;inp.value=hist[histPos];e.preventDefault();}}
+      else if(e.key==='ArrowDown'){if(histPos<hist.length-1){histPos++;inp.value=hist[histPos];}else{histPos=hist.length;inp.value='';}}
+    });
+    el.querySelector('.tl-hint').onclick=()=>{
+      const h=(t.hints||[])[Math.min(hintIdx,(t.hints||[]).length-1)];
+      if(h){fb.className='tl-fb hint';fb.innerHTML=`💡 ${h}`;hintIdx++;}
+    };
+    el.querySelector('.tl-show').onclick=()=>{
+      sol.innerHTML=`<div class="tl-sol-t">Розв'язок:</div>`+(t.sol||[]).map(c=>`<code>${escapeHTML(c)}</code>`).join('');
+      sol.classList.add('show');
+    };
+    el.querySelector('.tl-reset').onclick=()=>{
+      st=tlNewState(t.init);solved=false;hintIdx=0;hist=[];histPos=0;
+      scroll.innerHTML='';fb.className='tl-fb';fb.innerHTML='';sol.classList.remove('show');sol.innerHTML='';
+      el.classList.remove('solved');
+      print(`<span class="tw-cm"># стан скинуто до початкового</span>`);
+      paint();
+    };
+    if(lsGet('gfp:tl:'+key)==='1')el.classList.add('solved-before');
+    print(`<span class="tw-cm"># вводь команди; help — список, «Скинути» — почати заново</span>`);
+    paint();
+  });
+}
+
+/* === 12c. ДАНІ ПРАКТИКУМУ === */
+const TERMLAB={
+  tl_pbip_init:{
+    title:`Перший репозиторій для PBIP-проєкту`,
+    task:`Ти зберіг звіт як PBIP: у папці лежать <code>report.pbip</code> і <code>definition/model.tmdl</code>, але Git про них ще не знає. Перетвори папку на репозиторій і зроби перший коміт з усіма файлами.`,
+    init:{initialized:false,files:{'report.pbip':'untracked','definition/model.tmdl':'untracked'}},
+    goal:{initialized:true,headOn:'main',commitsAtLeast:1,fileStatus:{'report.pbip':'clean','definition/model.tmdl':'clean'}},
+    hints:[`Спершу репозиторій має зʼявитися: одна команда. Потім — стандартний шлях зміни: staging → коміт.`,`git init → git add . → git commit -m "..."`],
+    sol:[`git init`,`git add .`,`git commit -m "перша версія звіту"`],
+    ok:`Репозиторій створено, обидва файли в історії. Тепер кожна зміна звіту може стати комітом.`},
+  tl_status_flow:{
+    title:`Два осмислені коміти замість одного великого`,
+    task:`Ти змінив модель (<code>definition/model.tmdl</code>) і додав нову таблицю (<code>definition/tables/Sales.tmdl</code>). Зроби ДВА окремі коміти: спершу зміни моделі, потім нову таблицю — щоб в історії було видно, що і навіщо змінилось.`,
+    init:{files:{'definition/model.tmdl':'modified','definition/tables/Sales.tmdl':'untracked'}},
+    goal:{commitsAtLeast:3,fileStatus:{'definition/model.tmdl':'clean','definition/tables/Sales.tmdl':'clean'}},
+    hints:[`git add вміє брати один конкретний файл — цим і користуйся.`,`add model.tmdl → commit → add Sales.tmdl → commit`],
+    sol:[`git add definition/model.tmdl`,`git commit -m "оновлення моделі"`,`git add definition/tables/Sales.tmdl`,`git commit -m "нова таблиця Sales"`],
+    ok:`Дві логічні зміни — два коміти. Колега (і ти через місяць) скаже дякую.`},
+  tl_partial_stage:{
+    title:`Закомітити лише частину змін`,
+    task:`Змінені два файли: <code>definition/model.tmdl</code> (нова міра — готова) і <code>diagramLayout.json</code> (просто посовав таблички на діаграмі — комітити не хочеш). Закоміть ЛИШЕ зміну моделі; diagramLayout.json має лишитися незакоміченим.`,
+    init:{files:{'definition/model.tmdl':'modified','diagramLayout.json':'modified'}},
+    goal:{commitsExactly:2,fileStatus:{'definition/model.tmdl':'clean','diagramLayout.json':'modified'}},
+    hints:[`Не використовуй git add . — він забере все.`,`git add definition/model.tmdl → git commit -m "..."`],
+    sol:[`git add definition/model.tmdl`,`git commit -m "нова міра Total Sales"`],
+    ok:`Staging — це фільтр: у коміт пішло тільки те, що ти свідомо вибрав.`},
+  tl_branch_kpi:{
+    title:`Гілка для нових KPI-карток`,
+    task:`Керівник просить нові KPI-картки. У тебе вже змінений <code>report/pages/kpi/visual.json</code>. Створи гілку <code>feature/kpi-cards</code>, перейди на неї й закоміть зміну там. main чіпати не можна.`,
+    init:{files:{'report/pages/kpi/visual.json':'modified'}},
+    goal:{branch:'feature/kpi-cards',headOn:'feature/kpi-cards',fileStatus:{'report/pages/kpi/visual.json':'clean'},commitsAtLeast:2},
+    hints:[`Створити гілку і перейти на неї можна однією командою.`,`git switch -c feature/kpi-cards, далі add + commit`],
+    sol:[`git switch -c feature/kpi-cards`,`git add report/pages/kpi/visual.json`,`git commit -m "KPI-картки"`],
+    ok:`Фіча живе у своїй гілці, main стабільна — саме так працює команда.`},
+  tl_ff_merge:{
+    title:`Fast-forward: main просто доганяє`,
+    task:`Гілка <code>feature/date-table</code> пішла на два коміти вперед, а в main нових комітів немає. Влий фічу в main. Зверни увагу: merge-коміт не зʼявиться — main просто «доїде» вперед.`,
+    init:{commits:[{id:'C1',msg:`базова модель`},{id:'C2',p:['C1'],br:'feature/date-table',msg:`таблиця дат`},{id:'C3',p:['C2'],br:'feature/date-table',msg:`звʼязки таблиці дат`}],branches:{main:'C1','feature/date-table':'C3'},head:'main'},
+    goal:{merged:{from:'feature/date-table',into:'main'},headOn:'main',lastCommitParents:1},
+    hints:[`Merge виконують СТОЯЧИ на гілці, КУДИ вливаєш. Ти вже на main.`,`git merge feature/date-table`],
+    sol:[`git merge feature/date-table`],
+    ok:`Fast-forward: main пересунулась на C3 без нового коміту, бо власних комітів у неї не було.`},
+  tl_merge_commit:{
+    title:`Merge-коміт: гілки розійшлися`,
+    task:`Поки ти робив KPI-картки у <code>feature/kpi-cards</code>, у main зʼявився коміт колеги. Гілки розійшлися. Влий фічу в main — цього разу Git створить merge-коміт із двома батьками.`,
+    init:{commits:[{id:'C1',msg:`базова модель`},{id:'C2',p:['C1'],msg:`хедер звіту (колега)`},{id:'C3',p:['C1'],br:'feature/kpi-cards',msg:`KPI-картки`}],branches:{main:'C2','feature/kpi-cards':'C3'},head:'main'},
+    goal:{merged:{from:'feature/kpi-cards',into:'main'},headOn:'main',lastCommitParents:2},
+    hints:[`Команда та сама, що і при fast-forward, — Git сам вирішує, який тип злиття потрібен.`,`git merge feature/kpi-cards`],
+    sol:[`git merge feature/kpi-cards`],
+    ok:`M1 має двох батьків — C2 і C3. Обидві лінії роботи збережені в історії.`},
+  tl_merge_conflict:{
+    title:`Конфлікт у model.tmdl`,
+    task:`Ти і колега змінили ОДНУ й ту саму міру: ти — в main, колега — у <code>feature/new-calc</code>. Спробуй влити гілку, отримай конфлікт у <code>definition/model.tmdl</code> і розвʼяжи його: відредагуй файл, додай у staging і заверши merge комітом.`,
+    init:{commits:[{id:'C1',msg:`базова модель`},{id:'C2',p:['C1'],msg:`твоя версія міри`},{id:'C3',p:['C1'],br:'feature/new-calc',msg:`версія міри колеги`}],branches:{main:'C2','feature/new-calc':'C3'},head:'main',files:{'definition/model.tmdl':'clean'},conflictOn:{branch:'feature/new-calc',file:'definition/model.tmdl'}},
+    goal:{merged:{from:'feature/new-calc',into:'main'},lastCommitParents:2,fileStatus:{'definition/model.tmdl':'clean'}},
+    hints:[`Конфлікт — не помилка, а питання: «яку версію лишити?». Відповідаєш ти, редагуючи файл.`,`git merge feature/new-calc → edit definition/model.tmdl → git add definition/model.tmdl → git commit`],
+    sol:[`git merge feature/new-calc`,`edit definition/model.tmdl`,`git add definition/model.tmdl`,`git commit`],
+    ok:`Конфлікт розвʼязано свідомо: ти сам вирішив, яка формула міри правильна. Це і є суть merge-конфлікту.`},
+  tl_detached_rescue:{
+    title:`Порятунок коміту з detached HEAD`,
+    task:`Ти перемкнувся на старий коміт «подивитись, як було», зробив там новий коміт C3 — і тепер HEAD відірваний (detached), а C3 не належить жодній гілці. Врятуй його: створи гілку <code>rescue</code> на цьому коміті й повернись на main.`,
+    init:{commits:[{id:'C1',msg:`перша версія`},{id:'C2',p:['C1'],msg:`друга версія`},{id:'C3',p:['C1'],col:'feat2',lane:1,msg:`експеримент зі старої версії`}],branches:{main:'C2'},head:{detached:'C3'}},
+    goal:{branchAt:{rescue:'C3'},headOn:'main',headDetached:false},
+    hints:[`Гілка — це просто іменований вказівник на коміт. Постав його, поки стоїш на C3.`,`git branch rescue → git switch main`],
+    sol:[`git branch rescue`,`git switch main`],
+    ok:`C3 тепер тримається за гілку rescue і не загубиться. Detached HEAD безпечний, якщо знати цей трюк.`},
+  tl_restore_file:{
+    title:`Відкинути незакомічені зміни`,
+    task:`Ти експериментував із формулою міри в <code>definition/model.tmdl</code> і зрозумів, що все зіпсував. Коміту ще не було. Поверни файл до останньої закоміченої версії.`,
+    init:{files:{'definition/model.tmdl':'modified'}},
+    goal:{commitsExactly:1,fileStatus:{'definition/model.tmdl':'clean'}},
+    hints:[`Потрібна команда, що «відновлює» файл з останнього коміту.`,`git restore definition/model.tmdl`],
+    sol:[`git restore definition/model.tmdl`],
+    ok:`Зміни відкинуто, файл як у останньому коміті. Обережно: restore незворотний для незакомічених правок.`},
+  tl_unstage:{
+    title:`Прибрати зайве зі staging`,
+    task:`Ти випадково виконав <code>git add cache.abf</code> — а це кеш даних, його НЕ комітять. Прибери файл зі staging так, щоб він лишився на диску (стане знову untracked).`,
+    init:{files:{'cache.abf':'stagedNew'}},
+    goal:{commitsExactly:1,fileStatus:{'cache.abf':'untracked'}},
+    hints:[`Це «протилежність git add». Файл видаляти не треба.`,`git restore --staged cache.abf`],
+    sol:[`git restore --staged cache.abf`],
+    ok:`Файл вийшов зі staging, але лишився на диску. Наступний крок у житті — додати його в .gitignore.`},
+  tl_reset_soft:{
+    title:`Скасувати передчасний коміт, зберігши зміни`,
+    task:`Ти закомітив зміну моделі з повідомленням «wip» — занадто рано і з поганим описом. Коміт ще НЕ запушений. Скасуй його так, щоб зміни лишилися у staging — готові до нормального коміту.`,
+    init:{commits:[{id:'C1',msg:`базова модель`},{id:'C2',p:['C1'],msg:`wip`,files:['definition/model.tmdl']}],branches:{main:'C2'},files:{'definition/model.tmdl':'clean'}},
+    goal:{commitsExactly:1,fileStatus:{'definition/model.tmdl':'staged'}},
+    hints:[`reset має три режими; тобі потрібен той, що НЕ чіпає staging.`,`git reset --soft HEAD~1`],
+    sol:[`git reset --soft HEAD~1`],
+    ok:`Коміт зник, зміни в staging. --soft — найлагідніший режим reset. Для запушених комітів так робити не можна.`},
+  tl_revert_shared:{
+    title:`Скасувати запушений коміт безпечно`,
+    task:`Останній коміт зламав міру, і він УЖЕ на сервері — історію переписувати не можна. Зроби коміт-скасування і відправ його на сервер.`,
+    init:{commits:[{id:'C1',msg:`базова модель`},{id:'C2',p:['C1'],msg:`заміна формули маржі`,files:['definition/model.tmdl']}],branches:{main:'C2'},remote:{main:'C2'}},
+    goal:{lastMsgMatch:'^Revert',pushed:true,commitsAtLeast:3},
+    hints:[`Для спільної історії — тільки revert: він ДОДАЄ новий коміт, а не стирає старий.`,`git revert HEAD → git push`],
+    sol:[`git revert HEAD`,`git push`],
+    ok:`Історія не переписана: C2 лишився, але його вплив скасовано новим комітом. Сервер прийняв push без конфліктів.`},
+  tl_stash_switch:{
+    title:`Stash: терміновий фікс посеред роботи`,
+    task:`Ти працюєш у <code>feature/kpi-cards</code> з незакоміченими правками, аж тут — терміновий фікс у main. Git не пустить на main з «брудними» файлами. Сховай зміни у stash, перейди на main, зроби фікс у <code>definition/model.tmdl</code> (edit → add → commit), повернись у свою гілку й дістань зміни зі stash.`,
+    init:{commits:[{id:'C1',msg:`база`},{id:'C2',p:['C1'],br:'feature/kpi-cards',msg:`початок KPI-карток`}],branches:{main:'C1','feature/kpi-cards':'C2'},head:'feature/kpi-cards',files:{'report/pages/kpi/visual.json':'modified','definition/model.tmdl':'clean'}},
+    goal:{stashEmpty:true,headOn:'feature/kpi-cards',branchCommitsAtLeast:{main:2},fileStatus:{'report/pages/kpi/visual.json':'modified','definition/model.tmdl':'clean'}},
+    hints:[`Спробуй git switch main одразу — побачиш, чому потрібен stash.`,`git stash → git switch main → edit definition/model.tmdl → git add … → git commit -m "…" → git switch feature/kpi-cards → git stash pop`],
+    sol:[`git stash`,`git switch main`,`edit definition/model.tmdl`,`git add definition/model.tmdl`,`git commit -m "терміновий фікс міри"`,`git switch feature/kpi-cards`,`git stash pop`],
+    ok:`Фікс у main зроблено, а твоя незавершена робота повернулася зі stash цілою. Класичний робочий сценарій.`},
+  tl_first_push:{
+    title:`Відправити коміти на сервер`,
+    task:`Локально ти зробив два коміти, а сервер (Azure DevOps) досі бачить лише перший. Подивись <code>git status</code> — і синхронізуй сервер зі своєю роботою.`,
+    init:{commits:[{id:'C1',msg:`перша версія`},{id:'C2',p:['C1'],msg:`нова міра`},{id:'C3',p:['C2'],msg:`формат карток`}],branches:{main:'C3'},remote:{main:'C1'},tracking:{main:'C1'}},
+    goal:{pushed:true},
+    hints:[`status підкаже: ahead of origin/main by 2 commits.`,`git push`],
+    sol:[`git push`],
+    ok:`Сервер отримав C2 і C3. Тепер Git sync у Fabric зможе підтягнути ці зміни в робочу область.`},
+  tl_branch_push:{
+    title:`Перший push нової гілки`,
+    task:`Ти створив гілку <code>feature/refresh-fix</code> і зробив у ній коміт. На сервері цієї гілки ще немає — простий <code>git push</code> відмовить. Опублікуй гілку на сервері.`,
+    init:{commits:[{id:'C1',msg:`база`},{id:'C2',p:['C1'],br:'feature/refresh-fix',msg:`фікс оновлення даних`}],branches:{main:'C1','feature/refresh-fix':'C2'},head:'feature/refresh-fix',remote:{main:'C1'}},
+    goal:{remoteBranch:'feature/refresh-fix',pushed:true},
+    hints:[`Спробуй просто git push — Git сам підкаже повну команду.`,`git push -u origin feature/refresh-fix`],
+    sol:[`git push -u origin feature/refresh-fix`],
+    ok:`Гілка тепер на сервері, і Git запамʼятав звʼязок (-u): наступного разу вистачить простого git push.`},
+  tl_fetch_pull:{
+    title:`Fetch, потім pull: спершу подивитись, потім забрати`,
+    task:`Колега запушив новий коміт. Спершу виконай <code>git fetch</code> — побачиш на схемі, що origin/main пішов уперед, а твої файли ще не змінились. Потім забери зміни собі.`,
+    init:{commits:[{id:'C1',msg:`база`},{id:'C2',p:['C1'],msg:`твоя робота`},{id:'C3',p:['C2'],known:false,msg:`нова таблиця (колега)`}],branches:{main:'C2'},remote:{main:'C3'},tracking:{main:'C2'}},
+    goal:{branchAt:{main:'C3'},headOn:'main'},
+    hints:[`fetch = «дізнатися», pull = «дізнатися і застосувати».`,`git fetch → git pull`],
+    sol:[`git fetch`,`git pull`],
+    ok:`Fetch показав відставання, pull докотив main до C3 fast-forwardом. Безпечна пара команд перед початком роботи.`},
+  tl_push_reject:{
+    title:`Відхилений push: розвʼязка через pull --rebase`,
+    task:`Ти закомітив C2, але колега встиг запушити свій коміт раніше. Спробуй <code>git push</code> — отримаєш відмову non-fast-forward. Виправ ситуацію так, щоб історія лишилась ЛІНІЙНОЮ (без merge-коміту), і допуш свою роботу.`,
+    init:{commits:[{id:'C1',msg:`база`},{id:'C2',p:['C1'],msg:`твоя міра`},{id:'C3',p:['C1'],known:false,msg:`коміт колеги`}],branches:{main:'C2'},remote:{main:'C3'},tracking:{main:'C1'}},
+    goal:{pushed:true,noMergeCommits:true,commitsAtLeast:3},
+    hints:[`Сервер не приймає, бо в нього є коміт, якого немає в тебе. Забери його так, щоб твій коміт «переграв» поверх.`,`git push (відмова) → git pull --rebase → git push`],
+    sol:[`git push`,`git pull --rebase`,`git push`],
+    ok:`Твій C2 став C2′ поверх коміту колеги — історія лінійна, push пройшов. Стандартна розвʼязка для команд.`},
+  tl_final_capstone:{
+    title:`Фінальний бос: повний цикл фічі`,
+    task:`Усе разом, як у реальній команді. Репозиторій склоновано з сервера, у тебе змінені <code>report/pages/main/visual.json</code> і <code>definition/model.tmdl</code>. Зроби: гілку <code>feature/report-header</code> → два окремі коміти (спершу visual, потім model) → повернись на main → влий фічу → відправ на сервер. Далі в житті Git sync опублікує зміни в робочу область.`,
+    init:{commits:[{id:'C1',msg:`стан робочої області`}],branches:{main:'C1'},remote:{main:'C1'},files:{'report/pages/main/visual.json':'modified','definition/model.tmdl':'modified'}},
+    goal:{merged:{from:'feature/report-header',into:'main'},headOn:'main',pushed:true,commitsAtLeast:3,fileStatus:{'report/pages/main/visual.json':'clean','definition/model.tmdl':'clean'}},
+    hints:[`Порядок: switch -c → add+commit → add+commit → switch main → merge → push.`,`git switch -c feature/report-header → git add report/pages/main/visual.json → git commit -m "…" → git add definition/model.tmdl → git commit -m "…" → git switch main → git merge feature/report-header → git push`],
+    sol:[`git switch -c feature/report-header`,`git add report/pages/main/visual.json`,`git commit -m "новий хедер звіту"`,`git add definition/model.tmdl`,`git commit -m "міра для хедера"`,`git switch main`,`git merge feature/report-header`,`git push`],
+    ok:`Повний цикл пройдено: фіча в гілці → merge у main → push. Саме цей потік команда повторює щодня; Git sync далі публікує main у робочу область.`}
+};
+Object.assign(PLAYERS,{
+  pr_dag:[
+    {cap:`Кожен коміт зберігає посилання на свого батька: C3 знає про C2, C2 — про C1. Цей ланцюг і є історією проєкту.`,nodes:[N('C3',0,'main',['C2'],['main','HEAD']),N('C2',0,'main',['C1']),N('C1',0,'main',[])]},
+    {cap:`Тому «вставити коміт у середину» неможливо: зміниться батько — зміниться і сам коміт (у нього буде інший підпис-SHA). Пунктирний X так і залишиться відгалуженням збоку, а не частиною ланцюга. Історію додають лише зверху.`,nodes:[N('C3',0,'main',['C2'],['main','HEAD']),N('X',1,'feat2',['C1'],[],true),N('C2',0,'main',['C1']),N('C1',0,'main',[])]}
+  ],
+  pr_ff_vs_merge:[
+    {cap:`Ситуація А: після розгалуження main НЕ має власних нових комітів. Якщо зараз влити feature, main просто «доїде» до C3 — це fast-forward, новий коміт не потрібен.`,nodes:[N('C3',1,'feature',['C2'],['feature']),N('C2',1,'feature',['C1']),N('C1',0,'main',[],['main','HEAD'])]},
+    {cap:`Ситуація Б: у main зʼявився власний C4. Гілки розійшлися — fast-forward неможливий: main не може «доїхати» вперед по прямій, бо її лінія вже пішла вбік.`,nodes:[N('C4',0,'main',['C1'],['main','HEAD']),N('C3',1,'feature',['C2'],['feature']),N('C2',1,'feature',['C1']),N('C1',0,'main',[])]},
+    {cap:`Тому git merge створює merge-коміт M1 із ДВОМА батьками — C4 і C3. Обидві лінії історії збережено, нічого не втрачено.`,nodes:[N('M1',0,'merge',['C4','C3'],['main','HEAD']),N('C4',0,'main',['C1']),N('C3',1,'feature',['C2'],['feature']),N('C2',1,'feature',['C1']),N('C1',0,'main',[])]}
+  ],
+  pr_reset_vs_revert:[
+    {cap:`Початок: коміт C3 зламав міру (позначений bad). Треба прибрати його вплив. Є два шляхи — reset і revert. Порівняй наступні кроки.`,nodes:[N('C3',0,'main',['C2'],['main','HEAD','bad']),N('C2',0,'main',['C1']),N('C1',0,'main',[])]},
+    {cap:`Шлях 1 — git reset --hard HEAD~1: вказівник main відʼїхав назад на C2, а C3 осиротів (пунктир). Історію ПЕРЕПИСАНО. Небезпечно, якщо C3 уже на сервері: твоя історія розійдеться з серверною.`,nodes:[N('C3',0,'main',['C2'],[],true),N('C2',0,'main',['C1'],['main','HEAD']),N('C1',0,'main',[])]},
+    {cap:`Шлях 2 — git revert HEAD: історія НЕ переписується — зверху додається C4, який скасовує зміни C3. Безпечно для спільних гілок і для гілки, яку Git sync тягне в робочу область Fabric.`,nodes:[N('C4',0,'main',['C3'],['main','HEAD']),N('C3',0,'main',['C2'],['bad']),N('C2',0,'main',['C1']),N('C1',0,'main',[])]}
+  ],
+  pr_sync_state:[
+    {cap:`Стан після git fetch: локальна main стоїть на C2, а origin/main (твоє знання про сервер) — уже на C4. Ти позаду на два коміти. Файли на диску ще НЕ змінились — fetch лише оновив інформацію.`,nodes:[N('C4',0,'main',['C3'],['origin/main']),N('C3',0,'main',['C2']),N('C2',0,'main',['C1'],['main','HEAD']),N('C1',0,'main',[])]},
+    {cap:`git pull = fetch + злиття. Локальних власних комітів немає, тому main просто доїжджає до C4 (fast-forward). Тепер локально і на сервері — однакова історія.`,nodes:[N('C4',0,'main',['C3'],['main','HEAD','origin/main']),N('C3',0,'main',['C2']),N('C2',0,'main',['C1']),N('C1',0,'main',[])]}
+  ]
+});
+Object.assign(QCHECKS,{
+  qc_pr_parents:{q:`На схемі вище C3 посилається на C2. Колега пропонує: «додаймо коміт МІЖ C1 і C2, щоб виправити стару помилку». Що на це скаже Git?`,
+    opts:[`Так не вийде: новий батько означає інший коміт — C2 і C3 довелося б створити заново; історію додають лише зверху`,`Вийде: команда git insert додає коміт у потрібне місце ланцюга`,`Вийде: треба перейти на C1 у detached HEAD і закомітити — коміт стане між C1 і C2`,`Так не вийде, бо старі коміти в Git не можна змінити взагалі нічим, навіть rebase`],
+    correct:0,why:`Коміт містить посилання на батька, тому «вставка в середину» = переписування всього ланцюга далі. Коміт із detached HEAD створив би відгалуження ЗБОКУ, а не вставку. А rebase якраз і переписує історію — створюючи нові коміти.`},
+  qc_pr_ffwhen:{q:`Подивись на ситуацію Б на схемі вище. Чому саме тут fast-forward при git merge feature неможливий?`,
+    opts:[`Бо в main зʼявився власний коміт C4, якого немає у feature — «доїхати вперед по прямій» уже не можна`,`Бо у feature два коміти, а fast-forward працює лише з одним`,`Бо fast-forward можливий тільки одразу після git fetch`,`Бо гілку feature вже зливали раніше, а двічі та сама гілка не зливається`],
+    correct:0,why:`Fast-forward можливий, лише коли поточна гілка є прямим предком тієї, що вливається. Кількість комітів, fetch і повторні злиття тут ні до чого.`},
+  qc_pr_undo_choice:{q:`Гілка main синхронізується з робочою областю Fabric (Git sync), і поганий коміт УЖЕ запушено. Як правильно прибрати його вплив?`,
+    opts:[`git revert: новий коміт-скасування — історія не переписується, push пройде, Git sync спокійно підхопить`,`git reset --hard HEAD~1 і git push: сервер прийме, бо локальна історія головніша`,`Виправити файли вручну прямо в робочій області Fabric — Git сам підтягне зміну назад у репозиторій`,`git stash: сховати поганий коміт зі спільної історії`],
+    correct:0,why:`Переписану reset-ом історію сервер відхилить (non-fast-forward), ручні правки в робочій області Git не підхопить (правда живе в Git), а stash працює з незакоміченими змінами, не з комітами. Лишається revert.`},
+  qc_pr_pull_read:{q:`На кроці 1 схеми вище origin/main стоїть на C4, локальна main — на C2, своїх нових комітів у тебе немає. Що зробить git pull?`,
+    opts:[`Fast-forward: main доїде до C4 без merge-коміту, бо локальних власних комітів немає`,`Створить merge-коміт M1 — pull завжди зливає дві гілки через merge`,`Відмовить: спершу треба запушити щось своє`,`Мовчки перезапише локальні незакомічені зміни серверною версією`],
+    correct:0,why:`pull = fetch + злиття. Коли локальна гілка — прямий предок серверної, злиття вироджується у fast-forward. Merge-коміт зʼявився б, лише якби історії розійшлися.`}
+});
+Object.assign(QUIZ,{
+  prA:[
+    {q:`Прочитай вивід:<pre>$ git status
+On branch main
+Changes to be committed:
+        new file:   definition/tables/Calendar.tmdl
+Changes not staged for commit:
+        modified:   definition/model.tmdl
+Untracked files:
+        report/pages/new/page.json</pre>Що увійде в коміт, якщо зараз виконати <code>git commit -m "..."</code>?`,
+     opts:[`Лише Calendar.tmdl — тільки він у staging (Changes to be committed)`,`Calendar.tmdl і model.tmdl — обидва ж змінені`,`Усі три файли — commit завжди забирає всі зміни в папці`,`Нічого: спершу обовʼязково потрібен git push`],
+     correct:0,why:`У коміт потрапляє лише вміст staging. model.tmdl змінений, але не доданий (git add), а page.json Git взагалі ще не відстежує.`},
+    {q:`Прочитай вивід:<pre>$ git log --oneline
+C5 (HEAD -> main) нове форматування мір
+C4 (origin/main) виправлення звʼязку
+C3 перша версія моделі</pre>Скільки комітів відправиться на сервер після <code>git push</code>?`,
+     opts:[`Один — C5: мітка origin/main показує, що сервер уже має C4 і все давніше`,`Два — C5 і C4`,`Три — push щоразу відправляє всю історію заново`,`Нуль — push відправляє лише вміст staging, а він порожній`],
+     correct:0,why:`origin/main — це твоє знання про сервер: він стоїть на C4. Отже, серверу бракує лише C5. Push передає саме відсутні коміти, а staging тут ні до чого.`},
+    {q:`Ти змінив model.tmdl, одразу виконав <code>git commit -m "нова міра"</code> і побачив:<pre>no changes added to commit (use "git add")</pre>Що сталося?`,
+     opts:[`Пропущено крок git add — зміни лишились у робочій директорії, staging порожній, коміт не створено`,`Файл завеликий, Git відмовився його комітити`,`Локальна історія застаріла — спершу потрібен git pull`,`Коміт створився, але порожній — тепер треба git commit --amend`],
+     correct:0,why:`Шлях зміни завжди триетапний: робоча директорія → git add (staging) → git commit. Без add комітити нічого.`}
+  ],
+  prB:[
+    {q:`Прочитай граф:<pre>$ git log --oneline --graph
+*   M1 (HEAD -> main) Merge branch 'feature/kpi'
+|\\
+| * C4 (feature/kpi) картки KPI
+* | C3 хедер звіту
+|/
+* C2 базова модель</pre>Який коміт є merge-комітом і хто його батьки?`,
+     opts:[`M1; його батьки — C3 і C4`,`C4; його батько — C2`,`C3; його батьки — C2 і C4`,`C2; він — батько всіх, отже merge-коміт`],
+     correct:0,why:`Merge-коміт — той, у якого ДВА батьки: остання вершина main (C3) і вершина влитої гілки (C4). На графі до M1 сходяться дві лінії.`},
+    {q:`Ти виконав <code>git merge feature/kpi</code> у main. Що тепер із самою гілкою feature/kpi?`,
+     opts:[`Нічого не зникло: вказівник feature/kpi так само стоїть на своєму останньому коміті — гілку можна видалити або продовжити роботу`,`Git автоматично видалив її одразу після злиття`,`Вона переїхала на merge-коміт разом із main`,`Вона стала прихованою, дістати її можна лише через git reflog`],
+     correct:0,why:`merge рухає лише ту гілку, НА якій ти стоїш. Гілка-джерело залишається на місці, поки ти сам її не видалиш (git branch -d) або не додаси в неї нові коміти.`},
+    {q:`Чим <code>git switch -c feature/x</code> відрізняється від <code>git branch feature/x</code>?`,
+     opts:[`switch -c створює гілку І одразу переходить на неї; branch лише створює вказівник — HEAD лишається де був`,`branch створює гілку на сервері, а switch -c — локально`,`switch -c працює тільки з гілками, які вже існують`,`Нічим — це два написання однієї команди`],
+     correct:0,why:`Класична пастка: після git branch ти ще на старій гілці, і наступний коміт піде НЕ у нову гілку. switch -c робить обидва кроки одразу.`}
+  ],
+  prC:[
+    {q:`Ти випадково зробив <code>git reset --hard HEAD~1</code> і «втратив» коміт. Дивишся reflog:<pre>$ git reflog
+a1f9c3e HEAD@{0}: reset: moving to HEAD~1
+7b42d8f HEAD@{1}: commit: розрахунок маржі
+c93e1a0 HEAD@{2}: commit: базова модель</pre>Яка команда поверне коміт «розрахунок маржі»?`,
+     opts:[`git reset --hard 7b42d8f — повернути HEAD на стан, де коміт ще існував`,`git reset --hard a1f9c3e — це ж найсвіжіший запис угорі`,`git revert 7b42d8f — revert повертає коміти`,`git pull — сервер автоматично відновить втрачене`],
+     correct:0,why:`reflog — журнал, де БУВ HEAD. Запис a1f9c3e — це вже стан ПІСЛЯ помилкового reset. Повертатися треба на 7b42d8f. revert створює коміт-скасування (протилежне завдання), а сервер про твій локальний reset нічого не знає.`},
+    {q:`Після <code>git reset --mixed HEAD~1</code> (або просто git reset HEAD~1) де опиняться зміни з відкоченого коміту?`,
+     opts:[`У робочій директорії як незакомічені зміни — ПОЗА staging`,`У staging, одразу готові до нового коміту`,`Зникнуть безслідно, як при --hard`,`Автоматично переїдуть у stash`],
+     correct:0,why:`Три режими reset: --soft лишає зміни у staging, --mixed (типовий) — у робочій директорії, --hard — стирає. Запамʼятай сходинки: soft → mixed → hard = staging → робоча папка → ніде.`},
+    {q:`Ти виправив текст останнього коміту через <code>git commit --amend</code>, але цей коміт УЖЕ був запушений. Що станеться при наступному git push?`,
+     opts:[`Відмова non-fast-forward: amend створив НОВИЙ коміт замість старого, твоя історія розійшлася з серверною`,`Push пройде: сервер розпізнає, що це той самий коміт із новим текстом`,`Push пройде, але повідомлення на сервері залишиться старим`,`Git автоматично зіллє два повідомлення в одне`],
+     correct:0,why:`amend не «редагує» коміт, а створює інший (інший SHA). Сервер має старий, ти — новий: історії розійшлися. Правило: amend — лише для НЕзапушених комітів.`}
+  ],
+  prD:[
+    {q:`Прочитай вивід:<pre>$ git push
+To origin
+ ! [rejected]        main -> main (non-fast-forward)
+error: failed to push some refs to 'origin'</pre>Яка правильна реакція?`,
+     opts:[`git pull (найкраще --rebase), переконатися, що все зібралося, і тоді git push`,`git push --force — моя версія свіжіша, сервер зобовʼязаний прийняти`,`Видалити гілку на сервері й запушити її заново`,`git reset --hard origin/main — відкинути свої коміти й почати спочатку`],
+     correct:0,why:`Відмова означає: на сервері є чужі коміти, яких немає в тебе. Спершу забери їх (pull), потім віддай своє. --force затер би роботу колеги, а reset --hard знищив би твою.`},
+    {q:`Після git fetch статус показує:<pre>Your branch is behind 'origin/main' by 2 commits.</pre>Що зараз із твоїми локальними ФАЙЛАМИ?`,
+     opts:[`Ще нічого не змінилось: fetch лише оновив знання про сервер; файли зміняться після git pull`,`Файли вже оновлені до серверної версії`,`Файли тимчасово заблоковані до завершення синхронізації`,`Fetch уже створив merge-коміт із серверними змінами`],
+     correct:0,why:`fetch — «розвідка»: він завантажує інформацію про нові коміти, але не чіпає ні файли, ні твої гілки. Саме тому fetch завжди безпечний.`},
+    {q:`Колега: «забери собі проєкт PDP з Azure DevOps». Репозиторію на твоєму диску ще НЕМАЄ. Яка команда?`,
+     opts:[`git clone <url> — перша повна копія репозиторію разом з усією історією`,`git pull <url> — стягнути останні зміни проєкту`,`git fetch <url> — дізнатися, що є на сервері`,`git init — створити порожній репозиторій, далі він синхронізується сам`],
+     correct:0,why:`pull і fetch працюють УСЕРЕДИНІ вже наявного репозиторію. Коли його ще немає — тільки clone: він створює папку, історію і звʼязок з origin одразу.`}
+  ],
+  prE1:[
+    {q:`Прочитай diff:<pre>--- a/definition/tables/Sales.tmdl
++++ b/definition/tables/Sales.tmdl
+@@
+-  lineageTag: 8f2c-11aa
++  lineageTag: 3ab1-90bc
+@@
+-  measure 'Total Sales' = SUM(Sales[Amount])
++  measure 'Total Sales' =
++      CALCULATE(SUM(Sales[Amount]), Sales[Status] = "Closed")</pre>Яке повідомлення коміту чесно описує цю зміну?`,
+     opts:[`«Total Sales тепер рахує лише закриті продажі» — зміна формули і є суттю; lineageTag — технічний шум`,`«Оновлено lineageTag таблиці Sales» — це ж перший рядок diff`,`«Перейменовано таблицю Sales»`,`«Видалено міру Total Sales»`],
+     correct:0,why:`У PBIP-diff завжди є технічний шум (lineageTag, ordinal тощо). Опис коміту має називати ЗМІСТОВНУ зміну — тут це нова умова фільтра у формулі DAX.`},
+    {q:`Diff зачепив один рядок:<pre>-  displayFolder: Міри\\Продажі
++  displayFolder: Міри\\Фінанси</pre>Що реально зміниться для користувачів звіту?`,
+     opts:[`Лише місце міри в папках панелі даних — усі розрахунки й числа залишаться тими самими`,`Формула міри тепер обчислюється інакше`,`Міра зникне з усіх візуалів звіту`,`Зміниться формат відображення чисел міри`],
+     correct:0,why:`displayFolder — суто організаційна властивість (папка в списку полів). Уміння відрізняти «косметичні» рядки TMDL від змістовних — база читання PBIP-diff.`},
+    {q:`Під час merge у файлі зʼявилося:<pre>measure 'Total Sales' =
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+    CALCULATE(SUM(Sales[Amount]), Sales[Status] = "Closed")
+=======
+    SUM(Sales[Amount]) * 1.2
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/uplift</pre>Який фінальний вміст файлу правильний ПІСЛЯ розвʼязання конфлікту?`,
+     opts:[`Одна погоджена формула, а всі рядки з <<<<<<<, ======= і >>>>>>> видалені`,`Обидві формули разом із маркерами — Git при коміті сам вибере потрібну`,`Залишити лише рядок ======= як розділювач двох версій`,`Порожня міра — конфліктний код завжди видаляють`],
+     correct:0,why:`Маркери — це «підказки на полях», які Git вставив для тебе. Розвʼязати конфлікт = лишити одну робочу версію формули і прибрати ВСІ маркери. Файл із маркерами зламає модель.`},
+    {q:`Прочитай два виводи:<pre>$ git log --oneline main..feature/dates
+C7 звʼязок з календарем
+C6 таблиця дат
+$ git log --oneline feature/dates..main
+(порожньо)</pre>Що зробить <code>git merge feature/dates</code>, якщо стояти на main?`,
+     opts:[`Fast-forward: у main немає власних комітів після спільної бази, merge-коміт не потрібен`,`Створить merge-коміт, бо у feature/dates аж два коміти`,`Завершиться конфліктом: два коміти проти нуля`,`Нічого: гілки вже злиті`],
+     correct:0,why:`main..feature — «що є у feature, чого немає в main» (два коміти). Зворотний діапазон порожній — отже main нічого свого не має і може просто доїхати вперед.`}
+  ],
+  prE2:[
+    {q:`У Fabric на вкладці Source control одночасно горить «Update required» (у Git є новіша версія) і видно твої «Uncommitted changes». Який порядок дій правильний за принципом «Git — джерело правди»?`,
+     opts:[`Спершу Update from Git — підтягнути новіше; потім переглянути свої зміни і закомітити те, що досі актуальне`,`Спершу закомітити все своє поверх, а Update можна й пропустити`,`Нічого не робити: Fabric синхронізує все сам за розкладом оновлення даних`,`Видалити робочу область і створити нову з Git — так надійніше`],
+     correct:0,why:`Правда живе в Git: спочатку приймаєш новішу версію (Update from Git), потім дивишся, чи твої незбережені зміни ще потрібні, і комітиш їх. Розклад оновлення ДАНИХ із синхронізацією визначень не повʼязаний.`},
+    {q:`Що з переліченого КОМІТИТЬСЯ в Git у PBIP-проєкті? (обери все правильне)`,multi:true,
+     opts:[`Тека definition/ семантичної моделі (TMDL-файли)`,`Файл .pbip і файли звіту (report/…)`,`Файли .platform з метаданими елементів`,`cache.abf і localSettings.json`],
+     correct:[0,1,2],why:`Визначення моделі та звіту і метадані .platform — це «рецепт» проєкту, вони і є вмістом репозиторію. cache.abf (локальний кеш даних) і localSettings.json — особисті локальні файли, їх додають у .gitignore.`},
+    {q:`У main лежить недороблена фіча, а в прод терміново потрібен маленький фікс, який уже існує окремим комітом C8 у гілці feature/fix. Найбезпечніший шлях?`,
+     opts:[`Перенести самий лише C8 в опубліковану гілку (git cherry-pick C8) — недороблена фіча з main нікуди не поїде`,`Опублікувати main як є: недороблена фіча просто нікому не заважатиме`,`git reset --hard C8 у main і force push`,`Скопіювати виправлені файли вручну в робочу область, оминаючи Git`],
+     correct:0,why:`cherry-pick переносить один конкретний коміт куди треба. Публікація main потягла б недороблене, reset+force переписав би спільну історію, а ручні правки в обхід Git розсинхронізують робочу область із репозиторієм.`}
+  ]
+});
+Object.assign(ORDERS,{
+  pr_or_release:{title:`Повний цикл релізу фічі в команді Power BI`,steps:[
+    `git switch -c feature/nova-mira — окрема гілка для роботи`,
+    `Правки в PBIP-файлах + git add + git commit (можна кілька разів)`,
+    `git switch main і git pull — повернутись на свіжу main`,
+    `git merge feature/nova-mira — влити готову фічу`,
+    `git push — відправити main на сервер`,
+    `Git sync (Update from Git) публікує зміни в робочу область`,
+    `(Опційно) Deployment pipeline розкочує з Dev у Prod`]}
+});
+window.__TL__={bank:TERMLAB,newState:tlNewState,run:tlRun,check:tlCheckGoal,goalKeys:TL_GOAL_KEYS};
+
 /* === 13. ПРОГРЕС (localStorage) === */
 const LS_PREFIX='gfp:';
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
@@ -943,9 +1827,9 @@ function initPage(){
   if(typeof buildRebase==='function')buildRebase();
   if(typeof lcPlace==='function'&&document.getElementById('lcExp'))lcPlace(0);
   if(document.getElementById('glossList'))buildGlossary();
-  buildQchecks();buildCsim();buildOrders();buildVideos();
+  buildQchecks();buildCsim();buildOrders();buildTermlab();buildVideos();
   initSearch();initCollapse();initProgress();initHighlightFromSearch();initVersionCheck();
 }
-window.__GFP__={PLAYERS:Object.keys(PLAYERS),QUIZ:Object.keys(QUIZ),SCEN:Object.keys(SCEN),QCHECKS:Object.keys(QCHECKS),CSIM:Object.keys(CSIM),ORDERS:Object.keys(ORDERS)};
+window.__GFP__={PLAYERS:Object.keys(PLAYERS),QUIZ:Object.keys(QUIZ),SCEN:Object.keys(SCEN),QCHECKS:Object.keys(QCHECKS),CSIM:Object.keys(CSIM),ORDERS:Object.keys(ORDERS),TERMLAB:Object.keys(TERMLAB)};
 document.addEventListener('DOMContentLoaded',initPage);
 if(document.readyState!=='loading')initPage();

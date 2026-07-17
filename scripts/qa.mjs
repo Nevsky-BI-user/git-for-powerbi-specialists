@@ -31,7 +31,7 @@ function loadDom(file) {
 
 const allFiles = ['index.html', ...pages.map(p => p.file)];
 const anchorMap = {};
-const attrKinds = [['data-p', 'PLAYERS'], ['data-q', 'QUIZ'], ['data-qc', 'QCHECKS'], ['data-cs', 'CSIM'], ['data-o', 'ORDERS'], ['data-s', 'SCEN']];
+const attrKinds = [['data-p', 'PLAYERS'], ['data-q', 'QUIZ'], ['data-qc', 'QCHECKS'], ['data-cs', 'CSIM'], ['data-o', 'ORDERS'], ['data-s', 'SCEN'], ['data-tl', 'TERMLAB']];
 
 await new Promise(res => setTimeout(res, 0));
 for (const file of allFiles) {
@@ -50,9 +50,9 @@ for (const file of allFiles) {
     });
   });
   // widgets actually rendered (non-empty)
-  [['.gplayer', 'svg'], ['.quiz', '.qcard'], ['.qcheck', '.qc-opt'], ['.csim', '.cs-inp'], ['.order', '.or-chip'], ['.scplayer', '.repo']].forEach(([w, inner]) => {
+  [['.gplayer', 'svg'], ['.quiz', '.qcard'], ['.qcheck', '.qc-opt'], ['.csim', '.cs-inp'], ['.order', '.or-chip'], ['.scplayer', '.repo'], ['.termlab', '.tl-inp']].forEach(([w, inner]) => {
     doc.querySelectorAll(w).forEach(el => {
-      if (!el.querySelector(inner)) F(`G2 ${file}: ${w}[${el.dataset.p || el.dataset.q || el.dataset.qc || el.dataset.cs || el.dataset.o || el.dataset.s}] не відрендерився`);
+      if (!el.querySelector(inner)) F(`G2 ${file}: ${w}[${el.dataset.p || el.dataset.q || el.dataset.qc || el.dataset.cs || el.dataset.o || el.dataset.s || el.dataset.tl}] не відрендерився`);
     });
   });
   // collect anchors
@@ -70,7 +70,7 @@ for (const file of allFiles) {
     // G6 coverage: goal + interactive per lesson
     doc.querySelectorAll('section.lesson').forEach(sec => {
       if (!sec.querySelector('.goalbox')) W(`G6 ${file}#${sec.id}: без блоку "Ціль"`);
-      if (!sec.querySelector('.gplayer,.quiz,.qcheck,.csim,.order,.scplayer,.rbwrap,#lcExp,.gloss-list,#glossList,.tree'))
+      if (!sec.querySelector('.gplayer,.quiz,.qcheck,.csim,.order,.scplayer,.termlab,.rbwrap,#lcExp,.gloss-list,#glossList,.tree'))
         W(`G6 ${file}#${sec.id}: без інтерактиву (${sec.querySelector('h2')?.textContent.trim().slice(0, 40)})`);
     });
   } else {
@@ -114,6 +114,30 @@ OK('G4 перевірено внутрішні посилання');
 
 // G2b: search index anchors valid
 idx.forEach(e => {if (!anchorMap[e.p] || !anchorMap[e.p].has(e.a)) F(`G3 індекс: битий запис ${e.p}#${e.a}`);});
+
+// G2c: termlab — кожен sol розв'язує свій goal через сам симулятор
+{
+  const vc = new VirtualConsole();
+  const tlErrs = [];
+  vc.on('jsdomError', e => {if (!/Not implemented/.test(e.message)) tlErrs.push(e.message);});
+  const dom = new JSDOM(`<body><script>${engineSrc}</script></body>`, {runScripts: 'dangerously', virtualConsole: vc, url: 'https://x.test/'});
+  const TL = dom.window.__TL__;
+  if (tlErrs.length) F(`G2c termlab: engine.js помилки: ${tlErrs[0]}`);
+  else if (!TL) F('G2c termlab: window.__TL__ відсутній');
+  else {
+    let ok = 0;
+    for (const key of Object.keys(TL.bank)) {
+      const t = TL.bank[key];
+      Object.keys(t.goal).forEach(k => {if (!TL.goalKeys.includes(k)) F(`G2c termlab ${key}: невідомий goal-ключ "${k}"`);});
+      if (TL.check(TL.newState(t.init), t.goal)) F(`G2c termlab ${key}: goal виконаний уже на старті`);
+      const st = TL.newState(t.init);
+      (t.sol || []).forEach(cmd => TL.run(st, cmd));
+      if (!TL.check(st, t.goal)) F(`G2c termlab ${key}: sol не розв'язує goal`); else ok++;
+    }
+    OK(`G2c termlab: ${ok}/${Object.keys(TL.bank).length} розв'язків проходять replay`);
+  }
+  dom.window.close();
+}
 
 console.log('\n==== ПІДСУМОК: FAIL=' + fails + ' WARN=' + warns + ' ====');
 process.exit(fails ? 1 : 0);
