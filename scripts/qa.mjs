@@ -70,7 +70,7 @@ for (const file of allFiles) {
     // G6 coverage: goal + interactive per lesson
     doc.querySelectorAll('section.lesson').forEach(sec => {
       if (!sec.querySelector('.goalbox')) W(`G6 ${file}#${sec.id}: без блоку "Ціль"`);
-      if (!sec.querySelector('.gplayer,.quiz,.qcheck,.csim,.order,.scplayer,.termlab,.rbwrap,#lcExp,.gloss-list,#glossList,.tree'))
+      if (!sec.querySelector('.gplayer,.quiz,.qcheck,.csim,.order,.scplayer,.termlab,.rbwrap,#lcExp,.gloss-list,#glossList,#cheatList,.tree'))
         W(`G6 ${file}#${sec.id}: без інтерактиву (${sec.querySelector('h2')?.textContent.trim().slice(0, 40)})`);
     });
   } else {

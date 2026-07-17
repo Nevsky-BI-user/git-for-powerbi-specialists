@@ -33,6 +33,7 @@ docs/
   index.html            головна: картки модулів + картки практикуму + прогрес
   modules/NN-slug.html  10 сторінок-модулів, 67 уроків (секції s0..sN)
   modules/prN-slug.html 5 сторінок практикуму (pr1-osnovy..pr5-ekzamen, 20 секцій задач; лежать у modules/, бо sitePrefix() розпізнає лише цей шлях)
+  modules/10-cheatsheet.html друкована шпаргалка (рендер GIT_CMDS через buildCheatsheet + @media print в app.css; кнопка #printBtn)
   assets/app.css        уся стилізація
   assets/engine.js      дані (PLAYERS/QUIZ/SCEN/QCHECKS/CSIM/ORDERS/TERMLAB/GIT_CMDS) + віджети (вкл. termlab-рушій: стан репо, парсер git-команд, goal-DSL) + пошук + прогрес
   assets/search-index.js  генерується скриптом, руками не правити
@@ -65,7 +66,6 @@ Source of truth — файли в `docs/`. Разовий міграційний
 ## Backlog
 
 - csim/order-покриття у модулях 04–08 (зараз найгустіше в 01/03).
-- Друкована шпаргалка команд (окрема сторінка print-css).
 - Самодіагностика рівня на старті з рекомендацією модуля.
 - termlab: конфлікти при pull/rebase (merge-конфлікти вже органічні) + більше задач у практикумі.
 - Задачі «прочитай diff» реалізовано в банку `prE1` (pr5-ekzamen); окремий віджет із підсвіткою diff — можливе продовження.

@@ -780,6 +780,18 @@ function buildOrders(){
   });
 }
 
+/* === 12a. ДРУКОВАНА ШПАРГАЛКА === */
+function buildCheatsheet(){
+  const list=document.getElementById('cheatList');if(!list||list.dataset.built)return;list.dataset.built='1';
+  const cats=[...new Set(GIT_CMDS.map(x=>x.cat))];
+  list.innerHTML=cats.map(cat=>{
+    const rows=GIT_CMDS.filter(x=>x.cat===cat).map(x=>`<tr><td class="ch-c"><code>${escapeHTML(x.c)}</code></td><td class="ch-d">${escapeHTML(x.d)}${x.ex?`<div class="ch-ex">${escapeHTML(x.ex)}</div>`:''}</td></tr>`).join('');
+    return `<div class="ch-cat">${escapeHTML(cat)}</div><table class="ch-tbl">${rows}</table>`;
+  }).join('');
+  const btn=document.getElementById('printBtn');
+  if(btn)btn.onclick=()=>window.print();
+}
+
 /* === 12b. TERMLAB: ІНТЕРАКТИВНИЙ ТРЕНАЖЕР ТЕРМІНАЛУ === */
 const TL_LANE_COLORS=['feature','feat2','hotfix'];
 function tlTokens(s){
@@ -1876,6 +1888,7 @@ function initPage(){
   if(typeof buildRebase==='function')buildRebase();
   if(typeof lcPlace==='function'&&document.getElementById('lcExp'))lcPlace(0);
   if(document.getElementById('glossList'))buildGlossary();
+  if(document.getElementById('cheatList'))buildCheatsheet();
   buildQchecks();buildCsim();buildOrders();buildTermlab();buildVideos();
   initSearch();initCollapse();initProgress();initHighlightFromSearch();initVersionCheck();
 }

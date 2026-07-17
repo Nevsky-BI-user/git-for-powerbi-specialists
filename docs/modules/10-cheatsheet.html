@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Глосарій команд · Git for Power BI specialists</title>
+<title>Шпаргалка команд · Git for Power BI specialists</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/app.css">
 </head>
-<body data-page="09-glossary">
+<body data-page="10-cheatsheet">
 <aside>
   <div class="brand">
     <div class="k">Інтерактивний курс</div>
@@ -34,8 +34,8 @@
 <a href="../modules/06-pbip.html"><span class="num">06</span><span>PBIP / PBIR / TMDL</span></a>
 <a href="../modules/07-komanda.html"><span class="num">07</span><span>Робота в команді</span></a>
 <a href="../modules/08-advanced.html"><span class="num">08</span><span>Просунуті техніки</span></a>
-<a href="../modules/09-glossary.html" class="active"><span class="num">09</span><span>Глосарій команд</span></a>
-<a href="../modules/10-cheatsheet.html"><span class="num">10</span><span>Шпаргалка команд</span></a>
+<a href="../modules/09-glossary.html"><span class="num">09</span><span>Глосарій команд</span></a>
+<a href="../modules/10-cheatsheet.html" class="active"><span class="num">10</span><span>Шпаргалка команд</span></a>
     <div class="modlabel">Практикум</div>
 <a href="../modules/pr1-osnovy.html"><span class="num">П1</span><span>Основи й коміти</span></a>
 <a href="../modules/pr2-hilky.html"><span class="num">П2</span><span>Гілки та злиття</span></a>
@@ -43,28 +43,23 @@
 <a href="../modules/pr4-remote.html"><span class="num">П4</span><span>Віддалений репозиторій</span></a>
 <a href="../modules/pr5-ekzamen.html"><span class="num">П5</span><span>PBIP-екзамен</span></a>
     <div class="modlabel">На цій сторінці</div>
-<a href="#s0" data-sec="s0"><span class="num">01</span><span>Команди Git</span></a>
+<a href="#s0" data-sec="s0"><span class="num">01</span><span>Шпаргалка Git-команд</span></a>
   </nav>
 </aside>
 <button class="reopen" id="reopenBtn">☰ Меню</button>
 <main id="main">
 <section class="lesson show" id="s0" data-n="s0">
-
-<div class="crumb">Глосарій</div>
-<h2>Інтерактивний глосарій команд Git</h2>
-<p class="lead">Усі команди з курсу в одному місці. Фільтруй за назвою чи описом або обери категорію. Кожну з цих команд ти вводиш у Git Bash, а для більшості є кнопкові еквіваленти в Sourcetree чи VS Code.</p>
-<div class="goalbox"><b>Ціль уроку</b>користуватися глосарієм як щоденною шпаргалкою.</div>
-<div class="widget">
-  <div class="gloss-controls">
-    <input id="glossSearch" type="text" placeholder="Фільтр: напр. rebase, push, скинути…" autocomplete="off">
-    <div class="gloss-cats" id="glossCats"></div>
-  </div>
-  <div class="gloss-list" id="glossList"></div>
-  <div class="gloss-count" id="glossCount"></div>
-</div>
-
+<div class="crumb">Довідник</div>
+<h2>Шпаргалка Git-команд для Power BI</h2>
+<p class="lead">Усі команди курсу на одному аркуші — тримай поруч із клавіатурою.</p>
+<div class="goalbox"><b>Ціль</b>мати всі команди курсу під рукою: на екрані — або роздрукованими біля робочого місця</div>
+<div class="cheat-actions"><button id="printBtn">🖨 Роздрукувати</button><span class="ch-hint">У діалозі друку вимкни колонтитули — вийде чистий аркуш. Працює і «Зберегти як PDF».</span></div>
+<div class="ch-flow"><b>Потік команди:</b> feature/* → правки + commit → merge у main → push → Git sync (Update from Git) публікує в робочу область<br><b>Шлях зміни:</b> робоча тека → <b>git add</b> → staging → <b>git commit</b> → історія → <b>git push</b> → сервер</div>
+<div id="cheatList"></div>
+<div class="print-note">Git for Power BI specialists · nevsky-bi-user.github.io/git-for-powerbi-specialists · повний курс з інтерактивними тренажерами — онлайн</div>
+<div class="note tip">Потрібні пояснення «простими словами» і приклади? Той самий набір команд із фільтром і пошуком — в <a href="09-glossary.html">інтерактивному глосарії</a>.</div>
 </section>
-<div class="pager"><a href="08-advanced.html"><span class="lbl">← попередній модуль</span>Просунуті техніки</a><a class="nxt" href="../index.html"><span class="lbl">→</span>Курс завершено · на головну</a></div>
+<div class="pager"><a href="09-glossary.html"><span class="lbl">← попередній модуль</span>Глосарій команд</a><a class="nxt" href="../index.html"><span class="lbl">→</span>На головну</a></div>
 </main>
 <script src="../assets/search-index.js"></script>
 <script src="../assets/engine.js"></script>

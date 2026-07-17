@@ -379,3 +379,32 @@ a.mcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .mcard.pr .mc-num{color:var(--new)}
 .mcard.pr:hover{border-color:var(--new)}
 .mcard.pr .mprog i{background:var(--new)}
+
+/* === друкована шпаргалка команд === */
+.cheat-actions{display:flex;gap:12px;align-items:center;margin:14px 0;flex-wrap:wrap}
+.cheat-actions button{font-family:inherit;font-size:13px;background:var(--accent);color:#fff;border:none;border-radius:9px;padding:9px 16px;cursor:pointer}
+.cheat-actions .ch-hint{font-size:12px;color:var(--dim)}
+.ch-flow{font-family:'JetBrains Mono',monospace;font-size:12px;border:1px dashed var(--line);border-radius:10px;padding:10px 14px;margin:12px 0;color:var(--muted);line-height:1.7}
+.ch-flow b{color:var(--accent)}
+.ch-cat{font-weight:700;font-size:12.5px;margin:20px 0 7px;color:var(--accent);text-transform:uppercase;letter-spacing:.07em}
+.ch-tbl{width:100%;border-collapse:collapse}
+.ch-tbl td{border:1px solid var(--line);padding:6px 10px;font-size:12.5px;vertical-align:top;line-height:1.5}
+.ch-c{white-space:nowrap;width:36%}
+.ch-ex{color:var(--dim);font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:3px}
+.print-note{display:none}
+@media print{
+  body{display:block;background:#fff;color:#000}
+  aside,.reopen,.donebar,.pager,.cheat-actions,#searchResults,.note{display:none!important}
+  main{margin:0!important;padding:0!important;max-width:none!important;width:auto!important}
+  section.lesson{border:none;padding:0}
+  .goalbox{display:none}
+  .crumb{display:none}
+  h2{font-size:16pt;margin:0 0 6pt}
+  .ch-flow{border-color:#bbb;color:#333;font-size:9pt;margin:6pt 0}
+  .ch-cat{color:#000;font-size:10pt;margin:10pt 0 4pt;page-break-after:avoid}
+  .ch-tbl{page-break-inside:auto}
+  .ch-tbl tr{page-break-inside:avoid}
+  .ch-tbl td{border-color:#bbb;font-size:8.5pt;padding:3pt 6pt;color:#000}
+  .ch-ex{color:#555;font-size:7.5pt}
+  .print-note{display:block;font-size:8pt;color:#777;margin-top:10pt}
+}

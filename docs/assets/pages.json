@@ -147,6 +147,15 @@
   ]
  },
  {
+  "slug": "10-cheatsheet",
+  "title": "Шпаргалка команд",
+  "file": "modules/10-cheatsheet.html",
+  "count": 1,
+  "lessons": [
+   "Шпаргалка Git-команд"
+  ]
+ },
+ {
   "slug": "pr1-osnovy",
   "title": "Практикум · Основи й коміти",
   "file": "modules/pr1-osnovy.html",
