@@ -792,6 +792,73 @@ function buildCheatsheet(){
   if(btn)btn.onclick=()=>window.print();
 }
 
+/* === 12aa. САМОДІАГНОСТИКА РІВНЯ (головна) === */
+const DIAG=[
+  {topic:`Інструменти`,page:`modules/00-start.html`,label:`Модуль 00 · Старт та інструменти`,
+   q:`Де найчастіше вводять git-команди на Windows у цьому курсі?`,
+   opts:[`У Git Bash (терміналі)`,`У вікні Power BI Desktop`,`У формулах DAX`,`У налаштуваннях Windows`],correct:0},
+  {topic:`Термінал`,page:`modules/01-terminal.html`,label:`Модуль 01 · Термінал і файли`,
+   q:`Ти відкрив термінал у папці проєкту. Що зробить команда <code>cd ..</code>?`,
+   opts:[`Перейде на одну папку вгору`,`Створить нову папку з назвою «..»`,`Покаже вміст поточної папки`,`Закриє термінал`],correct:0},
+  {topic:`Три зони Git`,page:`modules/02-osnovy.html`,label:`Модуль 02 · Основи Git`,
+   q:`Ти змінив <code>model.tmdl</code> і виконав <code>git add model.tmdl</code>. Де тепер ця зміна?`,
+   opts:[`У staging — підготовлена до наступного коміту`,`Уже в історії комітів`,`Уже на сервері`,`Ніде — add лише перевіряє файл на помилки`],correct:0},
+  {topic:`Щоденні команди`,page:`modules/03-komandy.html`,label:`Модуль 03 · Щоденні команди`,
+   q:`Яка послідовність доставить твою зміну з робочої теки аж на сервер?`,
+   opts:[`git add → git commit → git push`,`git push → git commit → git add`,`git commit → git add → git sync`,`git save → git upload → git publish`],correct:0},
+  {topic:`Fetch і pull`,page:`modules/03-komandy.html`,label:`Модуль 03 · Щоденні команди`,
+   q:`Чим <code>git fetch</code> відрізняється від <code>git pull</code>?`,
+   opts:[`fetch лише оновлює знання про сервер; pull — ще й застосовує зміни до твоєї гілки`,`fetch швидший, але робить те саме`,`fetch працює лише з гілкою main`,`Нічим — це синоніми`],correct:0},
+  {topic:`Скасування`,page:`modules/04-vypravlennia.html`,label:`Модуль 04 · Виправлення помилок`,
+   q:`Поганий коміт УЖЕ запушено на спільну гілку. Як правильно прибрати його вплив?`,
+   opts:[`git revert — новий коміт-скасування`,`git reset --hard і force push`,`Видалити репозиторій і склонувати заново`,`git stash`],correct:0},
+  {topic:`Rebase`,page:`modules/05-rebase.html`,label:`Модуль 05 · Rebase та історія`,
+   q:`Що робить <code>git rebase main</code>, виконаний у твоїй фіче-гілці?`,
+   opts:[`Переграє твої коміти поверх свіжої main, створюючи нові коміти з новими SHA`,`Зливає main у фічу merge-комітом`,`Видаляє твої коміти безповоротно`,`Перейменовує гілку на main`],correct:0},
+  {topic:`PBIP`,page:`modules/06-pbip.html`,label:`Модуль 06 · PBIP / PBIR / TMDL`,
+   q:`Що з переліченого НЕ комітять у Git у PBIP-проєкті?`,
+   opts:[`cache.abf — локальний кеш даних`,`definition/model.tmdl`,`Файли звіту report/…`,`Файл .pbip`],correct:0},
+  {topic:`Fabric Git sync`,page:`modules/07-komanda.html`,label:`Модуль 07 · Робота в команді`,
+   q:`Що робить «Update from Git» у робочій області Fabric?`,
+   opts:[`Підтягує поточний стан гілки з Git у робочу область`,`Відправляє звіти з робочої області в Git`,`Оновлює дані звіту з джерела`,`Створює резервну копію робочої області`],correct:0},
+  {topic:`Просунуте`,page:`modules/08-advanced.html`,label:`Модуль 08 · Просунуті техніки`,
+   q:`Навіщо потрібна команда <code>git cherry-pick C8</code>?`,
+   opts:[`Перенести один конкретний коміт C8 у поточну гілку`,`Видалити коміт C8 з історії`,`Позначити C8 тегом «перевірено»`,`Створити гілку з назвою C8`],correct:0}
+];
+function buildDiag(){
+  const box=document.getElementById('diagBox');if(!box||box.dataset.built)return;box.dataset.built='1';
+  const qs=DIAG.map(d=>{const s=shuffleQ({q:d.q,opts:d.opts,correct:d.correct});return {topic:d.topic,page:d.page,label:d.label,q:s.q,opts:s.opts,correct:s.correct};});
+  let idx=0;const answers=[];
+  function renderQ(){
+    const d=qs[idx];
+    box.innerHTML=`<div class="dg-head"><span class="dg-cnt">Питання ${idx+1} / ${qs.length}</span><span class="dg-topic">${d.topic}</span></div>
+      <div class="dg-q">${d.q}</div>
+      <div class="dg-opts">${d.opts.map((o,i)=>`<button class="dg-opt" data-i="${i}">${o}</button>`).join('')}</div>
+      <div class="dg-note">Відповідай чесно — правильні відповіді тут не показуються, це не іспит, а навігатор.</div>`;
+    box.querySelectorAll('.dg-opt').forEach(b=>b.onclick=()=>{
+      answers.push(+b.dataset.i===d.correct);
+      idx++;
+      if(idx<qs.length)renderQ();else renderResult();
+    });
+  }
+  function renderResult(){
+    const firstWrong=answers.indexOf(false);
+    const rec=firstWrong<0
+      ?{page:`modules/pr1-osnovy.html`,label:`Практикум · Основи й коміти`,why:`Уся драбина теорії без прогалин — рушай одразу до задач і тренажера терміналу. Модулі завжди поруч як довідник.`}
+      :{page:qs[firstWrong].page,label:qs[firstWrong].label,why:`Перша прогалина — тема «${qs[firstWrong].topic}». Стартуй із цього модуля: далі теми спираються одна на одну.`};
+    const rows=qs.map((d,i)=>`<span class="dg-row ${answers[i]?'ok':'no'}">${answers[i]?'✓':'✗'} ${d.topic}</span>`).join('');
+    box.innerHTML=`<div class="dg-res"><div class="dg-res-t">Рекомендація для тебе</div>
+      <a class="dg-rec" href="${rec.page}">${rec.label} →</a>
+      <div class="dg-why">${rec.why}</div>
+      <div class="dg-break">${rows}</div>
+      <button class="dg-again">Пройти ще раз</button></div>`;
+    box.querySelector('.dg-again').onclick=()=>{idx=0;answers.length=0;renderQ();};
+    lsSet('gfp:diag',rec.label);
+  }
+  renderQ();
+}
+window.__DIAG__={count:DIAG.length,pages:DIAG.map(d=>d.page)};
+
 /* === 12b. TERMLAB: ІНТЕРАКТИВНИЙ ТРЕНАЖЕР ТЕРМІНАЛУ === */
 const TL_LANE_COLORS=['feature','feat2','hotfix'];
 function tlTokens(s){
@@ -1889,6 +1956,7 @@ function initPage(){
   if(typeof lcPlace==='function'&&document.getElementById('lcExp'))lcPlace(0);
   if(document.getElementById('glossList'))buildGlossary();
   if(document.getElementById('cheatList'))buildCheatsheet();
+  if(document.getElementById('diagBox'))buildDiag();
   buildQchecks();buildCsim();buildOrders();buildTermlab();buildVideos();
   initSearch();initCollapse();initProgress();initHighlightFromSearch();initVersionCheck();
 }

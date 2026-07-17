@@ -77,6 +77,14 @@ for (const file of allFiles) {
     // index cards progress render
     const bar = doc.querySelector('.mcard .mprog i');
     if (!bar) F('G5 index: картки прогресу відсутні');
+    // самодіагностика рівня
+    const dg = doc.getElementById('diagBox');
+    if (dg) {
+      if (!dg.querySelector('.dg-opt')) F('G5 index: самодіагностика не відрендерилась (.dg-opt відсутні)');
+      const DG = dom.window.__DIAG__;
+      if (!DG || DG.count < 5) F('G5 index: __DIAG__ відсутній або замалий');
+      else DG.pages.forEach(p => {if (!fs.existsSync(path.join(ROOT, p))) F(`G5 index: diag посилається на неіснуючу сторінку ${p}`);});
+    }
   }
   // G3: search works on this page
   const inp = doc.getElementById('searchBox');

@@ -380,6 +380,27 @@ a.mcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .mcard.pr:hover{border-color:var(--new)}
 .mcard.pr .mprog i{background:var(--new)}
 
+/* === самодіагностика рівня (головна) === */
+#diagBox{border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:12px;background:var(--panel);padding:16px 18px;margin:14px 0 6px;max-width:640px}
+.dg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dg-cnt{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+.dg-topic{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);font-weight:700;border:1px solid var(--line);border-radius:99px;padding:3px 9px}
+.dg-q{font-size:14px;font-weight:600;line-height:1.5;margin-bottom:11px}
+.dg-opts{display:flex;flex-direction:column;gap:7px}
+.dg-opt{font-family:inherit;font-size:13px;text-align:left;border:1px solid var(--line);background:var(--panel-2);border-radius:9px;padding:9px 12px;cursor:pointer;color:var(--txt);line-height:1.45}
+.dg-opt:hover{border-color:var(--blue)}
+.dg-note{font-size:11px;color:var(--dim);margin-top:10px}
+.dg-res-t{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);font-weight:700;margin-bottom:8px}
+.dg-rec{display:inline-block;font-size:15px;font-weight:700;color:#fff;background:var(--blue);border-radius:10px;padding:11px 17px;text-decoration:none;margin-bottom:9px}
+.dg-rec:hover{opacity:.92}
+.dg-why{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:12px}
+.dg-break{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.dg-row{font-size:11px;border:1px solid var(--line);border-radius:7px;padding:4px 8px}
+.dg-row.ok{color:var(--new);border-color:rgba(14,159,110,.4)}
+.dg-row.no{color:var(--drop);border-color:rgba(229,72,77,.4)}
+.dg-again{font-family:inherit;font-size:12px;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+.dg-again:hover{border-color:var(--blue);color:var(--blue)}
+
 /* === друкована шпаргалка команд === */
 .cheat-actions{display:flex;gap:12px;align-items:center;margin:14px 0;flex-wrap:wrap}
 .cheat-actions button{font-family:inherit;font-size:13px;background:var(--accent);color:#fff;border:none;border-radius:9px;padding:9px 16px;cursor:pointer}
