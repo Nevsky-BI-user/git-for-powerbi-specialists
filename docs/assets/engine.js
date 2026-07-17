@@ -806,7 +806,7 @@ function tlNewState(init){
   const defs=init.commits||[{id:'C1',msg:`початкова версія проєкту`}];
   defs.forEach(c=>{
     const meta=c.br&&st.brMeta[c.br]?st.brMeta[c.br]:{lane:0,color:'main'};
-    st.commits[c.id]={id:c.id,parents:c.p||[],msg:c.msg||c.id,color:c.col||meta.color,lane:c.lane!=null?c.lane:meta.lane,known:c.known!==false,files:c.files||[]};
+    st.commits[c.id]={id:c.id,parents:c.p||[],msg:c.msg||c.id,color:c.col||meta.color,lane:c.lane!=null?c.lane:meta.lane,known:c.known!==false,files:c.files||[],br:c.br||null};
     st.order.push(c.id);
     const m=c.id.match(/^C(\d+)/);if(m)st.cseq=Math.max(st.cseq,+m[1]);
   });
@@ -827,7 +827,7 @@ function tlIsAncestor(st,a,b){return a===b||tlReach(st,b).has(a);}
 function tlDirtyFiles(st){return Object.keys(st.files).filter(f=>['modified','staged','stagedNew','conflict'].indexOf(st.files[f])>=0);}
 function tlStagedFiles(st){return Object.keys(st.files).filter(f=>st.files[f]==='staged'||st.files[f]==='stagedNew');}
 function tlNewCommit(st,id,msg,parents,color,lane,files){
-  st.commits[id]={id,parents,msg,color,lane,known:true,files:files||[]};
+  st.commits[id]={id,parents,msg,color,lane,known:true,files:files||[],br:tlCurBranch(st)};
   st.order.push(id);
   const b=tlCurBranch(st);
   if(b)st.branches[b]=id;else st.head={type:'commit',id};
@@ -931,7 +931,7 @@ function tlDoCommit(st,msg){
     const id='M'+(++st.mseq);
     const p1=tlTip(st,b),p2=tlTip(st,from);
     const fls=tlStagedFiles(st);
-    st.commits[id]={id,parents:[p1,p2],msg:msg||`Merge branch '${from}'`,color:'merge',lane:st.brMeta[b]?st.brMeta[b].lane:0,known:true,files:fls};
+    st.commits[id]={id,parents:[p1,p2],msg:msg||`Merge branch '${from}'`,color:'merge',lane:st.brMeta[b]?st.brMeta[b].lane:0,known:true,files:fls,br:b};
     st.order.push(id);st.branches[b]=id;
     fls.forEach(f=>st.files[f]='clean');
     st.conflict=null;
@@ -1108,7 +1108,7 @@ function tlRun(st,line){
         return {out:[`Auto-merging ${f}`,`CONFLICT (content): Merge conflict in ${f}`,`Automatic merge failed; fix conflicts and then commit the result.`,`підказка: edit ${f} → git add ${f} → git commit`]};
       }
       const id='M'+(++st.mseq);
-      st.commits[id]={id,parents:[tipT,tipF],msg:`Merge branch '${name}'`,color:'merge',lane:st.brMeta[b]?st.brMeta[b].lane:0,known:true,files:[]};
+      st.commits[id]={id,parents:[tipT,tipF],msg:`Merge branch '${name}'`,color:'merge',lane:st.brMeta[b]?st.brMeta[b].lane:0,known:true,files:[],br:b};
       st.order.push(id);st.branches[b]=id;
       return {out:[`Merge made by the 'ort' strategy.`]};
     }
@@ -1150,7 +1150,7 @@ function tlRun(st,line){
         localOnly.forEach(id=>{
           const c=st.commits[id];delete st.commits[id];
           const nid=id+`'`;
-          st.commits[nid]={id:nid,parents:[base],msg:c.msg,color:'rebased',lane:c.lane,known:true,files:c.files};
+          st.commits[nid]={id:nid,parents:[base],msg:c.msg,color:'rebased',lane:c.lane,known:true,files:c.files,br:c.br};
           st.order.push(nid);copies.push(nid);base=nid;
         });
         st.branches[b]=base;
@@ -1272,7 +1272,7 @@ function tlRun(st,line){
       return {out:[`git: '${sub}' is not a git command. See 'git --help'.`]};
   }
 }
-const TL_GOAL_KEYS=['initialized','branch','branchAt','branchCommitsAtLeast','headOn','headDetached','commitsAtLeast','commitsExactly','fileStatus','merged','lastCommitParents','lastMsgMatch','pushed','remoteBranch','stashEmpty','noMergeCommits'];
+const TL_GOAL_KEYS=['initialized','branch','branchAt','branchCommitsAtLeast','commitsOnBranch','headOn','headDetached','commitsAtLeast','commitsExactly','fileStatus','merged','lastCommitParents','lastMsgMatch','pushed','remoteBranch','stashEmpty','noMergeCommits'];
 function tlCheckGoal(st,goal){
   for(const k of Object.keys(goal)){
     const v=goal[k];
@@ -1280,6 +1280,7 @@ function tlCheckGoal(st,goal){
     else if(k==='branch'){if(st.branches[v]===undefined)return false;}
     else if(k==='branchAt'){for(const b of Object.keys(v))if(st.branches[b]!==v[b])return false;}
     else if(k==='branchCommitsAtLeast'){for(const b of Object.keys(v)){const t=tlTip(st,b);if(!t||tlReach(st,t).size<v[b])return false;}}
+    else if(k==='commitsOnBranch'){let n=0;Object.keys(st.commits).forEach(id=>{if(st.commits[id].br===v.branch)n++;});if(n<v.atLeast)return false;}
     else if(k==='headOn'){if(tlCurBranch(st)!==v)return false;}
     else if(k==='headDetached'){if((st.head&&st.head.type==='commit')!==v)return false;}
     else if(k==='commitsAtLeast'){const h=tlHeadCommit(st);if(!h||tlReach(st,h).size<v)return false;}
@@ -1375,7 +1376,7 @@ const TERMLAB={
     task:`Ти змінив модель (<code>definition/model.tmdl</code>) і додав нову таблицю (<code>definition/tables/Sales.tmdl</code>). Зроби ДВА окремі коміти: спершу зміни моделі, потім нову таблицю — щоб в історії було видно, що і навіщо змінилось.`,
     init:{files:{'definition/model.tmdl':'modified','definition/tables/Sales.tmdl':'untracked'}},
     goal:{commitsAtLeast:3,fileStatus:{'definition/model.tmdl':'clean','definition/tables/Sales.tmdl':'clean'}},
-    hints:[`git add вміє брати один конкретний файл — цим і користуйся.`,`add model.tmdl → commit → add Sales.tmdl → commit`],
+    hints:[`git add вміє брати один конкретний файл — цим і користуйся.`,`git add definition/model.tmdl → git commit → git add definition/tables/Sales.tmdl → git commit`],
     sol:[`git add definition/model.tmdl`,`git commit -m "оновлення моделі"`,`git add definition/tables/Sales.tmdl`,`git commit -m "нова таблиця Sales"`],
     ok:`Дві логічні зміни — два коміти. Колега (і ти через місяць) скаже дякую.`},
   tl_partial_stage:{
@@ -1390,7 +1391,7 @@ const TERMLAB={
     title:`Гілка для нових KPI-карток`,
     task:`Керівник просить нові KPI-картки. У тебе вже змінений <code>report/pages/kpi/visual.json</code>. Створи гілку <code>feature/kpi-cards</code>, перейди на неї й закоміть зміну там. main чіпати не можна.`,
     init:{files:{'report/pages/kpi/visual.json':'modified'}},
-    goal:{branch:'feature/kpi-cards',headOn:'feature/kpi-cards',fileStatus:{'report/pages/kpi/visual.json':'clean'},commitsAtLeast:2},
+    goal:{branch:'feature/kpi-cards',headOn:'feature/kpi-cards',branchAt:{main:'C1'},fileStatus:{'report/pages/kpi/visual.json':'clean'},commitsAtLeast:2},
     hints:[`Створити гілку і перейти на неї можна однією командою.`,`git switch -c feature/kpi-cards, далі add + commit`],
     sol:[`git switch -c feature/kpi-cards`,`git add report/pages/kpi/visual.json`,`git commit -m "KPI-картки"`],
     ok:`Фіча живе у своїй гілці, main стабільна — саме так працює команда.`},
@@ -1460,8 +1461,8 @@ const TERMLAB={
     ok:`Історія не переписана: C2 лишився, але його вплив скасовано новим комітом. Сервер прийняв push без конфліктів.`},
   tl_stash_switch:{
     title:`Stash: терміновий фікс посеред роботи`,
-    task:`Ти працюєш у <code>feature/kpi-cards</code> з незакоміченими правками, аж тут — терміновий фікс у main. Git не пустить на main з «брудними» файлами. Сховай зміни у stash, перейди на main, зроби фікс у <code>definition/model.tmdl</code> (edit → add → commit), повернись у свою гілку й дістань зміни зі stash.`,
-    init:{commits:[{id:'C1',msg:`база`},{id:'C2',p:['C1'],br:'feature/kpi-cards',msg:`початок KPI-карток`}],branches:{main:'C1','feature/kpi-cards':'C2'},head:'feature/kpi-cards',files:{'report/pages/kpi/visual.json':'modified','definition/model.tmdl':'clean'}},
+    task:`Ти працюєш у <code>feature/kpi-cards</code> з незакоміченими правками у <code>visual.json</code>, аж тут — терміновий фікс у main. Git не пустить перемкнутися: цей файл відрізняється між гілками, і перемикання перезаписало б твої незбережені правки (саме в такому разі Git блокує switch; якби файл між гілками не відрізнявся — Git перемкнув би гілку й просто переніс правки з собою). Сховай зміни у stash, перейди на main, зроби фікс у <code>definition/model.tmdl</code> (edit → add → commit), повернись у свою гілку й дістань зміни зі stash.`,
+    init:{commits:[{id:'C1',msg:`база`},{id:'C2',p:['C1'],br:'feature/kpi-cards',msg:`початок KPI-карток`,files:['report/pages/kpi/visual.json']}],branches:{main:'C1','feature/kpi-cards':'C2'},head:'feature/kpi-cards',files:{'report/pages/kpi/visual.json':'modified','definition/model.tmdl':'clean'}},
     goal:{stashEmpty:true,headOn:'feature/kpi-cards',branchCommitsAtLeast:{main:2},fileStatus:{'report/pages/kpi/visual.json':'modified','definition/model.tmdl':'clean'}},
     hints:[`Спробуй git switch main одразу — побачиш, чому потрібен stash.`,`git stash → git switch main → edit definition/model.tmdl → git add … → git commit -m "…" → git switch feature/kpi-cards → git stash pop`],
     sol:[`git stash`,`git switch main`,`edit definition/model.tmdl`,`git add definition/model.tmdl`,`git commit -m "терміновий фікс міри"`,`git switch feature/kpi-cards`,`git stash pop`],
@@ -1502,7 +1503,7 @@ const TERMLAB={
     title:`Фінальний бос: повний цикл фічі`,
     task:`Усе разом, як у реальній команді. Репозиторій склоновано з сервера, у тебе змінені <code>report/pages/main/visual.json</code> і <code>definition/model.tmdl</code>. Зроби: гілку <code>feature/report-header</code> → два окремі коміти (спершу visual, потім model) → повернись на main → влий фічу → відправ на сервер. Далі в житті Git sync опублікує зміни в робочу область.`,
     init:{commits:[{id:'C1',msg:`стан робочої області`}],branches:{main:'C1'},remote:{main:'C1'},files:{'report/pages/main/visual.json':'modified','definition/model.tmdl':'modified'}},
-    goal:{merged:{from:'feature/report-header',into:'main'},headOn:'main',pushed:true,commitsAtLeast:3,fileStatus:{'report/pages/main/visual.json':'clean','definition/model.tmdl':'clean'}},
+    goal:{merged:{from:'feature/report-header',into:'main'},headOn:'main',pushed:true,commitsAtLeast:3,commitsOnBranch:{branch:'feature/report-header',atLeast:2},fileStatus:{'report/pages/main/visual.json':'clean','definition/model.tmdl':'clean'}},
     hints:[`Порядок: switch -c → add+commit → add+commit → switch main → merge → push.`,`git switch -c feature/report-header → git add report/pages/main/visual.json → git commit -m "…" → git add definition/model.tmdl → git commit -m "…" → git switch main → git merge feature/report-header → git push`],
     sol:[`git switch -c feature/report-header`,`git add report/pages/main/visual.json`,`git commit -m "новий хедер звіту"`,`git add definition/model.tmdl`,`git commit -m "міра для хедера"`,`git switch main`,`git merge feature/report-header`,`git push`],
     ok:`Повний цикл пройдено: фіча в гілці → merge у main → push. Саме цей потік команда повторює щодня; Git sync далі публікує main у робочу область.`}
@@ -1537,7 +1538,7 @@ Object.assign(QCHECKS,{
   qc_pr_undo_choice:{q:`Гілка main синхронізується з робочою областю Fabric (Git sync), і поганий коміт УЖЕ запушено. Як правильно прибрати його вплив?`,
     opts:[`git revert: новий коміт-скасування — історія не переписується, push пройде, Git sync спокійно підхопить`,`git reset --hard HEAD~1 і git push: сервер прийме, бо локальна історія головніша`,`Виправити файли вручну прямо в робочій області Fabric — Git сам підтягне зміну назад у репозиторій`,`git stash: сховати поганий коміт зі спільної історії`],
     correct:0,why:`Переписану reset-ом історію сервер відхилить (non-fast-forward). Правка у Fabric не потрапить у Git САМА: вона зʼявиться на вкладці Source control як Uncommitted, і поки її не закомітять або не скасують, гілка й робоча область розходяться (тому «правда живе в Git» — правити краще через Desktop/Git). Stash працює з незакоміченими змінами, а не з комітами. Лишається revert.`},
-  qc_pr_pull_read:{q:`На кроці 1 схеми вище origin/main стоїть на C4, локальна main — на C2, своїх нових комітів у тебе немає. Що зробить git pull?`,
+  qc_pr_pull_read:{q:`На першому кадрі схеми вище (стан одразу після fetch) origin/main стоїть на C4, локальна main — на C2, своїх нових комітів у тебе немає. Що зробить git pull?`,
     opts:[`Fast-forward: main доїде до C4 без merge-коміту, бо локальних власних комітів немає`,`Створить merge-коміт M1 — pull завжди зливає дві гілки через merge`,`Відмовить: спершу треба запушити щось своє`,`Мовчки перезапише локальні незакомічені зміни серверною версією`],
     correct:0,why:`pull = fetch + злиття. Коли локальна гілка — прямий предок серверної, злиття вироджується у fast-forward. Merge-коміт зʼявився б, лише якби історії розійшлися.`}
 });
@@ -1647,9 +1648,9 @@ $ git log --oneline feature/dates..main
     {q:`Що з переліченого КОМІТИТЬСЯ в Git у PBIP-проєкті? (обери все правильне)`,multi:true,
      opts:[`Тека definition/ семантичної моделі (TMDL-файли)`,`Файл .pbip і файли звіту (report/…)`,`Файли .platform з метаданими елементів`,`cache.abf і localSettings.json`],
      correct:[0,1,2],why:`Визначення моделі та звіту і метадані .platform — це «рецепт» проєкту, вони і є вмістом репозиторію. cache.abf (локальний кеш даних) і localSettings.json — особисті локальні файли, їх додають у .gitignore.`},
-    {q:`У main лежить недороблена фіча, а в прод терміново потрібен маленький фікс, який уже існує окремим комітом C8 у гілці feature/fix. Найбезпечніший шлях?`,
-     opts:[`Перенести самий лише C8 в опубліковану гілку (git cherry-pick C8) — недороблена фіча з main нікуди не поїде`,`Опублікувати main як є: недороблена фіча просто нікому не заважатиме`,`git reset --hard C8 у main і force push`,`Скопіювати виправлені файли вручну в робочу область, оминаючи Git`],
-     correct:0,why:`cherry-pick переносить один конкретний коміт куди треба. Публікація main потягла б недороблене, reset+force переписав би спільну історію, а ручні правки в обхід Git розсинхронізують робочу область із репозиторієм.`}
+    {q:`У гілці feature/big — велика недороблена фіча, і там само окремим комітом C8 уже лежить терміновий маленький фікс. main синхронізується з робочою областю (Git sync). Як доставити в прод ЛИШЕ фікс?`,
+     opts:[`git switch main → git cherry-pick C8 → git push: у main поїде лише фікс, а недороблена фіча залишиться у feature/big`,`git merge feature/big у main як є — фікс же всередині, а недороблене нікому не заважатиме`,`git reset --hard C8 у main і force push`,`Скопіювати виправлені файли вручну в робочу область, оминаючи Git`],
+     correct:0,why:`cherry-pick переносить ОДИН обраний коміт на іншу гілку — так в опублікований main потрапляє лише фікс. Merge всієї feature/big потягнув би в публікацію недороблене, reset+force переписав би спільну історію, а ручні правки в обхід Git розсинхронізують робочу область із репозиторієм.`}
   ]
 });
 Object.assign(ORDERS,{
