@@ -55,6 +55,13 @@ for (const file of allFiles) {
       if (!el.querySelector(inner)) F(`G2 ${file}: ${w}[${el.dataset.p || el.dataset.q || el.dataset.qc || el.dataset.cs || el.dataset.o || el.dataset.s || el.dataset.tl || el.dataset.dq}] не відрендерився`);
     });
   });
+  // G2: клік по вікну термінала termlab має фокусувати поле вводу (новачок клікає у велике вікно, не в рядок)
+  const tlScroll = doc.querySelector('.termlab .tl-scroll');
+  if (tlScroll) {
+    tlScroll.dispatchEvent(new dom.window.MouseEvent('click', {bubbles: true}));
+    if (!doc.activeElement || !doc.activeElement.classList.contains('tl-inp'))
+      F(`G2 ${file}: клік по вікну termlab не фокусує поле вводу`);
+  }
   // collect anchors
   anchorMap[file] = new Set([...doc.querySelectorAll('[id]')].map(e => e.id));
   // G5 progress on module pages

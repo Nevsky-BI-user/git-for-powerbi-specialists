@@ -1572,6 +1572,12 @@ function buildTermlab(){
         lsSet('gfp:tl:'+key,'1');
       }
     }
+    el.querySelector('.tl-term').addEventListener('click',e=>{
+      if(e.target.closest('.tl-inp'))return;
+      const s=window.getSelection&&window.getSelection();
+      if(s&&String(s).length)return; // користувач виділяє текст виводу — фокус не крадемо
+      inp.focus();
+    });
     inp.addEventListener('keydown',e=>{
       if(e.key==='Enter'){exec(inp.value);inp.value='';}
       else if(e.key==='ArrowUp'){if(histPos>0){histPos--;inp.value=hist[histPos];e.preventDefault();}}
@@ -1590,7 +1596,7 @@ function buildTermlab(){
       scroll.innerHTML='';fb.className='tl-fb';fb.innerHTML='';sol.classList.remove('show');sol.innerHTML='';
       el.classList.remove('solved');
       print(`<span class="tw-cm"># стан скинуто до початкового</span>`);
-      paint();
+      paint();inp.focus();
     };
     if(lsGet('gfp:tl:'+key)==='1')el.classList.add('solved-before');
     print(`<span class="tw-cm"># вводь команди; help — список, «Скинути» — почати заново</span>`);
