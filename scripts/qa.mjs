@@ -31,7 +31,7 @@ function loadDom(file) {
 
 const allFiles = ['index.html', ...pages.map(p => p.file)];
 const anchorMap = {};
-const attrKinds = [['data-p', 'PLAYERS'], ['data-q', 'QUIZ'], ['data-qc', 'QCHECKS'], ['data-cs', 'CSIM'], ['data-o', 'ORDERS'], ['data-s', 'SCEN'], ['data-tl', 'TERMLAB'], ['data-dq', 'DIFFQ']];
+const attrKinds = [['data-p', 'PLAYERS'], ['data-q', 'QUIZ'], ['data-qc', 'QCHECKS'], ['data-cs', 'CSIM'], ['data-o', 'ORDERS'], ['data-s', 'SCEN'], ['data-tl', 'TERMLAB'], ['data-dq', 'DIFFQ'], ['data-ca', 'CMDANIM'], ['data-um', 'UIMOCK']];
 
 await new Promise(res => setTimeout(res, 0));
 for (const file of allFiles) {
@@ -50,10 +50,16 @@ for (const file of allFiles) {
     });
   });
   // widgets actually rendered (non-empty)
-  [['.gplayer', 'svg'], ['.quiz', '.qcard'], ['.qcheck', '.qc-opt'], ['.csim', '.cs-inp'], ['.order', '.or-chip'], ['.scplayer', '.repo'], ['.termlab', '.tl-inp'], ['.diffq', '.dq-opt']].forEach(([w, inner]) => {
+  [['.gplayer', 'svg'], ['.quiz', '.qcard'], ['.qcheck', '.qc-opt'], ['.csim', '.cs-inp'], ['.order', '.or-chip'], ['.scplayer', '.repo'], ['.termlab', '.tl-inp'], ['.diffq', '.dq-opt'], ['.cmdanim', '.ca-play'], ['.uimock', 'svg']].forEach(([w, inner]) => {
     doc.querySelectorAll(w).forEach(el => {
-      if (!el.querySelector(inner)) F(`G2 ${file}: ${w}[${el.dataset.p || el.dataset.q || el.dataset.qc || el.dataset.cs || el.dataset.o || el.dataset.s || el.dataset.tl || el.dataset.dq}] не відрендерився`);
+      if (!el.querySelector(inner)) F(`G2 ${file}: ${w}[${el.dataset.p || el.dataset.q || el.dataset.qc || el.dataset.cs || el.dataset.o || el.dataset.s || el.dataset.tl || el.dataset.dq || el.dataset.ca || el.dataset.um}] не відрендерився`);
     });
+  });
+  // G2: іконки програм (ticon) — ключ має бути в ICONS і реально відрендерений svg
+  doc.querySelectorAll('.ticon[data-i]').forEach(el => {
+    const v = el.getAttribute('data-i');
+    if (!keys || !keys.ICONS || !keys.ICONS.includes(v)) F(`G2 ${file}: data-i="${v}" не знайдено у ICONS`);
+    else if (!el.querySelector('svg')) F(`G2 ${file}: .ticon[${v}] не відрендерився`);
   });
   // G2: клік по вікну термінала termlab має фокусувати поле вводу (новачок клікає у велике вікно, не в рядок)
   const tlScroll = doc.querySelector('.termlab .tl-scroll');
@@ -151,6 +157,21 @@ idx.forEach(e => {if (!anchorMap[e.p] || !anchorMap[e.p].has(e.a)) F(`G3 інд�
     }
     OK(`G2c termlab: ${ok}/${Object.keys(TL.bank).length} розв'язків проходять replay`);
   }
+  // G2f: uimock — кожен запис банку має title, cap і валідний svg
+  const UM = dom.window.__UM__;
+  if (!UM || !UM.bank) F('G2f uimock: window.__UM__ відсутній');
+  else {
+    let umOk = 0;
+    for (const key of Object.keys(UM.bank)) {
+      const u = UM.bank[key];
+      let bad = false;
+      if (!u.title) {F(`G2f uimock ${key}: відсутній title`); bad = true;}
+      if (!u.cap) {F(`G2f uimock ${key}: відсутній cap`); bad = true;}
+      if (!u.svg || u.svg.indexOf('<svg') === -1 || u.svg.indexOf('</svg>') === -1) {F(`G2f uimock ${key}: svg не містить <svg>...</svg>`); bad = true;}
+      if (!bad) umOk++;
+    }
+    OK(`G2f uimock: ${umOk}/${Object.keys(UM.bank).length} записів банку валідні`);
+  }
   // G2d: csim — канонічний sol проходить власні регекси
   const CS = dom.window.__CSIM__;
   if (!CS) F('G2d csim: window.__CSIM__ відсутній');
@@ -162,6 +183,51 @@ idx.forEach(e => {if (!anchorMap[e.p] || !anchorMap[e.p].has(e.a)) F(`G3 інд�
       if (!c.a.some(rx => new RegExp(rx).test(norm))) F(`G2d csim ${key}: sol "${c.sol}" не матчиться власними регексами`); else csOk++;
     }
     OK(`G2d csim: ${csOk}/${Object.keys(CS).length} sol проходять власні регекси`);
+  }
+  // G2e: cmdanim — валідація всього банку через window.__CA__
+  const CA = dom.window.__CA__;
+  if (!CA || !CA.bank) F('G2e cmdanim: window.__CA__ відсутній');
+  else {
+    const validPanels = ['explorer', 'repo', 'files', 'remote'];
+    const validStepT = ['type', 'out', 'fx', 'note', 'pause'];
+    const validFileStatus = ['untracked', 'modified', 'staged', 'clean'];
+    const validOpsByPanel = {
+      explorer: ['add', 'del', 'ren', 'mark', 'cwd'],
+      repo: ['commit', 'branch', 'head', 'mark', 'tip'],
+      files: ['set', 'mark'],
+      remote: ['send', 'recv', 'mark'],
+    };
+    let caOk = 0;
+    for (const key of Object.keys(CA.bank)) {
+      const c = CA.bank[key];
+      let bad = false;
+      if (!validPanels.includes(c.panel)) {F(`G2e cmdanim ${key}: невідома panel "${c.panel}"`); bad = true;}
+      if (c.panel === 'explorer' && !(c.fs0 && Array.isArray(c.fs0.items))) {F(`G2e cmdanim ${key}: explorer без fs0.items`); bad = true;}
+      if (c.panel === 'repo' && !(c.repo0 && Array.isArray(c.repo0.commits))) {F(`G2e cmdanim ${key}: repo без repo0.commits`); bad = true;}
+      if (c.panel === 'files') {
+        if (!(c.files0 && typeof c.files0 === 'object')) {F(`G2e cmdanim ${key}: files без files0`); bad = true;}
+        else for (const f of Object.keys(c.files0)) {
+          if (!validFileStatus.includes(c.files0[f])) {F(`G2e cmdanim ${key}: files0["${f}"] — невідомий статус "${c.files0[f]}"`); bad = true;}
+        }
+      }
+      if (c.panel === 'remote') {
+        if (!(c.remote0 && typeof c.remote0.local === 'number' && typeof c.remote0.remote === 'number' && c.remote0.local >= 0 && c.remote0.remote >= 0)) {
+          F(`G2e cmdanim ${key}: remote0.local/remote мають бути невід'ємними числами`); bad = true;
+        }
+      }
+      if (!Array.isArray(c.steps) || !c.steps.length) {F(`G2e cmdanim ${key}: steps порожній або не масив`); bad = true;}
+      else c.steps.forEach((s, i) => {
+        if (!validStepT.includes(s.t)) {F(`G2e cmdanim ${key}: крок ${i} — невідомий t="${s.t}"`); bad = true;}
+        if ((s.t === 'type' || s.t === 'note') && typeof s.s !== 'string') {F(`G2e cmdanim ${key}: крок ${i} (${s.t}) без s-рядка`); bad = true;}
+        if (s.t === 'out' && !Array.isArray(s.s)) {F(`G2e cmdanim ${key}: крок ${i} (out) — s не масив рядків`); bad = true;}
+        if (s.t === 'fx') {
+          const allowed = validOpsByPanel[c.panel];
+          if (allowed && !allowed.includes(s.op)) {F(`G2e cmdanim ${key}: крок ${i} (fx) — op "${s.op}" не дозволено для panel "${c.panel}"`); bad = true;}
+        }
+      });
+      if (!bad) caOk++;
+    }
+    OK(`G2e cmdanim: ${caOk}/${Object.keys(CA.bank).length} записів банку валідні`);
   }
   dom.window.close();
 }

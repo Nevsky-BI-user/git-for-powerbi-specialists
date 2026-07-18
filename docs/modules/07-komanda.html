@@ -70,7 +70,7 @@
 <div class="goalbox"><b>Ціль уроку</b>тримати репозиторій чистим: що ігнорувати і чому.</div>
 <div class="ytvideo" data-v="v_07"></div>
 <div class="tdef"><div class="t">.gitignore</div><div class="d">Текстовий файл у репозиторії зі списком шаблонів шляхів, які Git не відстежує й не комітить.</div><div class="plain"><b>Простими словами:</b> «список того, що не зберігати в історії» — тимчасове, важке чи особисте.</div></div>
-<h3>Що Power BI Desktop створює автоматично</h3>
+<h3><span class="ticon" data-i="powerbi"></span>Що Power BI Desktop створює автоматично</h3>
 <pre><span class="c"># Дефолтний .gitignore від Power BI Desktop:</span>
 **/.pbi/localSettings.json
 **/.pbi/cache.abf</pre>
@@ -106,6 +106,8 @@ Thumbs.db
 <div class="card"><h4>hotfix/*</h4><p>Термінове виправлення; так само зливається в main і публікується через Git sync (у схемі з Dev/Prod — далі pipeline).</p></div>
 </div>
 <div class="tdef"><div class="t">Pull Request (PR) / Merge Request</div><div class="d">Запит на злиття гілки в основну з переглядом колегою перед прийняттям.</div><div class="plain"><b>Простими словами:</b> «прошу влити мою гілку — гляньте перед цим».</div><div class="ex">У цій PBIP-команді детальний review діфів у PR непрактичний (TMDL/JSON-шум, без прев'ю звіту), тож зміни зливають у main напряму; роль бар'єру виконують валідація в Desktop, CI та (за наявності Dev/Prod) deployment pipeline. Детальніше — урок «Робочий процес: merge → деплой».</div></div>
+<p>Ось як такий PR виглядає у вебінтерфейсі — тут на прикладі <span class="ticon" data-i="github"></span>GitHub. У цій команді він не обов'язковий крок, а довідковий інструмент: корисно впізнавати екран, якщо колись захочеш показати колезі конкретну зміну перед merge.</p>
+<div class="uimock" data-um="github_pr"></div>
 <div class="tdef"><div class="t">CI (Continuous Integration)</div><div class="d">Автоматичні перевірки, що запускаються на сервері при push (напр. валідація моделі, Best Practice Analyzer).</div><div class="plain"><b>Простими словами:</b> «робот-контролер», що перевіряє зміни без участі людини.</div></div>
 <h3>Потік фічі у графі</h3>
 <div class="widget"><div class="wtitle">feature → merge у main</div><div class="gplayer" data-p="branching"></div></div>
@@ -127,6 +129,7 @@ Thumbs.db
 </table>
 <div class="note warn"><b>Після вирішення TMDL-конфлікту відкрий проєкт у Power BI Desktop або провалідуй у Tabular Editor.</b> Git перевіряє лише текст, не валідність моделі.</div>
 <div class="note tip"><b>Інструмент для вирішення.</b> Конфліктний TMDL/JSON відкривай у VS Code: вбудований merge-редактор показує «свою» та «чужу» версії поруч і дає кнопки Accept Current / Accept Incoming / Accept Both — не треба вручну вишукувати маркери <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>.</div>
+<div class="dobox">Відкрий <span class="ticon" data-i="vscode"></span>VS Code, перейди на вкладку Source Control (Ctrl+Shift+G) і подивись, де в інтерфейсі зʼявляються кнопки Accept Current / Accept Incoming / Accept Both — навіть без реального конфлікту зараз корисно один раз побачити, де їх шукати.</div>
 <p>Склади повний ланцюжок: від CONFLICT до валідної моделі.</p>
 <div class="order" data-o="or_07_tmdl_conflict"></div>
 <h3>Профілактика</h3>
@@ -488,14 +491,14 @@ hotfix/prod-refresh-error
 <section class="lesson show" id="s8" data-n="s8">
 
 <div class="crumb">Модуль F — командна робота</div>
-<h2>Azure DevOps: pipelines, задачі, політики</h2>
+<h2><span class="ticon" data-i="azuredevops"></span>Azure DevOps: pipelines, задачі, політики</h2>
 <p class="lead">Що дає Azure DevOps навколо Git-репозиторію PBIP.</p>
 <div class="goalbox"><b>Ціль уроку</b>звʼязати репозиторій із задачами та автоматичними перевірками.</div>
 <div class="tdef"><div class="t">Work items (робочі елементи)</div><div class="d">Задачі / баги / User Stories в Azure DevOps з власними ID.</div><div class="plain"><b>Простими словами:</b> «квитки» роботи; згадка ID у коміті прив'язує зміну до задачі для трасування.</div></div>
 <pre><span class="c"># у повідомленні коміту або описі:</span>
 fix(report): correct sales filter   #123
 <span class="c"># Closes #123 / Fixes #456 — автозв'язок із задачею</span></pre>
-<div class="tdef"><div class="t">Azure Pipelines (CI/CD)</div><div class="d">Автоматичні конвеєри, що запускаються на події (push, оновлення гілки) і виконують кроки: валідація, тести, публікація.</div><div class="plain"><b>Простими словами:</b> «робот-складальник» на сервері. Для PBIP: перевірити модель (BPA), за потреби — автоматично опублікувати в Dev workspace.</div></div>
+<div class="tdef"><div class="t"><span class="ticon" data-i="azuredevops"></span>Azure Pipelines (CI/CD)</div><div class="d">Автоматичні конвеєри, що запускаються на події (push, оновлення гілки) і виконують кроки: валідація, тести, публікація.</div><div class="plain"><b>Простими словами:</b> «робот-складальник» на сервері. Для PBIP: перевірити модель (BPA), за потреби — автоматично опублікувати в Dev workspace.</div></div>
 <pre><span class="c"># azure-pipelines.yml (спрощено)</span>
 trigger:
   branches: [ main ]
@@ -529,10 +532,10 @@ PBI_CLIENT_SECRET=
 <section class="lesson show" id="s12" data-n="s12">
 
 <div class="crumb">Модуль F — командна робота</div>
-<h2>Fabric Git integration: підключаємо робочу область</h2>
+<h2><span class="ticon" data-i="powerbi"></span>Fabric Git integration: підключаємо робочу область</h2>
 <p class="lead">Фініш усього циклу курсу: merge у main → push → Update from Git. Тут розберемо, де саме в Power BI Service живе ця кнопка і що означають статуси поруч із нею. Це та частина процесу, яку аналітик робить у браузері, а не в терміналі. Git-хостинг (dev.azure.com / github.com — куди йде git push, «сервер» зі сценаріїв) і app.powerbi.com (робоча область, де тиснеш Update from Git) — це ДВА РІЗНІ сайти; вони не синхронізуються самі, поки не натиснеш Update from Git.</p>
 <div class="goalbox"><b>Ціль уроку</b>підключити робочу область до гілки main і впевнено читати статуси панелі Source control.</div>
-<div class="tdef"><div class="t">Fabric Git integration</div><div class="d">Вбудований звʼязок робочої області Power BI / Fabric із гілкою Git-репозиторію: область уміє підтягувати коміти з гілки (Update from Git) і комітити зміни, зроблені в Service, назад у гілку.</div><div class="plain"><b>Простими словами:</b> «підписка» робочої області на гілку — натиснув Update, і область стала такою самою, як main.</div><div class="ex">Гілку <code>main</code> підключають до робочої області; після push у main достатньо натиснути Update from Git — і звіт опубліковано.</div></div>
+<div class="tdef"><div class="t"><span class="ticon" data-i="powerbi"></span>Fabric Git integration</div><div class="d">Вбудований звʼязок робочої області Power BI / Fabric із гілкою Git-репозиторію: область уміє підтягувати коміти з гілки (Update from Git) і комітити зміни, зроблені в Service, назад у гілку.</div><div class="plain"><b>Простими словами:</b> «підписка» робочої області на гілку — натиснув Update, і область стала такою самою, як main.</div><div class="ex">Гілку <code>main</code> підключають до робочої області; після push у main достатньо натиснути Update from Git — і звіт опубліковано.</div></div>
 <p>Передумови — дві, і обидві поза Git: робоча область має бути на ємності Fabric або Premium (на особистій My workspace чи звичайній Pro-області Git integration недоступна), а адміністратор tenant має дозволити Git integration у налаштуваннях (Admin portal → Tenant settings). Якщо чогось із цього немає — питання не до Git і не до тебе, а до адміністратора.</p>
 <h3>Підключення — робиться один раз</h3>
 <p><b>Крок 0, у браузері:</b> відкрий <code>app.powerbi.com</code>, увійди робочим акаунтом; зліва в меню Workspaces обери робочу область.</p>
@@ -545,6 +548,9 @@ PBI_CLIENT_SECRET=
 </ol>
 <h3>Панель Source control</h3>
 <p>Після підключення вгорі робочої області зʼявляється кнопка Source control з лічильником. Вона відкриває панель із двома вкладками: <b>Updates</b> — вхідні коміти з гілки, які ще не застосовані до області (саме тут кнопка Update from Git); <b>Changes</b> — зміни, зроблені безпосередньо в Service, які ще не закомічені в гілку.</p>
+<div class="uimock" data-um="pbi_git_sync"></div>
+<p>Спробуй на практиці, якщо маєш доступ до Fabric-ємності:</p>
+<div class="dobox">Відкрий робочу область Fabric (<code>app.powerbi.com</code>) і перевір Source control: чи є вгорі кнопка з лічильником, і в якій вона зараз вкладці — Updates чи Changes.</div>
 <h3>Статуси елементів</h3>
 <table class="cmdtable">
 <tr><td>Synced</td><td>Елемент збігається з гілкою. Робити нічого не треба.</td></tr>

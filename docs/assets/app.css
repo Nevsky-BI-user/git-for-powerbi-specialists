@@ -456,3 +456,80 @@ pre .dl{display:inline-block;width:100%;padding:0 4px;border-radius:3px}
   .ch-ex{color:#555;font-size:7.5pt}
   .print-note{display:block;font-size:8pt;color:#777;margin-top:10pt}
 }
+
+/* === ticon + dobox === */
+.ticon{display:inline-flex;width:18px;height:18px;vertical-align:-3px;margin-right:6px}
+.ticon svg{width:100%;height:100%}
+.ticon.lg{width:26px;height:26px}
+.dobox{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;background:rgba(91,91,214,.07);padding:12px 15px;margin:14px 0}
+.dobox::before{content:"ЗРОБИ ЗАРАЗ";display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:7px}
+
+/* === cmdanim: анімація «що робить команда» === */
+.cmdanim{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:15px 17px;margin:18px 0;background:var(--panel)}
+.cmdanim .ca-title{font-size:14.5px;font-weight:700;margin-bottom:12px}
+.cmdanim .ca-title::before{content:"Анімація команди";display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent);margin-bottom:6px;font-weight:700}
+.cmdanim .ca-desk{display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start}
+.cmdanim .ca-term{margin:0}
+.cmdanim .ca-body{min-height:120px;max-height:220px;overflow-y:auto}
+.cmdanim .ca-line{white-space:pre-wrap;word-break:break-word;margin-bottom:2px}
+.cmdanim .ca-cursor{display:inline-block;color:#8b8bff;animation:caBlink 1s steps(1) infinite}
+.cmdanim .ca-app{background:var(--panel);border:1px solid var(--line);border-radius:11px;overflow:hidden;box-shadow:0 2px 10px rgba(20,24,34,.05)}
+.cmdanim .ca-app .tw-bar{background:var(--panel-2);border-bottom:1px solid var(--line);padding:8px 12px}
+.cmdanim .ca-app .tw-bar .tw-title{color:var(--muted);font-size:10.5px;margin-left:0;font-family:'JetBrains Mono',monospace}
+.cmdanim .ca-app-body{padding:13px 15px;min-height:120px;max-height:220px;overflow:auto;transition:opacity .2s}
+.cmdanim .ca-app-body.ca-fading{opacity:.12}
+.cmdanim .ca-eempty,.cmdanim .ca-rempty{color:var(--dim);font-size:12.5px;padding:10px 2px}
+.cmdanim .ca-elist{display:flex;flex-direction:column;gap:5px}
+.cmdanim .ca-erow{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--txt);padding:5px 8px;border-radius:7px;background:var(--panel-2)}
+.cmdanim .ca-eicon{font-size:14px}
+.cmdanim .ca-erow.ca-enter{animation:caRowIn .42s ease both}
+.cmdanim .ca-erow.ca-leaving{animation:caRowOut .38s ease both}
+.cmdanim .ca-erow.ca-renaming{animation:caPulseBg .36s ease}
+.cmdanim .ca-erow.ca-markpulse,.cmdanim .ca-frow.ca-markpulse{animation:caMarkRow .7s ease}
+.cmdanim .ca-note{font-size:12.5px;font-style:italic;color:var(--muted);margin:13px 0;min-height:1.4em;line-height:1.55}
+.cmdanim .ca-play{font-family:inherit;font-size:12.5px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 15px;cursor:pointer}
+.cmdanim .ca-play:hover:not(:disabled){opacity:.92}
+.cmdanim .ca-play:disabled{opacity:.55;cursor:default}
+.cmdanim circle.ca-pulse{animation:caPulseGlow .6s ease-in-out 2}
+.cmdanim circle.ca-cnode-ghost{stroke-dasharray:3 2}
+/* files panel: статус-бейджі */
+.cmdanim .ca-flist{display:flex;flex-direction:column;gap:5px}
+.cmdanim .ca-frow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--txt);padding:6px 9px;border-radius:7px;background:var(--panel-2)}
+.cmdanim .ca-fname{overflow-wrap:anywhere}
+.cmdanim .ca-fbadge{flex:none;font-size:9.5px;font-weight:700;border-radius:20px;padding:3px 9px;border:1px solid var(--dim);color:var(--dim);background:var(--panel);transition:.15s}
+.cmdanim .ca-fbadge.st-untracked{border-color:var(--dim);color:var(--dim)}
+.cmdanim .ca-fbadge.st-modified{border-color:#d9a514;color:#a87b00;background:rgba(217,165,20,.1)}
+.cmdanim .ca-fbadge.st-staged{border-color:var(--blue);color:var(--blue);background:rgba(79,107,237,.1)}
+.cmdanim .ca-fbadge.st-clean{border-color:var(--new);color:var(--new);background:rgba(14,159,110,.1)}
+.cmdanim .ca-fbadge.ca-fpulse{animation:caMarkRow .7s ease}
+/* remote panel: ПК ⇄ GitHub */
+.cmdanim .ca-remote{display:flex;align-items:center;gap:10px}
+.cmdanim .ca-rbox{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px;background:var(--panel-2);text-align:center}
+.cmdanim .ca-rlabel{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:8px}
+.cmdanim .ca-rdots{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:12px;margin-bottom:6px}
+.cmdanim .ca-rdot{width:10px;height:10px;border-radius:50%;background:var(--accent);display:inline-block}
+.cmdanim .ca-rdot.ca-rdot-in{animation:caDotIn .5s ease both}
+.cmdanim .ca-rcount{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted)}
+.cmdanim .ca-rarrow{flex:none;font-size:20px;color:var(--dim);transition:.2s}
+.cmdanim .ca-rarrow .ca-rarrow-ico{display:block}
+.cmdanim .ca-rarrow.ca-rarrow-active{color:var(--accent)}
+.cmdanim .ca-rbox.ca-markpulse{animation:caMarkRow .7s ease}
+@keyframes caBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes caRowIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes caRowOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(10px)}}
+@keyframes caPulseBg{0%,100%{background:var(--panel-2)}50%{background:rgba(91,91,214,.18)}}
+@keyframes caMarkRow{0%,100%{box-shadow:0 0 0 0 rgba(91,91,214,0)}50%{box-shadow:0 0 0 4px rgba(91,91,214,.28)}}
+@keyframes caPulseGlow{0%{filter:drop-shadow(0 0 0 rgba(91,91,214,0))}50%{filter:drop-shadow(0 0 6px rgba(91,91,214,.9))}100%{filter:drop-shadow(0 0 0 rgba(91,91,214,0))}}
+@keyframes caDotIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+@media(max-width:760px){.cmdanim .ca-desk{grid-template-columns:1fr}}
+@media(prefers-reduced-motion: reduce){
+  .cmdanim .ca-cursor{animation:none}
+  .cmdanim .ca-app-body{transition:none}
+  .cmdanim .ca-erow.ca-enter,.cmdanim .ca-erow.ca-leaving,.cmdanim .ca-erow.ca-renaming,.cmdanim .ca-erow.ca-markpulse,.cmdanim .ca-frow.ca-markpulse,.cmdanim .ca-rbox.ca-markpulse,.cmdanim .ca-fbadge.ca-fpulse,.cmdanim .ca-rdot.ca-rdot-in,.cmdanim circle.ca-pulse{animation:none}
+}
+
+/* === uimock: схеми «як це виглядає в реальній програмі» === */
+.uimock{border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin:18px 0;background:var(--panel-2)}
+.uimock .um-title{font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+.uimock svg{width:100%;height:auto;display:block}
+.uimock .um-cap{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.6}

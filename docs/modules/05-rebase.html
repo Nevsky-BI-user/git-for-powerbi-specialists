@@ -91,8 +91,9 @@
   <div class="pnav"><button class="ghost" id="rbPrev">← Назад</button><button id="rbNext">Далі →</button><span class="cnt" id="rbCnt"></span></div>
 </div>
 <div class="note tip"><b>Термінал чи Sourcetree?</b> Interactive rebase зручніше робити в терміналі: <code>git rebase -i HEAD~4</code> у Git Bash відкриває todo-список як <b>текстовий файл</b> — у тій самій вкладці VS Code, що й повідомлення комітів (<code>core.editor</code> з модуля 03). Редагуєш рядки (<code>pick</code> → потрібна дія), зберігаєш, закриваєш вкладку — rebase продовжиться сам. Sourcetree теж уміє (правий клік по коміту → «Rebase children… interactively»), відповідність його кнопок командам Git — у таблиці нижче.</div>
+<div class="dobox">Відкрий Git Bash і виконай <code>git config --get core.editor</code>. Якщо у відповідь <code>code --wait</code> — todo-список interactive rebase у тебе відкриватиметься саме в <span class="ticon" data-i="vscode"></span><b>VS Code</b>, як описано вище; якщо порожньо — постав, як у модулі 03.</div>
 <div class="note warn"><b>Гілку вже пушив?</b> Interactive rebase змінює SHA комітів, тому звичайний <code>git push</code> після нього Git відхилить (розбіжність з віддаленою гілкою). Потрібен <code>git push --force-with-lease</code> — детальніше про нього в модулі 07.</div>
-<h3>Дії Sourcetree → Git</h3>
+<h3><span class="ticon" data-i="sourcetree"></span>Дії Sourcetree → Git</h3>
 <table class="cmdtable">
 <tr><td>(за замовч.)</td><td><code>pick</code> — застосувати без змін.</td></tr>
 <tr><td>Edit message</td><td><code>reword</code> — зупинитись для зміни повідомлення.</td></tr>

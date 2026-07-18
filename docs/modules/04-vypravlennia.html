@@ -77,7 +77,8 @@
   </div>
   <div class="wexplain" id="rsExp">Обери режим, щоб побачити які зони він зачіпає.</div>
 </div>
-<div class="note tip"><b>Де це у Sourcetree:</b> правий клік по коміту в графі → «Reset current branch to this commit», у діалозі обираєш режим Soft / Mixed / Hard. Це та сама команда, що й у Git Bash: кнопка не робить її безпечнішою, тож перед Hard так само переконайся, що незакомічені зміни тобі більше не потрібні.</div>
+<div class="note tip"><b><span class="ticon" data-i="sourcetree"></span>Де це у Sourcetree:</b> правий клік по коміту в графі → «Reset current branch to this commit», у діалозі обираєш режим Soft / Mixed / Hard. Це та сама команда, що й у Git Bash: кнопка не робить її безпечнішою, тож перед Hard так само переконайся, що незакомічені зміни тобі більше не потрібні.</div>
+<div class="cmdanim" data-ca="git_reset"></div>
 <table class="cmdtable">
 <tr><td>git restore &lt;файл&gt;</td><td>Відкинути зміни файлу у working dir. Історію не чіпає.</td></tr>
 <tr><td>git restore --staged &lt;файл&gt;</td><td>Прибрати файл зі staging (зміни лишаються).</td></tr>
@@ -88,8 +89,10 @@
 </table>
 <p>Спробуй сам: коміт зроблено зарано — відкоти його, але всі зміни збережи.</p>
 <div class="csim" data-cs="cs_04_reset_soft"></div>
-<div class="note tip"><b>Де це у VS Code:</b> «Discard Changes» (іконка ↶ біля файлу в панелі Source Control) — це і є git restore. Типовий сценарій: зіпсував міру у звіті в Power BI Desktop, зберіг PBIP, глянув diff — і одним кліком повернув файл до стану останнього коміту. Огляд самих клієнтів — в <a href="00-start.html#s5">уроці «Sourcetree та інші графічні клієнти»</a>.</div>
+<div class="note tip"><b><span class="ticon" data-i="vscode"></span>Де це у VS Code:</b> «Discard Changes» (іконка ↶ біля файлу в панелі Source Control) — це і є git restore. Типовий сценарій: зіпсував міру у звіті в Power BI Desktop, зберіг PBIP, глянув diff — і одним кліком повернув файл до стану останнього коміту. Огляд самих клієнтів — в <a href="00-start.html#s5">уроці «Sourcetree та інші графічні клієнти»</a>.</div>
+<div class="dobox">Зроби це просто зараз: у своєму репозиторії зміни рядок у будь-якому файлі, не комітячи, — глянь на нього в diff, а тоді поверни командою <code>git restore &lt;файл&gt;</code> або кнопкою «Discard Changes» у VS Code. Переконайся, що файл повернувся до збереженого стану.</div>
 <p>А тепер найчастіша щоденна ситуація: файл зіпсовано ще до коміту.</p>
+<div class="cmdanim" data-ca="git_restore"></div>
 <div class="csim" data-cs="cs_04_restore"></div>
 <div class="note warn"><b>reset переписує історію, revert — ні.</b> На спільних гілках (main) — лише revert. reset --hard — локально й усвідомлено. Три наступні уроки розбирають revert, reflog і amend докладно.</div>
 
@@ -101,21 +104,23 @@
 <p class="lead">Єдиний інструмент скасування, який безпечний для гілки, що вже на сервері. Розберемо, як він працює й де його підводні камені.</p>
 <div class="goalbox"><b>Ціль уроку</b>скасовувати запушені коміти через revert і розуміти, чому це не reset.</div>
 <div class="tdef"><div class="t">git revert</div><div class="d">Створює НОВИЙ коміт, зміни якого дзеркально протилежні вказаному коміту. Історія не переписується — вона росте вперед.</div><div class="plain"><b>Аналогія:</b> бухгалтерія. Помилкову проводку не виривають із журналу — додають сторнувальний запис. Обидва рядки видно, баланс виправлено.</div></div>
-<h3>Типовий сценарій у Power BI</h3>
+<h3><span class="ticon" data-i="powerbi"></span>Типовий сценарій у Power BI</h3>
 <p>Ти виправив міру, закомітив, запушив — а наступного ранку зʼясувалось, що новий фільтр ламає квартальний підсумок. Коміт уже в main, робоча область уже синхронізувалась. Переписувати історію пізно — скасовуємо коміт новим комітом:</p>
 <pre><span class="cmd">git log</span> <span class="arg">--oneline -3</span>          <span class="c"># знайти SHA проблемного коміту</span>
 <span class="out">e4f5a6b fix: correct YTD filter   ← оцей ламає підсумок</span>
 <span class="cmd">git revert</span> <span class="arg">e4f5a6b</span>            <span class="c"># Git створює коміт "Revert …" з протилежними змінами</span>
 <span class="cmd">git push</span>                       <span class="c"># колеги отримають скасування звичайним pull</span></pre>
-<div class="note tip">Після <code>git revert &lt;sha&gt;</code> Git відкриє вкладку VS Code (той самий редактор із модуля 03, налаштований через <code>core.editor</code>) із готовим повідомленням «Revert …» — збережи (Ctrl+S) і закрий вкладку, термінал продовжить сам. У цей момент термінал виглядає «завислим» — це нормально, він просто чекає на редактор. Якщо повідомлення за замовчуванням влаштовує, пропусти цей крок одразу: <code>git revert --no-edit &lt;sha&gt;</code>.</div>
+<div class="note tip">Після <code>git revert &lt;sha&gt;</code> Git відкриє вкладку <span class="ticon" data-i="vscode"></span>VS Code (той самий редактор із модуля 03, налаштований через <code>core.editor</code>) із готовим повідомленням «Revert …» — збережи (Ctrl+S) і закрий вкладку, термінал продовжить сам. У цей момент термінал виглядає «завислим» — це нормально, він просто чекає на редактор. Якщо повідомлення за замовчуванням влаштовує, пропусти цей крок одразу: <code>git revert --no-edit &lt;sha&gt;</code>.</div>
 <p>Після push робоча область підтягне скасування через Git sync — звіт повернеться до робочої версії, а в історії буде видно і помилку, і виправлення.</p>
+<div class="uimock" data-um="pbi_git_sync"></div>
 <h3>Що варто знати наперед</h3>
 <ul>
 <li><strong>Revert може конфліктувати.</strong> Якщо після проблемного коміту той самий рядок TMDL змінювали ще раз, Git попросить вирішити конфлікт — так само, як при merge (модуль 05): виправив у VS Code → <code>git add</code> → <code>git revert --continue</code>.</li>
 <li><strong>Revert merge-коміту</strong> — окремий випадок: потрібен ключ <code>-m 1</code>, щоб указати, «до якого з батьків» повертатись. Новачку простіше скасувати окремі коміти або покликати досвідченого колегу.</li>
 <li><strong>Кілька комітів</strong> скасовуються по одному (<code>git revert &lt;старий&gt; &lt;новіший&gt;</code>) — кожен отримає свій коміт-скасування.</li>
 </ul>
-<div class="note tip"><b>Де це у GUI:</b> у Sourcetree — правий клік по коміту → Reverse commit; у VS Code з розширенням GitLens — Revert Commit у контекстному меню історії. Під капотом — той самий <code>git revert</code>.</div>
+<div class="note tip"><b>Де це у GUI:</b> у <span class="ticon" data-i="sourcetree"></span>Sourcetree — правий клік по коміту → Reverse commit; у <span class="ticon" data-i="vscode"></span>VS Code з розширенням GitLens — Revert Commit у контекстному меню історії. Під капотом — той самий <code>git revert</code>.</div>
+<div class="cmdanim" data-ca="git_revert"></div>
 <div class="csim" data-cs="cs_revert"></div>
 <div class="qcheck" data-qc="qc_revert_deep"></div>
 
@@ -163,7 +168,8 @@
 <span class="cmd">git add</span> <span class="arg">report/definition/pages/okr.json</span>
 <span class="cmd">git commit --amend</span> <span class="arg">--no-edit</span>   <span class="c"># файл доїхав тим самим комітом, повідомлення без змін</span></pre>
 <div class="note warn"><b>Головне правило: amend — лише до push.</b> Amend переписує SHA, тобто історію. Якщо коміт уже на сервері, після amend push вимагатиме <code>--force-with-lease</code>, а це ламає копії колег — та сама логіка, що й у золотому правилі rebase (модуль 05). Коміт уже запушено? Виправляй наступним комітом або <a href="#s2">revert-ом</a>.</div>
-<div class="note tip"><b>Де це у GUI:</b> у Sourcetree під полем повідомлення є прапорець <em>Amend latest commit</em>; у VS Code — команда «Commit (Amend)». Обидва роблять той самий <code>git commit --amend</code>.</div>
+<div class="note tip"><b>Де це у GUI:</b> у <span class="ticon" data-i="sourcetree"></span>Sourcetree під полем повідомлення є прапорець <em>Amend latest commit</em>; у <span class="ticon" data-i="vscode"></span>VS Code — команда «Commit (Amend)». Обидва роблять той самий <code>git commit --amend</code>.</div>
+<div class="dobox">Зроби це просто зараз: у наступному коміті навмисно залиш одруківку в повідомленні — і одразу виправ через <code>git commit --amend</code>, поки коміт ще не запушено. Так рука звикне: виправляти можна одразу, а не другим комітом «fix typo».</div>
 <div class="csim" data-cs="cs_amend"></div>
 <div class="order" data-o="or_04_amend"></div>
 <div class="qcheck" data-qc="qc_amend"></div>

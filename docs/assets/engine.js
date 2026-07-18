@@ -1604,6 +1604,592 @@ function buildTermlab(){
   });
 }
 
+/* === 12ba. CMDANIM: анімація «що робить команда» (два вікна — термінал + контекст) === */
+const CMDANIM={
+  mkdir:{
+    title:`mkdir — нова папка в Провіднику`,
+    panel:'explorer',
+    fs0:{path:`C:\\PBI`,items:[{n:`Sales.pbip`,k:'file'}]},
+    steps:[
+      {t:'type',s:`mkdir zvit`},
+      {t:'fx',op:'add',n:`zvit`,k:'folder'},
+      {t:'fx',op:'mark',n:`zvit`},
+      {t:'note',s:`Це те саме, що в Провіднику Windows натиснути правою кнопкою миші → «Створити» → «Папку» і назвати її zvit.`}
+    ]
+  },
+  git_commit:{
+    title:`git commit — новий знімок в історії репозиторію`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git commit -m "нова міра Total Sales"`},
+      {t:'out',s:[`[main c3f1a02] нова міра Total Sales`,` 1 file changed, 1 insertion(+)`]},
+      {t:'fx',op:'commit',id:'c3',msg:`нова міра Total Sales`,par:['c2'],br:'main'},
+      {t:'fx',op:'mark',id:'c3'},
+      {t:'note',s:`git commit зберігає знімок staging-зони як новий коміт c3. Гілка main і HEAD одразу переїжджають на нього.`}
+    ]
+  },
+  cd:{
+    title:`cd — перейти в іншу папку`,
+    panel:'explorer',
+    fs0:{path:`C:\\PBI\\zvit`,items:[{n:`report.pbip`,k:'file'},{n:`definition`,k:'folder'}]},
+    steps:[
+      {t:'type',s:`cd definition`},
+      {t:'fx',op:'cwd',path:`C:\\PBI\\zvit\\definition`,items:[{n:`model.tmdl`,k:'file'},{n:`relationships.tmdl`,k:'file'},{n:`tables`,k:'folder'}]},
+      {t:'note',s:`Те саме, що двічі клікнути по папці definition в Провіднику: вікно показує вже її вміст, а заголовок угорі змінюється на новий шлях.`}
+    ]
+  },
+  ls:{
+    title:`ls — показати вміст поточної папки`,
+    panel:'explorer',
+    fs0:{path:`C:\\PBI\\zvit\\definition`,items:[{n:`model.tmdl`,k:'file'},{n:`relationships.tmdl`,k:'file'},{n:`tables`,k:'folder'}]},
+    steps:[
+      {t:'type',s:`ls`},
+      {t:'out',s:[`model.tmdl  relationships.tmdl  tables/`]},
+      {t:'fx',op:'mark',n:`model.tmdl`},
+      {t:'fx',op:'mark',n:`relationships.tmdl`},
+      {t:'fx',op:'mark',n:`tables`},
+      {t:'note',s:`ls — той самий список, що ти бачиш у вікні Провідника, тільки текстом: не треба відкривати окреме вікно, щоб перевірити, що лежить поруч.`}
+    ]
+  },
+  pwd:{
+    title:`pwd — де я зараз`,
+    panel:'explorer',
+    fs0:{path:`C:\\PBI\\zvit\\definition\\tables`,items:[{n:`Sales.tmdl`,k:'file'},{n:`Customer.tmdl`,k:'file'}]},
+    steps:[
+      {t:'type',s:`pwd`},
+      {t:'out',s:[`/c/PBI/zvit/definition/tables`]},
+      {t:'fx',op:'mark',n:`Sales.tmdl`},
+      {t:'note',s:`pwd друкує повний шлях до поточної папки — так само, як рядок з адресою (breadcrumb) вгорі вікна Провідника показує, де ти перебуваєш. Підсвічене праворуч — вміст саме цієї папки.`}
+    ]
+  },
+  cp:{
+    title:`cp — скопіювати файл`,
+    panel:'explorer',
+    fs0:{path:`C:\\PBI\\zvit\\definition\\tables`,items:[{n:`Sales.tmdl`,k:'file'},{n:`Customer.tmdl`,k:'file'}]},
+    steps:[
+      {t:'type',s:`cp Sales.tmdl Sales_backup.tmdl`},
+      {t:'fx',op:'add',n:`Sales_backup.tmdl`,k:'file'},
+      {t:'note',s:`Те саме, що Ctrl+C → Ctrl+V у Провіднику: оригінал Sales.tmdl лишається на місці, а поруч з'являється його копія з новою назвою.`}
+    ]
+  },
+  mv:{
+    title:`mv — перейменувати або перемістити файл`,
+    panel:'explorer',
+    fs0:{path:`C:\\PBI\\zvit\\definition\\tables`,items:[{n:`Sales.tmdl`,k:'file'},{n:`Customer.tmdl`,k:'file'},{n:`Sales_backup.tmdl`,k:'file'}]},
+    steps:[
+      {t:'type',s:`mv Sales_backup.tmdl Sales_old.tmdl`},
+      {t:'fx',op:'ren',from:`Sales_backup.tmdl`,to:`Sales_old.tmdl`},
+      {t:'note',s:`mv вміє і перейменовувати (як F2 у Провіднику), і переносити файл в іншу папку — залежно від того, що вказано другим аргументом.`}
+    ]
+  },
+  rm:{
+    title:`rm — видалити файл`,
+    panel:'explorer',
+    fs0:{path:`C:\\PBI\\zvit\\definition\\tables`,items:[{n:`Sales.tmdl`,k:'file'},{n:`Customer.tmdl`,k:'file'},{n:`Sales_old.tmdl`,k:'file'}]},
+    steps:[
+      {t:'type',s:`rm Sales_old.tmdl`},
+      {t:'fx',op:'del',n:`Sales_old.tmdl`},
+      {t:'note',s:`На відміну від Delete у Провіднику, rm не кладе файл у кошик — він зникає одразу і безповоротно. Подумай двічі, перш ніж тиснути Enter.`}
+    ]
+  },
+  git_init:{
+    title:`git init — почати відстежувати папку Git-ом`,
+    panel:'explorer',
+    fs0:{path:`C:\\PBI\\zvit`,items:[{n:`report.pbip`,k:'file'},{n:`definition`,k:'folder'}]},
+    steps:[
+      {t:'type',s:`git init`},
+      {t:'out',s:[`Initialized empty Git repository in C:/PBI/zvit/.git/`]},
+      {t:'fx',op:'add',n:`.git`,k:'folder'},
+      {t:'note',s:`Git створив папку .git — вона прихована і в Провіднику зазвичай не видна, але саме в ній зберігається вся історія проєкту. Не видаляй її: без неї немає репозиторію.`}
+    ]
+  },
+  git_status:{
+    title:`git status — що змінилось`,
+    panel:'files',
+    files0:{'definition/model.tmdl':'modified','definition/tables/Sales.tmdl':'untracked','report/report.json':'clean'},
+    steps:[
+      {t:'type',s:`git status`},
+      {t:'out',s:[
+        `On branch main`,
+        `Changes not staged for commit:`,
+        `        modified:   definition/model.tmdl`,
+        `Untracked files:`,
+        `        definition/tables/Sales.tmdl`
+      ]},
+      {t:'fx',op:'mark',n:`definition/model.tmdl`},
+      {t:'fx',op:'mark',n:`definition/tables/Sales.tmdl`},
+      {t:'fx',op:'mark',n:`report/report.json`},
+      {t:'note',s:`status — це фотографія поточного стану: що ти чіпав (modified), що зовсім нове (untracked) і що вже збережено й не змінювалось (clean).`}
+    ]
+  },
+  git_add:{
+    title:`git add — покласти зміни в кошик staging`,
+    panel:'files',
+    files0:{'definition/model.tmdl':'modified','definition/tables/Sales.tmdl':'untracked'},
+    steps:[
+      {t:'type',s:`git add .`},
+      {t:'fx',op:'set',n:`definition/model.tmdl`,to:'staged'},
+      {t:'fx',op:'set',n:`definition/tables/Sales.tmdl`,to:'staged'},
+      {t:'note',s:`git add складає файли у «кошик» staging — це список того, що потрапить у наступний коміт. Сам коміт цим ще не створюється.`}
+    ]
+  },
+  git_restore:{
+    title:`git restore — відкинути незакомічені зміни`,
+    panel:'files',
+    files0:{'definition/model.tmdl':'modified'},
+    steps:[
+      {t:'type',s:`git restore definition/model.tmdl`},
+      {t:'fx',op:'set',n:`definition/model.tmdl`,to:'clean'},
+      {t:'note',s:`Увага: зміни, яких не було у staging чи коміті, ЗНИКАЮТЬ безповоротно — файл повертається до останньої збереженої версії, ніби ти нічого й не міняв.`}
+    ]
+  },
+  git_stash:{
+    title:`git stash — тимчасово прибрати зміни зі столу`,
+    panel:'files',
+    files0:{'report/pages/kpi/visual.json':'modified'},
+    steps:[
+      {t:'type',s:`git stash`},
+      {t:'out',s:[`Saved working directory and index state WIP on feature/kpi-cards: 3f1a02 нова міра Total Sales`]},
+      {t:'fx',op:'set',n:`report/pages/kpi/visual.json`,to:'clean'},
+      {t:'note',s:`Це як прибрати недороблені нотатки в шухляду: файли знову чисті, але зміни нікуди не зникли — git stash pop поверне їх звідти ж, де ти їх лишив.`}
+    ]
+  },
+  git_log:{
+    title:`git log — історія комітів`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'c3',msg:`нова міра Total Sales`,par:['c2'],br:'main'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git log --oneline`},
+      {t:'out',s:[`c3f1a02 нова міра Total Sales`,`a92e771 нова таблиця Sales`,`d10f4ab перша версія звіту`]},
+      {t:'fx',op:'mark',id:'c3'},
+      {t:'fx',op:'mark',id:'c2'},
+      {t:'fx',op:'mark',id:'c1'},
+      {t:'note',s:`log читається згори вниз — від найновішого коміту до найстарішого, як стрічка нотаток у щоденнику.`}
+    ]
+  },
+  git_branch:{
+    title:`git branch — нова гілка`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git branch feature/kpi`},
+      {t:'fx',op:'branch',n:`feature/kpi`,at:'c2'},
+      {t:'note',s:`git branch лише чіпляє нову табличку-закладку на поточний коміт. Жоден файл не змінився, HEAD і досі на main — щоб перейти на нову гілку, потрібен git switch.`}
+    ]
+  },
+  git_switch:{
+    title:`git switch — перейти на іншу гілку`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'f1',msg:`чернетка KPI-картки`,par:['c1'],br:'feature/kpi'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git switch feature/kpi`},
+      {t:'out',s:[`Switched to branch 'feature/kpi'`]},
+      {t:'fx',op:'head',to:'feature/kpi'},
+      {t:'note',s:`HEAD — це вказівник «де я зараз». switch просто переставляє його на іншу гілку; файли в робочій папці підлаштовуються під той коміт.`}
+    ]
+  },
+  git_merge:{
+    title:`git merge — злити гілку в main`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'f1',msg:`KPI-картка`,par:['c1'],br:'feature/kpi'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git merge feature/kpi`},
+      {t:'out',s:[`Merge made by the 'ort' strategy.`,` report/pages/kpi/visual.json | 40 ++++++++++++++++++++++`]},
+      {t:'fx',op:'commit',id:'m1',msg:`Merge branch 'feature/kpi'`,par:['c2','f1'],br:'main'},
+      {t:'fx',op:'head',to:'main'},
+      {t:'note',s:`Merge-коміт особливий: у нього ДВА батьки — останній коміт main і останній коміт feature/kpi. Так в історії видно, що дві лінії розробки з'єднались.`}
+    ]
+  },
+  git_reset:{
+    title:`git reset --hard — відкотити гілку назад`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'c3',msg:`експериментальна міра (не працює)`,par:['c2'],br:'main'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git reset --hard HEAD~1`},
+      {t:'out',s:[`HEAD is now at a92e771 нова таблиця Sales`]},
+      {t:'fx',op:'tip',br:'main',to:'c2'},
+      {t:'fx',op:'mark',id:'c3'},
+      {t:'note',s:`Гілка main тепер вказує на c2, а c3 лишився в базі, але до нього більше не веде жодна стрілка — на схемі він напівпрозорий. Якщо c3 вже потрапив на сервер до інших, reset --hard небезпечний: у колег історія розійдеться з твоєю.`}
+    ]
+  },
+  git_revert:{
+    title:`git revert — безпечно скасувати коміт`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'c3',msg:`експериментальна міра (не працює)`,par:['c2'],br:'main'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git revert HEAD`},
+      {t:'out',s:[`[main c4a1f9e] Revert "експериментальна міра (не працює)"`,` 1 file changed, 1 deletion(-)`]},
+      {t:'fx',op:'commit',id:'c4',msg:`revert: експериментальна міра (не працює)`,par:['c3'],br:'main'},
+      {t:'fx',op:'mark',id:'c4'},
+      {t:'note',s:`revert не стирає c3 з історії — він додає новий коміт c4, який скасовує його зміни. Це безпечніше за reset: історія лише росте вперед, і колеги, які вже мають c3, спокійно підтягнуть c4 звичайним pull.`}
+    ]
+  },
+  git_clone:{
+    title:`git clone — скачати повну копію репозиторію`,
+    panel:'remote',
+    remote0:{local:0,remote:3},
+    steps:[
+      {t:'type',s:`git clone https://github.com/team/pbi-reports.git`},
+      {t:'out',s:[`Cloning into 'pbi-reports'...`,`remote: Enumerating objects: 12, done.`,`Receiving objects: 100% (12/12), done.`]},
+      {t:'fx',op:'recv',n:3},
+      {t:'note',s:`clone — це не «підписка» на зміни, а повна копія: увесь репозиторій разом з усією історією комітів опиняється на твоєму комп'ютері.`}
+    ]
+  },
+  git_push:{
+    title:`git push — відправити коміти на сервер`,
+    panel:'remote',
+    remote0:{local:3,remote:1},
+    steps:[
+      {t:'type',s:`git push`},
+      {t:'out',s:[`To https://github.com/team/pbi-reports.git`,`   a1b2c3d..f9e8d7c  main -> main`]},
+      {t:'fx',op:'send',n:2},
+      {t:'note',s:`push доганяє GitHub твоїми новими комітами. Локальні коміти нікуди не зникають — просто тепер вони є і на сервері, і колеги зможуть їх забрати.`}
+    ]
+  },
+  git_pull:{
+    title:`git pull — забрати нові коміти з сервера`,
+    panel:'remote',
+    remote0:{local:1,remote:3},
+    steps:[
+      {t:'type',s:`git pull`},
+      {t:'out',s:[`Updating a1b2c3d..f9e8d7c`,`Fast-forward`]},
+      {t:'fx',op:'recv',n:2},
+      {t:'note',s:`pull підтягує коміти, яких на GitHub з'явилось більше, ніж у тебе, і одразу вливає їх у поточну гілку — робочі файли теж оновлюються.`}
+    ]
+  },
+  git_fetch:{
+    title:`git fetch — подивитись на нові коміти, не вливаючи їх`,
+    panel:'remote',
+    remote0:{local:1,remote:3},
+    steps:[
+      {t:'type',s:`git fetch`},
+      {t:'out',s:[`From https://github.com/team/pbi-reports`,`   a1b2c3d..f9e8d7c  main -> origin/main`]},
+      {t:'fx',op:'recv',n:2},
+      {t:'note',s:`fetch і pull відрізняються так: fetch лише розвідує, що нового на сервері (подивитись), а pull ще й одразу вливає ці зміни у твою гілку (влити). Після fetch робочі файли не зміняться, поки ти сам не зробиш merge чи pull.`}
+    ]
+  }
+};
+function caWait(ms){return new Promise(res=>setTimeout(res,ms));}
+function caReduced(){try{return typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}}
+async function caType(bodyEl,text,reduced){
+  const line=document.createElement('div');line.className='ca-line';
+  if(reduced){line.innerHTML=`<span class="tw-p">$</span> <span class="tw-c">${escapeHTML(text)}</span>`;bodyEl.appendChild(line);return;}
+  line.innerHTML=`<span class="tw-p">$</span> <span class="tw-c"></span><span class="ca-cursor">▌</span>`;
+  bodyEl.appendChild(line);
+  const cmdSpan=line.querySelector('.tw-c'),cur=line.querySelector('.ca-cursor');
+  let shown='';
+  for(let i=0;i<text.length;i++){shown+=text[i];cmdSpan.textContent=shown;bodyEl.scrollTop=bodyEl.scrollHeight;await caWait(35);}
+  if(cur)cur.remove();
+  await caWait(280);
+}
+async function caOut(bodyEl,lines,reduced){
+  if(reduced){(lines||[]).forEach(l=>{bodyEl.insertAdjacentHTML('beforeend',`<div class="ca-line tw-o">${escapeHTML(l)}</div>`);});return;}
+  for(const l of (lines||[])){
+    bodyEl.insertAdjacentHTML('beforeend',`<div class="ca-line tw-o">${escapeHTML(l)}</div>`);
+    bodyEl.scrollTop=bodyEl.scrollHeight;
+    await caWait(200);
+  }
+}
+function caExplorerHtml(items){
+  if(!items||!items.length)return `<div class="ca-eempty">папка порожня</div>`;
+  return `<div class="ca-elist">${items.map(it=>`<div class="ca-erow" data-n="${escapeHTML(it.n)}"><span class="ca-eicon">${it.k==='folder'?'📁':'📄'}</span><span class="ca-ename">${escapeHTML(it.n)}</span></div>`).join('')}</div>`;
+}
+function caFindRowIn(appBody,sel,name){return Array.prototype.find.call(appBody.querySelectorAll(sel),r=>r.dataset.n===name)||null;}
+function caFindRow(appBody,name){return caFindRowIn(appBody,'.ca-erow',name);}
+function caDoAdd(appBody,items,step,reduced){
+  items.push({n:step.n,k:step.k||'file'});
+  let wrap=appBody.querySelector('.ca-elist');
+  if(!wrap){appBody.innerHTML='<div class="ca-elist"></div>';wrap=appBody.querySelector('.ca-elist');}
+  const row=document.createElement('div');
+  row.className='ca-erow'+(reduced?'':' ca-enter');
+  row.dataset.n=step.n;
+  row.innerHTML=`<span class="ca-eicon">${step.k==='folder'?'📁':'📄'}</span><span class="ca-ename">${escapeHTML(step.n)}</span>`;
+  wrap.appendChild(row);
+  return reduced?Promise.resolve():caWait(420);
+}
+function caDoDel(appBody,items,step,reduced){
+  const idx=items.findIndex(x=>x.n===step.n);if(idx>=0)items.splice(idx,1);
+  const row=caFindRow(appBody,step.n);
+  if(!row)return Promise.resolve();
+  if(reduced){row.remove();return Promise.resolve();}
+  row.classList.add('ca-leaving');
+  return caWait(380).then(()=>row.remove());
+}
+function caDoRen(appBody,items,step,reduced){
+  const it=items.find(x=>x.n===step.from);if(it)it.n=step.to;
+  const row=caFindRow(appBody,step.from);
+  if(!row)return Promise.resolve();
+  if(reduced){row.dataset.n=step.to;const nm=row.querySelector('.ca-ename');if(nm)nm.textContent=step.to;return Promise.resolve();}
+  row.classList.add('ca-renaming');
+  return caWait(360).then(()=>{row.dataset.n=step.to;const nm=row.querySelector('.ca-ename');if(nm)nm.textContent=step.to;row.classList.remove('ca-renaming');});
+}
+function caDoMark(appBody,step,reduced,sel){
+  const row=caFindRowIn(appBody,sel||'.ca-erow',step.n);
+  if(!row||reduced)return Promise.resolve();
+  row.classList.remove('ca-markpulse');void row.offsetWidth;row.classList.add('ca-markpulse');
+  return caWait(700);
+}
+function caDoCwd(appBody,items,step,reduced,titleEl){
+  const newItems=(step.items||[]).map(x=>({n:x.n,k:x.k||'file'}));
+  function apply(){
+    items.length=0;newItems.forEach(x=>items.push(x));
+    if(titleEl)titleEl.textContent=`Провідник — ${step.path}`;
+    appBody.innerHTML=caExplorerHtml(items);
+  }
+  if(reduced){apply();return Promise.resolve();}
+  appBody.classList.add('ca-fading');
+  return caWait(220).then(()=>{apply();appBody.classList.remove('ca-fading');return caWait(240);});
+}
+function caApplyExplorerFx(appBody,items,step,reduced,titleEl){
+  if(step.op==='add')return caDoAdd(appBody,items,step,reduced);
+  if(step.op==='del')return caDoDel(appBody,items,step,reduced);
+  if(step.op==='ren')return caDoRen(appBody,items,step,reduced);
+  if(step.op==='mark')return caDoMark(appBody,step,reduced);
+  if(step.op==='cwd')return caDoCwd(appBody,items,step,reduced,titleEl);
+  return Promise.resolve();
+}
+function caRepoStateInit(repo0){
+  const commits={},order=[],branches={};
+  (repo0.commits||[]).forEach(c=>{commits[c.id]={id:c.id,msg:c.msg,par:(c.par||[]).slice(),br:c.br||'main'};order.push(c.id);branches[c.br||'main']=c.id;});
+  return {commits,order,branches,head:repo0.head||'main'};
+}
+function caReachable(state){
+  const seen={};
+  const stack=Object.keys(state.branches).map(br=>state.branches[br]);
+  while(stack.length){
+    const id=stack.pop();
+    if(!id||seen[id])continue;
+    seen[id]=true;
+    const c=state.commits[id];
+    if(c)(c.par||[]).forEach(p=>stack.push(p));
+  }
+  return seen;
+}
+function caRepoSvg(state,pulseId){
+  const ids=state.order;
+  if(!ids.length)return `<div class="ca-rempty">історія порожня</div>`;
+  const reach=caReachable(state);
+  const laneOf={};let laneSeq=0;
+  ids.forEach(id=>{const br=state.commits[id].br;if(!(br in laneOf))laneOf[br]=laneSeq++;});
+  const r=13,colW=74,rowH=52,topPad=32,leftPad=28;
+  const pos={};
+  ids.forEach((id,i)=>{const c=state.commits[id];pos[id]={x:leftPad+i*colW,y:topPad+laneOf[c.br]*rowH};});
+  let edges='';
+  ids.forEach(id=>{
+    const c=state.commits[id];
+    const ghostEdge=!reach[id];
+    (c.par||[]).forEach(pid=>{
+      const a=pos[id],b=pos[pid];if(!b)return;
+      const col=BR[c.br]||'#556';
+      const op=ghostEdge?' opacity="0.3"':'';
+      if(a.y===b.y)edges+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${col}" stroke-width="2"${op}/>`;
+      else{const mx=(a.x+b.x)/2;edges+=`<path d="M${a.x} ${a.y} C ${mx} ${a.y} ${mx} ${b.y} ${b.x} ${b.y}" fill="none" stroke="${col}" stroke-width="2"${op}/>`;}
+    });
+  });
+  let circ='';
+  ids.forEach(id=>{
+    const c=state.commits[id],p=pos[id],col=BR[c.br]||'#556';
+    const ghost=!reach[id];
+    const cls='ca-cnode'+(id===pulseId?' ca-pulse':'')+(ghost?' ca-cnode-ghost':'');
+    circ+=`<circle class="${cls}" cx="${p.x}" cy="${p.y}" r="${r}" fill="${col}" stroke="#ffffff" stroke-width="2"${ghost?' opacity="0.35"':''}/>`;
+    circ+=`<text x="${p.x}" y="${p.y+3}" text-anchor="middle" font-size="9" font-weight="700" fill="#16202d" font-family="JetBrains Mono,monospace"${ghost?' opacity="0.55"':''}>${escapeHTML(id)}</text>`;
+  });
+  let badges='';
+  Object.keys(state.branches).forEach(br=>{
+    const tip=state.branches[br],p=pos[tip];if(!p)return;
+    const isHead=state.head===br,label=br+(isHead?' • HEAD':'');
+    const w=label.length*6.6+16,by=p.y-r-24,col=BR[br]||'#889';
+    badges+=`<line x1="${p.x}" y1="${by+18}" x2="${p.x}" y2="${p.y-r}" stroke="${col}" stroke-width="1.2" stroke-dasharray="2 2"/>`;
+    badges+=`<rect x="${p.x-w/2}" y="${by}" width="${w}" height="18" rx="9" fill="${isHead?col:'none'}" stroke="${col}" stroke-width="1.4"/>`;
+    badges+=`<text x="${p.x}" y="${by+13}" text-anchor="middle" font-size="9.5" font-weight="700" fill="${isHead?'#0c0f14':col}" font-family="JetBrains Mono,monospace">${escapeHTML(label)}</text>`;
+  });
+  const maxLane=Math.max(...Object.values(laneOf));
+  const width=leftPad*2+(ids.length-1)*colW+r*2+30;
+  const height=topPad+maxLane*rowH+r*2+30;
+  return `<svg viewBox="0 0 ${width} ${height}" width="100%" style="max-width:${Math.round(width)}px" xmlns="http://www.w3.org/2000/svg">${edges}${badges}${circ}</svg>`;
+}
+function caApplyRepoFx(appBody,state,step,reduced){
+  if(step.op==='commit'){
+    state.commits[step.id]={id:step.id,msg:step.msg||'',par:(step.par||[]).slice(),br:step.br||state.head};
+    state.order.push(step.id);
+    state.branches[step.br||state.head]=step.id;
+    appBody.innerHTML=caRepoSvg(state,null);
+    return reduced?Promise.resolve():caWait(420);
+  }
+  if(step.op==='branch'){
+    state.branches[step.n]=step.at||state.branches[state.head];
+    appBody.innerHTML=caRepoSvg(state,null);
+    return reduced?Promise.resolve():caWait(420);
+  }
+  if(step.op==='head'){
+    state.head=step.to;
+    appBody.innerHTML=caRepoSvg(state,null);
+    return reduced?Promise.resolve():caWait(420);
+  }
+  if(step.op==='tip'){
+    state.branches[step.br]=step.to;
+    appBody.innerHTML=caRepoSvg(state,null);
+    return reduced?Promise.resolve():caWait(420);
+  }
+  if(step.op==='mark'){
+    appBody.innerHTML=caRepoSvg(state,step.id);
+    return reduced?Promise.resolve():caWait(700);
+  }
+  return Promise.resolve();
+}
+const CA_FILE_LABEL={untracked:`новий`,modified:`змінено`,staged:`у кошику staging`,clean:`збережено`};
+function caFilesHtml(files){
+  const names=Object.keys(files||{});
+  if(!names.length)return `<div class="ca-eempty">файлів немає</div>`;
+  return `<div class="ca-flist">${names.map(n=>`<div class="ca-frow" data-n="${escapeHTML(n)}"><span class="ca-fname">${escapeHTML(n)}</span><span class="ca-fbadge st-${files[n]}">${escapeHTML(CA_FILE_LABEL[files[n]]||files[n])}</span></div>`).join('')}</div>`;
+}
+function caDoSet(appBody,files,step,reduced){
+  files[step.n]=step.to;
+  const row=caFindRowIn(appBody,'.ca-frow',step.n);
+  if(!row)return Promise.resolve();
+  const badge=row.querySelector('.ca-fbadge');
+  if(!badge)return Promise.resolve();
+  badge.className='ca-fbadge st-'+step.to;
+  badge.textContent=CA_FILE_LABEL[step.to]||step.to;
+  if(reduced)return Promise.resolve();
+  badge.classList.remove('ca-fpulse');void badge.offsetWidth;badge.classList.add('ca-fpulse');
+  return caWait(700);
+}
+function caApplyFilesFx(appBody,files,step,reduced){
+  if(step.op==='set')return caDoSet(appBody,files,step,reduced);
+  if(step.op==='mark')return caDoMark(appBody,step,reduced,'.ca-frow');
+  return Promise.resolve();
+}
+function caCommitWord(n){
+  const n10=n%10,n100=n%100;
+  if(n100>=11&&n100<=14)return `комітів`;
+  if(n10===1)return `коміт`;
+  if(n10>=2&&n10<=4)return `коміти`;
+  return `комітів`;
+}
+function caRemoteHtml(state,dir){
+  const ico=dir==='send'?'→':(dir==='recv'?'←':'⇄');
+  const dots=n=>Array.from({length:n}).map(()=>`<span class="ca-rdot"></span>`).join('');
+  return `<div class="ca-remote">
+    <div class="ca-rbox" data-side="local"><div class="ca-rlabel">Твій ПК</div><div class="ca-rdots">${dots(state.local)}</div><div class="ca-rcount">${state.local} ${caCommitWord(state.local)}</div></div>
+    <div class="ca-rarrow${dir?' ca-rarrow-active':''}" data-dir="${dir||'none'}"><span class="ca-rarrow-ico">${ico}</span></div>
+    <div class="ca-rbox" data-side="remote"><div class="ca-rlabel">GitHub</div><div class="ca-rdots">${dots(state.remote)}</div><div class="ca-rcount">${state.remote} ${caCommitWord(state.remote)}</div></div>
+  </div>`;
+}
+function caDoTransfer(appBody,state,step,dir,reduced){
+  const n=Math.max(1,step.n||1);
+  if(dir==='send')state.remote+=n;else state.local+=n;
+  appBody.innerHTML=caRemoteHtml(state,dir);
+  if(reduced)return Promise.resolve();
+  const destSel=dir==='send'?'.ca-rbox[data-side="remote"] .ca-rdot':'.ca-rbox[data-side="local"] .ca-rdot';
+  const dots=appBody.querySelectorAll(destSel);
+  for(let i=Math.max(0,dots.length-n);i<dots.length;i++)dots[i].classList.add('ca-rdot-in');
+  return caWait(650);
+}
+function caDoMarkRemote(appBody,reduced){
+  const boxes=appBody.querySelectorAll('.ca-rbox');
+  if(!boxes.length||reduced)return Promise.resolve();
+  boxes.forEach(b=>b.classList.remove('ca-markpulse'));
+  void appBody.offsetWidth;
+  boxes.forEach(b=>b.classList.add('ca-markpulse'));
+  return caWait(700);
+}
+function caApplyRemoteFx(appBody,state,step,reduced){
+  if(step.op==='send')return caDoTransfer(appBody,state,step,'send',reduced);
+  if(step.op==='recv')return caDoTransfer(appBody,state,step,'recv',reduced);
+  if(step.op==='mark')return caDoMarkRemote(appBody,reduced);
+  return Promise.resolve();
+}
+function buildCmdanim(){
+  document.querySelectorAll('.cmdanim').forEach(el=>{
+    if(el.dataset.built)return;el.dataset.built='1';
+    const key=el.dataset.ca,t=CMDANIM[key];
+    if(!t){el.innerHTML=`<div class="ca-title">Анімацію не знайдено</div>`;return;}
+    let appName;
+    if(t.panel==='repo')appName=`Історія репозиторію`;
+    else if(t.panel==='files')appName=`Файли проєкту`;
+    else if(t.panel==='remote')appName=`Твій ПК ⇄ GitHub`;
+    else appName=`Провідник — ${t.fs0?t.fs0.path:''}`;
+    el.innerHTML=`<div class="ca-title">${escapeHTML(t.title)}</div>
+      <div class="ca-desk">
+        <div class="term-win ca-term"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">Git Bash</span></div>
+          <div class="tw-body ca-body"></div></div>
+        <div class="ca-app"><div class="tw-bar"><span class="tw-title">${escapeHTML(appName)}</span></div>
+          <div class="ca-app-body"></div></div>
+      </div>
+      <div class="ca-note"></div>
+      <button class="ca-play">▶ Показати, що робить команда</button>`;
+    const bodyTerm=el.querySelector('.ca-body'),appBody=el.querySelector('.ca-app-body'),noteEl=el.querySelector('.ca-note'),btn=el.querySelector('.ca-play'),titleEl=el.querySelector('.ca-app .tw-title');
+    let items=null,repoState=null,filesState=null,remoteState=null;
+    function resetVisual(){
+      items=t.fs0?t.fs0.items.map(x=>({n:x.n,k:x.k})):null;
+      repoState=t.repo0?caRepoStateInit(t.repo0):null;
+      filesState=t.files0?Object.assign({},t.files0):null;
+      remoteState=t.remote0?Object.assign({},t.remote0):null;
+      bodyTerm.innerHTML=`<div class="ca-line"><span class="tw-p">$</span> <span class="ca-cursor">▌</span></div>`;
+      noteEl.innerHTML=`Натисни кнопку нижче — побачиш анімацію по кроках.`;
+      if(titleEl)titleEl.textContent=appName;
+      if(t.panel==='repo')appBody.innerHTML=caRepoSvg(repoState,null);
+      else if(t.panel==='files')appBody.innerHTML=caFilesHtml(filesState);
+      else if(t.panel==='remote')appBody.innerHTML=caRemoteHtml(remoteState);
+      else appBody.innerHTML=caExplorerHtml(items);
+    }
+    resetVisual();
+    btn.addEventListener('click',async()=>{
+      btn.disabled=true;
+      resetVisual();
+      bodyTerm.innerHTML='';
+      const reduced=caReduced();
+      const notes=[];
+      for(const step of (t.steps||[])){
+        if(step.t==='type')await caType(bodyTerm,step.s,reduced);
+        else if(step.t==='out')await caOut(bodyTerm,step.s,reduced);
+        else if(step.t==='pause'){if(!reduced)await caWait(step.ms||500);}
+        else if(step.t==='note'){
+          if(reduced){notes.push(step.s);noteEl.innerHTML=notes.map(escapeHTML).join('<br>');}
+          else noteEl.innerHTML=escapeHTML(step.s);
+        }
+        else if(step.t==='fx'){
+          switch(t.panel){
+            case 'repo':await caApplyRepoFx(appBody,repoState,step,reduced);break;
+            case 'files':await caApplyFilesFx(appBody,filesState,step,reduced);break;
+            case 'remote':await caApplyRemoteFx(appBody,remoteState,step,reduced);break;
+            default:await caApplyExplorerFx(appBody,items,step,reduced,titleEl);
+          }
+        }
+      }
+      btn.disabled=false;btn.textContent='⟲ Ще раз';
+    });
+  });
+}
+
 /* === 12c. ДАНІ ПРАКТИКУМУ === */
 const TERMLAB={
   tl_pbip_init:{
@@ -1960,6 +2546,7 @@ cs_02_add_one:{t:`Додай у staging лише файл <code>model.tmdl</code
 });
 window.__TL__={bank:TERMLAB,newState:tlNewState,run:tlRun,check:tlCheckGoal,goalKeys:TL_GOAL_KEYS};
 window.__CSIM__=CSIM;
+window.__CA__={bank:CMDANIM};
 
 /* === 13. ПРОГРЕС (localStorage) === */
 const LS_PREFIX='gfp:';
@@ -2117,6 +2704,364 @@ function initVersionCheck(){
   });
 }
 
+/* === 15c. СХЕМИ ПРОГРАМ (uimock) === */
+const UIMOCK={
+  win_open_terminal:{title:`Як відкрити Git Bash у Windows`,
+    cap:`Два способи відкрити термінал: ① через меню Пуск (ввести «git bash»), ② через праву кнопку миші в потрібній папці — цей спосіб одразу відкриє термінал саме в ній.`,
+    svg:`<svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs>
+<clipPath id="cwotA"><rect x="20" y="20" width="680" height="195" rx="10"/></clipPath>
+<clipPath id="cwotB"><rect x="20" y="225" width="680" height="195" rx="10"/></clipPath>
+</defs>
+<rect x="20" y="20" width="680" height="195" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cwotA)">
+<rect x="20" y="20" width="680" height="28" fill="#f4f5f8"/>
+<text x="34" y="39" font-size="11" font-weight="600" fill="#5b6473">Пуск</text>
+<text x="692" y="39" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<circle cx="40" cy="66" r="13" fill="#5b5bd6"/>
+<text x="40" y="70" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="62" y="70" font-size="13" font-weight="700" fill="#1f2430">Меню Пуск: пошук «git bash»</text>
+<rect x="250" y="84" width="220" height="26" rx="13" fill="#ffffff" stroke="#e7e8ee"/>
+<circle cx="264" cy="97" r="4" fill="none" stroke="#9aa0ad" stroke-width="1.5"/>
+<line x1="267" y1="100" x2="271" y2="104" stroke="#9aa0ad" stroke-width="1.5"/>
+<text x="278" y="101" font-size="12" font-family="monospace" fill="#1f2430">git bash</text>
+<rect x="140" y="118" width="440" height="36" rx="6" fill="#5b5bd6" fill-opacity="0.12" stroke="#5b5bd6"/>
+<rect x="150" y="126" width="20" height="20" rx="4" fill="#5b5bd6"/>
+<text x="160" y="140" font-size="10" font-family="monospace" fill="#ffffff" text-anchor="middle">&gt;_</text>
+<text x="180" y="137" font-size="13" font-weight="700" fill="#1f2430">Git Bash</text>
+<text x="180" y="153" font-size="10" fill="#5b6473">Застосунок</text>
+<rect x="140" y="154" width="440" height="24" fill="#f4f5f8"/>
+<text x="160" y="170" font-size="11" fill="#5b6473">Git GUI — Застосунок</text>
+<rect x="140" y="178" width="440" height="24" fill="#f4f5f8"/>
+<text x="160" y="194" font-size="11" fill="#5b6473">Git CMD — Застосунок</text>
+</g>
+<rect x="20" y="225" width="680" height="195" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cwotB)">
+<rect x="20" y="225" width="680" height="28" fill="#f4f5f8"/>
+<text x="34" y="244" font-size="11" font-weight="600" fill="#5b6473">Провідник</text>
+<text x="692" y="244" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<circle cx="40" cy="271" r="13" fill="#5b5bd6"/>
+<text x="40" y="275" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<text x="62" y="275" font-size="13" font-weight="700" fill="#1f2430">Права кнопка миші в папці</text>
+<rect x="40" y="289" width="330" height="112" rx="6" fill="#f4f5f8" stroke="#e7e8ee"/>
+<rect x="58" y="305" width="18" height="15" fill="#9aa0ad" fill-opacity="0.5"/>
+<text x="84" y="317" font-size="11" fill="#5b6473">report.pbip</text>
+<rect x="58" y="335" width="18" height="15" fill="#9aa0ad" fill-opacity="0.5"/>
+<text x="84" y="347" font-size="11" fill="#5b6473">definition</text>
+<rect x="58" y="365" width="18" height="15" fill="#9aa0ad" fill-opacity="0.5"/>
+<text x="84" y="377" font-size="11" fill="#5b6473">README.md</text>
+<rect x="398" y="295" width="270" height="122" fill="#000000" opacity="0.06"/>
+<rect x="393" y="290" width="270" height="122" rx="6" fill="#ffffff" stroke="#e7e8ee"/>
+<text x="405" y="313" font-size="11" fill="#1f2430">Open</text>
+<text x="405" y="335" font-size="11" fill="#1f2430">Open in Terminal</text>
+<rect x="393" y="342" width="270" height="24" fill="#5b5bd6" fill-opacity="0.15"/>
+<text x="405" y="358" font-size="11" font-weight="700" fill="#5b5bd6">Open Git Bash here</text>
+<text x="405" y="381" font-size="11" fill="#1f2430">Open PowerShell here</text>
+<text x="405" y="403" font-size="11" fill="#1f2430">Properties</text>
+</g>
+</svg>`},
+  explorer_git:{title:`Папка .git у Провіднику Windows`,
+    cap:`Папка .git з'являється в кожному git-репозиторії — саме там Git зберігає всю історію комітів. Вона напівпрозора й приховувана: руками в ній нічого не чіпають.`,
+    svg:`<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs>
+<clipPath id="ceg"><rect x="20" y="20" width="680" height="380" rx="10"/></clipPath>
+<marker id="arr-eg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#5b5bd6"/></marker>
+</defs>
+<rect x="20" y="20" width="680" height="380" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#ceg)">
+<rect x="20" y="20" width="680" height="32" fill="#f4f5f8"/>
+<text x="40" y="41" font-size="12" font-weight="700" fill="#1f2430">pbi-reports</text>
+<text x="695" y="41" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<text x="40" y="70" font-size="11" fill="#5b6473">Цей ПК › Projects › pbi-reports</text>
+<rect x="40" y="84" width="640" height="22" fill="#ecedf2"/>
+<text x="90" y="99" font-size="10" fill="#9aa0ad">НАЗВА</text>
+<text x="420" y="99" font-size="10" fill="#9aa0ad">ЗМІНЕНО</text>
+<text x="560" y="99" font-size="10" fill="#9aa0ad">ТИП</text>
+<rect x="40" y="110" width="20" height="16" fill="#6b76a8" fill-opacity="0.5"/>
+<text x="70" y="123" font-size="13" fill="#1f2430">report.pbip</text>
+<text x="560" y="123" font-size="11" fill="#5b6473">PBIP-файл</text>
+<rect x="40" y="150" width="20" height="16" fill="#9aa0ad" fill-opacity="0.6"/>
+<text x="70" y="163" font-size="13" fill="#1f2430">definition</text>
+<text x="560" y="163" font-size="11" fill="#5b6473">Папка з файлами</text>
+<rect x="40" y="190" width="20" height="16" fill="#9aa0ad" fill-opacity="0.28"/>
+<text x="70" y="203" font-size="13" fill="#1f2430" fill-opacity="0.55">.git</text>
+<text x="560" y="203" font-size="11" fill="#5b6473" fill-opacity="0.55">Службова папка</text>
+<rect x="40" y="230" width="20" height="16" fill="#6b76a8" fill-opacity="0.5"/>
+<text x="70" y="243" font-size="13" fill="#1f2430">README.md</text>
+<text x="560" y="243" font-size="11" fill="#5b6473">Документ</text>
+<path d="M230,214 C260,250 300,270 320,296" fill="none" stroke="#5b5bd6" stroke-width="2" marker-end="url(#arr-eg)"/>
+<rect x="300" y="298" width="380" height="70" rx="8" fill="#f4f5f8" stroke="#5b5bd6" stroke-width="1.5"/>
+<text x="316" y="322" font-size="12" fill="#1f2430">Прихована папка — тут Git тримає</text>
+<text x="316" y="340" font-size="12" fill="#1f2430">всю історію комітів.</text>
+<text x="316" y="358" font-size="12" font-weight="700" fill="#e5484d">Руками не чіпати.</text>
+</g>
+</svg>`},
+  vscode_scm:{title:`Панель Source Control у VS Code`,
+    cap:`M (modified) — файл уже існував і змінився, U (untracked) — Git ще не бачив цей файл. Повідомлення коміту пишеш у полі Message і тиснеш Commit.`,
+    svg:`<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs><clipPath id="cvs"><rect x="20" y="20" width="680" height="380" rx="10"/></clipPath></defs>
+<rect x="20" y="20" width="680" height="380" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cvs)">
+<rect x="20" y="20" width="680" height="32" fill="#f4f5f8"/>
+<text x="40" y="41" font-size="12" font-weight="700" fill="#1f2430">Visual Studio Code — pbi-reports</text>
+<text x="695" y="41" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<rect x="20" y="52" width="44" height="348" fill="#f4f5f8"/>
+<rect x="20" y="145" width="3" height="30" fill="#5b5bd6"/>
+<rect x="32" y="72" width="16" height="16" rx="2" fill="none" stroke="#9aa0ad" stroke-width="1.5"/>
+<circle cx="40" cy="112" r="8" fill="none" stroke="#9aa0ad" stroke-width="1.5"/>
+<line x1="46" y1="118" x2="50" y2="122" stroke="#9aa0ad" stroke-width="1.5"/>
+<circle cx="35" cy="154" r="3" fill="#5b5bd6"/>
+<circle cx="45" cy="166" r="3" fill="#5b5bd6"/>
+<line x1="35" y1="157" x2="45" y2="163" stroke="#5b5bd6" stroke-width="1.5"/>
+<circle cx="50" cy="150" r="8" fill="#e5484d"/>
+<text x="50" y="153" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="700">2</text>
+<rect x="30" y="192" width="20" height="16" fill="none" stroke="#9aa0ad" stroke-width="1.5"/>
+<text x="80" y="70" font-size="10" letter-spacing="1" fill="#9aa0ad">SOURCE CONTROL</text>
+<rect x="80" y="80" width="600" height="50" rx="6" fill="#ffffff" stroke="#e7e8ee"/>
+<text x="92" y="109" font-size="12" fill="#9aa0ad">Message</text>
+<rect x="80" y="140" width="120" height="30" rx="6" fill="#5b5bd6"/>
+<text x="140" y="160" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">✓ Commit</text>
+<text x="80" y="192" font-size="11" font-weight="700" fill="#5b6473">CHANGES</text>
+<circle cx="150" cy="188" r="9" fill="#ecedf2"/>
+<text x="150" y="191" font-size="10" fill="#5b6473" text-anchor="middle">2</text>
+<rect x="80" y="202" width="600" height="28" fill="#ffffff"/>
+<text x="90" y="221" font-size="12" font-family="monospace" fill="#1f2430">model.tmdl</text>
+<rect x="650" y="208" width="18" height="18" rx="3" fill="#b7791f"/>
+<text x="659" y="221" font-size="11" fill="#ffffff" text-anchor="middle" font-weight="700">M</text>
+<rect x="80" y="230" width="600" height="28" fill="#ffffff"/>
+<text x="90" y="249" font-size="12" font-family="monospace" fill="#1f2430">Sales.tmdl</text>
+<rect x="650" y="236" width="18" height="18" rx="3" fill="#0e9f6e"/>
+<text x="659" y="249" font-size="11" fill="#ffffff" text-anchor="middle" font-weight="700">U</text>
+<rect x="80" y="276" width="600" height="60" rx="8" fill="#f4f5f8" stroke="#5b5bd6" stroke-width="1.5"/>
+<text x="96" y="298" font-size="12" fill="#1f2430">M = modified (файл існує, змінений)</text>
+<text x="96" y="318" font-size="12" fill="#1f2430">U = untracked (Git ще не бачив файл)</text>
+</g>
+</svg>`},
+  github_repo:{title:`Сторінка репозиторію на GitHub`,
+    cap:`Тут видно файли репозиторію, поточну гілку (main) і кнопку Code для клонування. Останній коміт підписаний повідомленням прямо в таблиці файлів.`,
+    svg:`<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs><clipPath id="cgr"><rect x="20" y="20" width="680" height="380" rx="10"/></clipPath></defs>
+<rect x="20" y="20" width="680" height="380" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cgr)">
+<rect x="20" y="20" width="680" height="32" fill="#f4f5f8"/>
+<text x="695" y="41" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<rect x="40" y="60" width="640" height="26" rx="6" fill="#f4f5f8" stroke="#e7e8ee"/>
+<text x="52" y="77" font-size="11" font-family="monospace" fill="#5b6473">github.com/you/pbi-reports</text>
+<text x="40" y="122" font-size="18" font-weight="800" fill="#1f2430">pbi-reports</text>
+<rect x="170" y="106" width="60" height="20" rx="10" fill="#f4f5f8" stroke="#e7e8ee"/>
+<text x="200" y="120" font-size="10" fill="#5b6473" text-anchor="middle">Public</text>
+<rect x="40" y="140" width="110" height="30" rx="6" fill="#f4f5f8" stroke="#e7e8ee"/>
+<text x="95" y="160" font-size="12" fill="#1f2430" text-anchor="middle">⑂ main ▾</text>
+<rect x="600" y="140" width="100" height="30" rx="6" fill="#0e9f6e"/>
+<text x="650" y="160" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">Code ▾</text>
+<rect x="40" y="188" width="640" height="24" fill="#ecedf2"/>
+<text x="60" y="204" font-size="10" fill="#9aa0ad">NAME</text>
+<text x="300" y="204" font-size="10" fill="#9aa0ad">LAST COMMIT MESSAGE</text>
+<text x="600" y="204" font-size="10" fill="#9aa0ad">DATE</text>
+<line x1="40" y1="212" x2="680" y2="212" stroke="#e7e8ee"/>
+<rect x="46" y="222" width="16" height="16" fill="#6b76a8" fill-opacity="0.5"/>
+<text x="70" y="235" font-size="12" fill="#1f2430">report.pbip</text>
+<text x="300" y="235" font-size="11" fill="#5b6473">Оновлено KPI-картки</text>
+<text x="600" y="235" font-size="11" fill="#5b6473">2 дні тому</text>
+<line x1="40" y1="246" x2="680" y2="246" stroke="#e7e8ee"/>
+<rect x="46" y="256" width="16" height="16" fill="#9aa0ad" fill-opacity="0.6"/>
+<text x="70" y="269" font-size="12" fill="#1f2430">definition</text>
+<text x="300" y="269" font-size="11" fill="#5b6473">Правки моделі даних</text>
+<text x="600" y="269" font-size="11" fill="#5b6473">2 дні тому</text>
+<line x1="40" y1="280" x2="680" y2="280" stroke="#e7e8ee"/>
+<rect x="46" y="290" width="16" height="16" fill="#6b76a8" fill-opacity="0.5"/>
+<text x="70" y="303" font-size="12" fill="#1f2430">README.md</text>
+<text x="300" y="303" font-size="11" fill="#5b6473">Initial commit</text>
+<text x="600" y="303" font-size="11" fill="#5b6473">місяць тому</text>
+<rect x="40" y="322" width="640" height="50" rx="8" fill="#f4f5f8" stroke="#e7e8ee"/>
+<circle cx="60" cy="347" r="5" fill="#0e9f6e"/>
+<text x="76" y="351" font-size="12" fill="#1f2430">Останній коміт: «Оновлено KPI-картки» · 2 дні тому</text>
+</g>
+</svg>`},
+  github_pr:{title:`Pull Request на GitHub`,
+    cap:`PR показує, звідки й куди йде злиття (feature/kpi-cards → main), обговорення змін і зелену кнопку Merge, коли все готово й перевірки пройдені.`,
+    svg:`<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs>
+<clipPath id="cgp"><rect x="20" y="20" width="680" height="380" rx="10"/></clipPath>
+<marker id="arr-gpr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#9aa0ad"/></marker>
+</defs>
+<rect x="20" y="20" width="680" height="380" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cgp)">
+<rect x="20" y="20" width="680" height="32" fill="#f4f5f8"/>
+<text x="695" y="41" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<rect x="40" y="60" width="640" height="26" rx="6" fill="#f4f5f8" stroke="#e7e8ee"/>
+<text x="52" y="77" font-size="11" font-family="monospace" fill="#5b6473">github.com/you/pbi-reports/pull/12</text>
+<rect x="40" y="100" width="76" height="22" rx="11" fill="#0e9f6e"/>
+<text x="78" y="115" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Відкрито</text>
+<text x="126" y="117" font-size="18" font-weight="800" fill="#1f2430">Нові KPI-картки #12</text>
+<rect x="40" y="140" width="170" height="26" rx="13" fill="#f4f5f8" stroke="#6b76a8"/>
+<text x="125" y="157" font-size="11" font-family="monospace" fill="#6b76a8" text-anchor="middle">feature/kpi-cards</text>
+<line x1="215" y1="153" x2="255" y2="153" stroke="#9aa0ad" stroke-width="1.5" marker-end="url(#arr-gpr)"/>
+<rect x="260" y="140" width="70" height="26" rx="13" fill="#f4f5f8" stroke="#5b5bd6"/>
+<text x="295" y="157" font-size="11" font-family="monospace" fill="#5b5bd6" text-anchor="middle">main</text>
+<text x="40" y="184" font-size="12" font-weight="700" fill="#5b5bd6">Conversation</text>
+<line x1="40" y1="190" x2="122" y2="190" stroke="#5b5bd6" stroke-width="2"/>
+<text x="170" y="184" font-size="12" fill="#9aa0ad">Files changed</text>
+<line x1="40" y1="196" x2="680" y2="196" stroke="#e7e8ee"/>
+<circle cx="60" cy="230" r="14" fill="#ecedf2" stroke="#e7e8ee"/>
+<rect x="90" y="210" width="420" height="52" rx="8" fill="#f4f5f8" stroke="#e7e8ee"/>
+<text x="104" y="232" font-size="11" fill="#1f2430">Додав 3 нові KPI-картки на сторінку</text>
+<text x="104" y="250" font-size="11" fill="#1f2430">«Огляд». Готово до перевірки.</text>
+<text x="40" y="300" font-size="12" fill="#0e9f6e">✓ Всі перевірки пройдено</text>
+<rect x="40" y="330" width="260" height="44" rx="8" fill="#0e9f6e"/>
+<text x="170" y="357" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">Merge pull request</text>
+</g>
+</svg>`},
+  pbi_save_pbip:{title:`Збереження звіту у форматі PBIP`,
+    cap:`У діалозі «Save As» обирай саме «Power BI project files (*.pbip)» — цей формат розкладає звіт на текстові файли, які Git уміє відстежувати.`,
+    svg:`<svg viewBox="0 0 720 465" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs>
+<clipPath id="csp"><rect x="90" y="25" width="540" height="390" rx="10"/></clipPath>
+<marker id="arr-psp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#5b5bd6"/></marker>
+</defs>
+<rect x="90" y="25" width="540" height="390" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#csp)">
+<rect x="90" y="25" width="540" height="32" fill="#f4f5f8"/>
+<text x="110" y="46" font-size="13" font-weight="700" fill="#1f2430">Save As</text>
+<text x="615" y="46" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<text x="110" y="76" font-size="11" fill="#5b6473">Цей ПК › Documents › pbi-reports</text>
+<rect x="110" y="92" width="500" height="110" fill="#f4f5f8" stroke="#e7e8ee"/>
+<text x="110" y="228" font-size="12" fill="#1f2430">File name:</text>
+<rect x="210" y="214" width="400" height="26" rx="4" fill="#ffffff" stroke="#e7e8ee"/>
+<text x="220" y="232" font-size="12" fill="#1f2430">Зведений звіт</text>
+<text x="110" y="264" font-size="12" fill="#1f2430">Save as type:</text>
+<rect x="210" y="250" width="400" height="26" rx="4" fill="#ffffff" stroke="#5b5bd6" stroke-width="2"/>
+<text x="220" y="268" font-size="11" font-weight="700" fill="#5b5bd6">Power BI project files (*.pbip)</text>
+<text x="592" y="268" font-size="10" fill="#5b5bd6">▾</text>
+<rect x="214" y="280" width="392" height="80" fill="#ffffff" stroke="#e7e8ee"/>
+<text x="222" y="296" font-size="11" fill="#5b6473">Power BI files (*.pbix)</text>
+<rect x="214" y="302" width="392" height="22" fill="#5b5bd6" fill-opacity="0.12"/>
+<text x="222" y="318" font-size="11" font-weight="700" fill="#5b5bd6">Power BI project files (*.pbip)</text>
+<text x="222" y="340" font-size="11" fill="#5b6473">All files (*.*)</text>
+<rect x="430" y="372" width="90" height="28" rx="4" fill="#5b5bd6"/>
+<text x="475" y="391" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">Save</text>
+<rect x="530" y="372" width="90" height="28" rx="4" fill="#f4f5f8" stroke="#e7e8ee"/>
+<text x="575" y="391" font-size="12" fill="#1f2430" text-anchor="middle">Cancel</text>
+</g>
+<path d="M340,418 C340,404 420,320 470,315" fill="none" stroke="#5b5bd6" stroke-width="2" marker-end="url(#arr-psp)"/>
+<rect x="90" y="420" width="540" height="40" rx="8" fill="#f4f5f8" stroke="#5b5bd6" stroke-width="1.5"/>
+<text x="106" y="444" font-size="12" font-weight="700" fill="#5b5bd6">Обери .pbip — саме цей формат дружить із Git</text>
+</svg>`},
+  pbip_folder:{title:`Структура PBIP-проєкту`,
+    cap:`PBIP розкладає звіт на файли: .pbip — точка входу, .Report — макет сторінок, .SemanticModel/definition — модель даних (TMDL-файли для кожної таблиці).`,
+    svg:`<svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs><clipPath id="cpf"><rect x="20" y="20" width="680" height="280" rx="10"/></clipPath></defs>
+<rect x="20" y="20" width="680" height="280" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cpf)">
+<rect x="20" y="20" width="680" height="32" fill="#f4f5f8"/>
+<text x="40" y="41" font-size="12" font-weight="700" fill="#1f2430">MyReport.pbip — File Explorer</text>
+<text x="695" y="41" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<text x="40" y="70" font-size="11" fill="#5b6473">Цей ПК › Projects › MyReport</text>
+<line x1="52" y1="106" x2="52" y2="260" stroke="#dcdde3" stroke-width="1.5" stroke-dasharray="2 3"/>
+<line x1="76" y1="174" x2="76" y2="260" stroke="#dcdde3" stroke-width="1.5" stroke-dasharray="2 3"/>
+<rect x="40" y="86" width="18" height="16" fill="#6b76a8" fill-opacity="0.5"/>
+<text x="66" y="99" font-size="13" fill="#1f2430">MyReport.pbip</text>
+<rect x="40" y="118" width="18" height="16" fill="#9aa0ad" fill-opacity="0.6"/>
+<text x="66" y="131" font-size="13" fill="#1f2430">MyReport.Report</text>
+<rect x="40" y="150" width="18" height="16" fill="#9aa0ad" fill-opacity="0.6"/>
+<text x="66" y="163" font-size="13" fill="#1f2430">MyReport.SemanticModel</text>
+<rect x="64" y="182" width="18" height="16" fill="#9aa0ad" fill-opacity="0.6"/>
+<text x="90" y="195" font-size="13" fill="#1f2430">definition</text>
+<rect x="88" y="214" width="18" height="16" fill="#6b76a8" fill-opacity="0.5"/>
+<text x="114" y="227" font-size="13" fill="#1f2430">model.tmdl</text>
+<rect x="88" y="246" width="18" height="16" fill="#9aa0ad" fill-opacity="0.6"/>
+<text x="114" y="259" font-size="13" fill="#1f2430">tables</text>
+<line x1="300" y1="93" x2="380" y2="93" stroke="#dcdde3" stroke-dasharray="2 2"/>
+<text x="386" y="97" font-size="11" fill="#5b6473">точка входу проєкту</text>
+<line x1="300" y1="125" x2="380" y2="125" stroke="#dcdde3" stroke-dasharray="2 2"/>
+<text x="386" y="129" font-size="11" fill="#5b6473">макет сторінок звіту</text>
+<line x1="340" y1="189" x2="420" y2="189" stroke="#dcdde3" stroke-dasharray="2 2"/>
+<text x="426" y="193" font-size="11" fill="#5b6473">модель даних: таблиці й міри</text>
+<line x1="330" y1="253" x2="410" y2="253" stroke="#dcdde3" stroke-dasharray="2 2"/>
+<text x="416" y="257" font-size="11" fill="#5b6473">TMDL-файл на кожну таблицю</text>
+</g>
+</svg>`},
+  pbi_git_sync:{title:`Update from Git у Fabric / Power BI Service`,
+    cap:`Кнопка Source control показує, скільки змін чекає. «Update from Git» = опублікувати в робочу область те, що вже влито в main, — це фінальний крок публікації.`,
+    svg:`<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs>
+<clipPath id="cgs"><rect x="20" y="20" width="680" height="380" rx="10"/></clipPath>
+<marker id="arr-pgs" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#5b5bd6"/></marker>
+</defs>
+<rect x="20" y="20" width="680" height="380" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cgs)">
+<rect x="20" y="20" width="680" height="32" fill="#f4f5f8"/>
+<text x="695" y="41" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<rect x="20" y="52" width="680" height="40" fill="#f4f5f8"/>
+<text x="40" y="76" font-size="13" font-weight="700" fill="#1f2430">Робоча область: Продажі</text>
+<rect x="560" y="60" width="130" height="26" rx="6" fill="#ffffff" stroke="#e7e8ee"/>
+<circle cx="573" cy="73" r="3" fill="#5b6473"/>
+<circle cx="581" cy="80" r="3" fill="#5b6473"/>
+<line x1="573" y1="76" x2="581" y2="77" stroke="#5b6473"/>
+<text x="590" y="77" font-size="10.5" fill="#1f2430">Source control</text>
+<circle cx="694" cy="60" r="10" fill="#5b5bd6"/>
+<text x="694" y="64" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<rect x="40" y="110" width="110" height="80" rx="6" fill="#f4f5f8" stroke="#e7e8ee" opacity="0.6"/>
+<rect x="160" y="110" width="110" height="80" rx="6" fill="#f4f5f8" stroke="#e7e8ee" opacity="0.6"/>
+<rect x="280" y="110" width="110" height="80" rx="6" fill="#f4f5f8" stroke="#e7e8ee" opacity="0.6"/>
+<rect x="400" y="92" width="280" height="308" fill="#ffffff" stroke="#e7e8ee"/>
+<text x="416" y="118" font-size="14" font-weight="800" fill="#1f2430">Updates</text>
+<text x="416" y="136" font-size="10" fill="#9aa0ad">Зміни, які прийшли з main</text>
+<line x1="416" y1="146" x2="664" y2="146" stroke="#e7e8ee"/>
+<rect x="416" y="156" width="16" height="16" fill="#6b76a8" fill-opacity="0.5"/>
+<text x="440" y="169" font-size="12" fill="#1f2430">Звіт продажів</text>
+<rect x="580" y="158" width="66" height="18" rx="9" fill="#b7791f" fill-opacity="0.15" stroke="#b7791f"/>
+<text x="613" y="171" font-size="9" fill="#b7791f" text-anchor="middle">Змінено</text>
+<rect x="416" y="196" width="16" height="16" fill="#9aa0ad" fill-opacity="0.6"/>
+<text x="440" y="209" font-size="12" fill="#1f2430">Sales.SemanticModel</text>
+<rect x="580" y="198" width="66" height="18" rx="9" fill="#0e9f6e" fill-opacity="0.15" stroke="#0e9f6e"/>
+<text x="613" y="211" font-size="9" fill="#0e9f6e" text-anchor="middle">Нове</text>
+<rect x="416" y="236" width="16" height="16" fill="#6b76a8" fill-opacity="0.5"/>
+<text x="440" y="249" font-size="12" fill="#1f2430">KPI Dashboard</text>
+<rect x="580" y="238" width="66" height="18" rx="9" fill="#b7791f" fill-opacity="0.15" stroke="#b7791f"/>
+<text x="613" y="251" font-size="9" fill="#b7791f" text-anchor="middle">Змінено</text>
+<line x1="416" y1="280" x2="664" y2="280" stroke="#e7e8ee"/>
+<rect x="416" y="296" width="248" height="36" rx="6" fill="#5b5bd6"/>
+<text x="540" y="319" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">Update all</text>
+<rect x="40" y="320" width="340" height="60" rx="8" fill="#f4f5f8" stroke="#5b5bd6" stroke-width="1.5"/>
+<text x="56" y="342" font-size="12" fill="#1f2430">Update from Git = опублікувати те,</text>
+<text x="56" y="360" font-size="12" fill="#1f2430">що вже влито в main.</text>
+</g>
+<path d="M380,340 C395,330 400,325 414,316" fill="none" stroke="#5b5bd6" stroke-width="2" marker-end="url(#arr-pgs)"/>
+</svg>`}
+};
+function buildUimock(){
+  document.querySelectorAll('.uimock[data-um]').forEach(el=>{
+    if(el.dataset.built)return;el.dataset.built='1';
+    const u=UIMOCK[el.dataset.um];
+    if(!u){el.innerHTML='Схему не знайдено';return;}
+    el.innerHTML=`<div class="um-title">${u.title}</div>${u.svg}<div class="um-cap">${u.cap}</div>`;
+  });
+}
+window.__UM__={bank:UIMOCK};
+
+/* === 15b. ІКОНКИ ПРОГРАМ (ticon) === */
+const ICONS={
+  git:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M13.09 23.549a1.54 1.54 0 0 1-2.18 0L.451 13.089a1.54 1.54 0 0 1 0-2.179l7.191-7.19 2.733 2.733a1.85 1.85 0 0 0 .964 2.326v6.66a1.849 1.849 0 1 0 1.54 0V8.957l2.508 2.508a1.85 1.85 0 1 0 1.09-1.09l-2.634-2.634a1.85 1.85 0 0 0-2.378-2.377L8.73 2.63 10.91.451a1.54 1.54 0 0 1 2.179 0l10.459 10.46a1.54 1.54 0 0 1 0 2.179z"/></svg>`,
+  github:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>`,
+  sourcetree:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M11.999 0C6.756 0 2.474 4.245 2.474 9.525c0 4.21 2.769 7.792 6.572 9.047v4.764c0 .37.295.664.664.664h4.506a.661.661 0 0 0 .664-.664v-4.764c.025-.008.049-.019.074-.027v.064c3.694-1.22 6.412-4.634 6.565-8.687.005-.124.007-.25.007-.375v-.022c0-.152-.006-.304-.013-.455C21.275 4.037 17.125 0 11.999 0Zm0 6.352a3.214 3.214 0 0 1 2.664 5.005v.002A3.218 3.218 0 0 1 12 12.775a3.212 3.212 0 0 1 0-6.424z"/></svg>`,
+  vscode:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3.5 3 12l6.5 8.5 1.9-1.5L6.4 12l5-6.99L9.5 3.5zm5 0-1.9 1.51 5 6.99-5 6.99 1.9 1.51L21 12 14.5 3.5z"/></svg>`,
+  azuredevops:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2 3 8.2v7.6L12 22l9-6.2V8.2L12 2zm0 2.47 6.3 4.35-6.3 2.98-6.3-2.98L12 4.47zM4.8 10.2l6.3 2.98v6.6l-6.3-4.34V10.2zm14.4 0v5.24l-6.3 4.34v-6.6l6.3-2.98z"/></svg>`,
+  powerbi:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8zm6.5-5a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V6zM17 14a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-5z"/></svg>`,
+  terminal:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4zm2 1.5v13h14v-13H5z"/><path d="M6.7 9.3a.9.9 0 0 1 1.27 0l2.3 2.3a.9.9 0 0 1 0 1.27l-2.3 2.3a.9.9 0 1 1-1.27-1.27L8.53 12 6.7 10.57a.9.9 0 0 1 0-1.27zM11.5 14.8h4.3a.9.9 0 1 1 0 1.8h-4.3a.9.9 0 1 1 0-1.8z"/></svg>`,
+  folder:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h4.4a1.5 1.5 0 0 1 1.1.48L11.4 6H19.5A1.5 1.5 0 0 1 21 7.5v11A1.5 1.5 0 0 1 19.5 20h-15A1.5 1.5 0 0 1 3 18.5v-13z"/></svg>`,
+  file:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 2.5A1.5 1.5 0 0 0 4.5 4v16A1.5 1.5 0 0 0 6 21.5h12a1.5 1.5 0 0 0 1.5-1.5V8.62a1.5 1.5 0 0 0-.44-1.06l-5.62-5.62A1.5 1.5 0 0 0 12.38 1.5H6zM6 3.5h6v4.5a1.5 1.5 0 0 0 1.5 1.5H18v10.5H6V3.5zm8 .62 3.88 3.88H14.5A.5.5 0 0 1 14 7.5V4.12z"/></svg>`,
+  pbip:`<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-opacity=".35" d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.4a1.5 1.5 0 0 1 1.1.48L11.4 7H19.5A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5v-11z"/><path d="M8 16v-3a.6.6 0 0 1 1.2 0v3H8zm3.4 0v-5a.6.6 0 0 1 1.2 0v5h-1.2zm3.4 0v-7a.6.6 0 0 1 1.2 0v7h-1.2z"/></svg>`
+};
+ICONS.gitbash=ICONS.terminal;
+function buildTicons(){
+  document.querySelectorAll('.ticon[data-i]').forEach(el=>{
+    if(el.dataset.built)return;el.dataset.built='1';
+    const svg=ICONS[el.dataset.i];
+    if(svg)el.innerHTML=svg;
+  });
+}
+
 /* === 16. ІНІЦІАЛІЗАЦІЯ СТОРІНКИ === */
 function initPage(){
   buildPlayers();buildQuizzes();buildScenarios();
@@ -2126,10 +3071,10 @@ function initPage(){
   if(document.getElementById('glossList'))buildGlossary();
   if(document.getElementById('cheatList'))buildCheatsheet();
   if(document.getElementById('diagBox'))buildDiag();
-  buildQchecks();buildCsim();buildOrders();buildTermlab();buildDiffq();buildVideos();
+  buildQchecks();buildCsim();buildOrders();buildTermlab();buildDiffq();buildVideos();buildTicons();buildCmdanim();buildUimock();
   colorizeDiffPre(document);
   initSearch();initCollapse();initProgress();initHighlightFromSearch();initVersionCheck();
 }
-window.__GFP__={PLAYERS:Object.keys(PLAYERS),QUIZ:Object.keys(QUIZ),SCEN:Object.keys(SCEN),QCHECKS:Object.keys(QCHECKS),CSIM:Object.keys(CSIM),ORDERS:Object.keys(ORDERS),TERMLAB:Object.keys(TERMLAB),DIFFQ:Object.keys(DIFFQ)};
+window.__GFP__={PLAYERS:Object.keys(PLAYERS),QUIZ:Object.keys(QUIZ),SCEN:Object.keys(SCEN),QCHECKS:Object.keys(QCHECKS),CSIM:Object.keys(CSIM),ORDERS:Object.keys(ORDERS),TERMLAB:Object.keys(TERMLAB),DIFFQ:Object.keys(DIFFQ),ICONS:Object.keys(ICONS),CMDANIM:Object.keys(CMDANIM),UIMOCK:Object.keys(UIMOCK)};
 document.addEventListener('DOMContentLoaded',initPage);
 if(document.readyState!=='loading')initPage();

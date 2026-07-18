@@ -66,7 +66,7 @@
 <span class="cmd">git bisect</span> <span class="arg">good</span>   <span class="c"># або</span>   <span class="cmd">git bisect</span> <span class="arg">bad</span>
 <span class="c"># … повторюєш, доки: "&lt;sha&gt; is the first bad commit"</span>
 <span class="cmd">git bisect</span> <span class="arg">reset</span>          <span class="c"># повернутися на свою гілку</span></pre>
-<div class="note tip"><b>PBIP-сценарій.</b> Звіт «раптом» порахувався інакше — bisect швидко вкаже коміт, де змінилась міра чи зв'язок, навіть серед сотень комітів.</div>
+<div class="note tip"><span class="ticon" data-i="pbip"></span><b>PBIP-сценарій.</b> Звіт «раптом» порахувався інакше — bisect швидко вкаже коміт, де змінилась міра чи зв'язок, навіть серед сотень комітів.</div>
 <div class="order" data-o="or_08_bisect"></div>
 <div class="note tip"><b>Як це виглядає на практиці.</b> bisect — територія термінала Git Bash: у Sourcetree такої команди немає. Зате перевірка кожного кроку — звична: Git уже підмінив файли на диску, тож відкриваєш PBIP у Power BI Desktop, дивишся, чи є баг, закриваєш файл і відповідаєш <code>good</code> чи <code>bad</code>.</div>
 <div class="csim" data-cs="cs_08_bisect_good"></div>
@@ -90,7 +90,7 @@
   <span class="arg">echo</span> "У коміті службові файли — прибери їх: git restore --staged &lt;файл&gt;"
   <span class="cmd">exit</span> <span class="arg">1</span>
 <span class="cmd">fi</span></pre>
-<p>Поклади цей текст у файл <code>.git/hooks/pre-commit</code> (без розширення) і зроби виконуваним: <code>chmod +x .git/hooks/pre-commit</code> — у Git Bash це працює й на Windows.</p>
+<div class="dobox">Поклади цей текст у файл <code>.git/hooks/pre-commit</code> (без розширення) і зроби виконуваним: <code>chmod +x .git/hooks/pre-commit</code> — у Git Bash це працює й на Windows.</div>
 <div class="note tip"><b>Де це писати.</b> Hook — звичайний скрипт: зручно писати й редагувати його у VS Code (з підсвіткою синтаксису), а перш ніж класти в <code>.git/hooks/</code> — прогнати вручну в терміналі Git Bash і переконатися, що він працює.</div>
 <div class="note"><b>Команді.</b> Локальні hooks не потрапляють у <code>.git</code> репозиторію; щоб поширити їх, тримають скрипти в самому репозиторії (напр. папка <code>hooks/</code>) і підключають, або переносять перевірки в CI (Azure Pipelines) на сервері.</div>
 

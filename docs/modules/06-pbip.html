@@ -66,8 +66,8 @@
 <div class="tdef"><div class="t">Бінарний vs текстовий файл</div><div class="d"><b>Бінарний</b> файл (як .pbix) — суцільний нечитабельний блок байтів. <b>Текстовий</b> — рядки, які можна читати й порівнювати.</div><div class="plain"><b>Простими словами:</b> бінарник — як запечатана коробка (видно лише «змінилась/ні»). Текст — як відкритий зошит (видно кожне слово).</div></div>
 <div class="tdef"><div class="t">PBIP (Power BI Project)</div><div class="d">Формат, у якому Power BI Desktop зберігає проєкт як папку текстових файлів замість одного .pbix.</div><div class="plain"><b>Простими словами:</b> «розпакований» Power BI, де модель і звіт лежать окремими читабельними файлами.</div></div>
 <div class="cards">
-<div class="card"><h4>.pbix</h4><p>Один бінарний файл. Git бачить як суцільний блок: діфи, гілкування, review неможливі.</p></div>
-<div class="card"><h4>PBIP</h4><p>Папка текстових файлів. Кожна міра, таблиця, візуал — окремо й читабельно. Git показує точні зміни.</p></div>
+<div class="card"><h4><span class="ticon" data-i="file"></span>.pbix</h4><p>Один бінарний файл. Git бачить як суцільний блок: діфи, гілкування, review неможливі.</p></div>
+<div class="card"><h4><span class="ticon" data-i="pbip"></span>PBIP</h4><p>Папка текстових файлів. Кожна міра, таблиця, візуал — окремо й читабельно. Git показує точні зміни.</p></div>
 </div>
 <h3>Як зберегти</h3>
 <p>Power BI Desktop → <strong>File → Save As → «Power BI project files (*.pbip)»</strong>. Desktop створить структуру папок і <code>.gitignore</code> автоматично. Під час Save As ти сам обираєш папку на диску — саме вона стане коренем майбутнього Git-репозиторію.</p>
@@ -100,6 +100,8 @@
     <div class="tdetail" id="treeDetail"><h4>Обери елемент</h4><p>Натисни на файл або папку зліва.</p></div>
   </div>
 </div>
+<p>А так ця сама структура виглядає в реальному Провіднику Windows: <code>.pbip</code> як точка входу, поруч — папка з макетом звіту й папка з моделлю даних (усередині — TMDL-файл на кожну таблицю).</p>
+<div class="uimock" data-um="pbip_folder"></div>
 
 </section>
 <section class="lesson show" id="s2" data-n="s2">
@@ -175,7 +177,10 @@
 <p class="lead">Покрокова послідовність: від .pbix до спільного репозиторію на сервері.</p>
 <div class="goalbox"><b>Ціль уроку</b>провести проєкт від збереження як PBIP до першого push.</div>
 <h3>Крок 1 — зберегти як PBIP</h3>
-<p>У Power BI Desktop: <strong>File → Save As → «Power BI project files (*.pbip)»</strong>, обери папку. Desktop створить структуру й <code>.gitignore</code>. Далі працюєш як звик: відкриваєш <code>.pbip</code>, правиш звіт, тиснеш Ctrl+S — Power BI Desktop перезаписує текстові файли в цій папці.</p>
+<div class="dobox">Збережи свій звіт як .pbip: у Power BI Desktop виконай <strong>File → Save As → «Power BI project files (*.pbip)»</strong> і обери папку. Desktop створить структуру й <code>.gitignore</code>.</div>
+<p>Ось як виглядає це вікно збереження:</p>
+<div class="uimock" data-um="pbi_save_pbip"></div>
+<p>Далі працюєш як звик: відкриваєш <code>.pbip</code>, правиш звіт, тиснеш Ctrl+S — Power BI Desktop перезаписує текстові файли в цій папці.</p>
 <h3>Крок 2 — увімкнути Git у папці</h3>
 <pre><span class="cmd">cd</span> <span class="arg">&lt;шлях_до_папки_з_кроку_1&gt;</span>          <span class="c"># перейти в папку проєкту</span>
 <span class="cmd">git init</span>                  <span class="c"># увімкнути контроль версій</span>

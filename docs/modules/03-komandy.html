@@ -67,11 +67,13 @@
 <div class="tdef"><div class="t">git clone</div><div class="d">Завантажує існуючий репозиторій із сервера на твій комп'ютер разом з усією історією.</div><div class="plain"><b>Простими словами:</b> «забрати собі повну копію спільного проєкту».</div></div>
 <pre><span class="cmd">git init</span>                   <span class="c"># новий репозиторій тут</span>
 <span class="cmd">git clone</span> <span class="arg">&lt;url&gt;</span>         <span class="c"># завантажити існуючий</span></pre>
+<div class="cmdanim" data-ca="git_init"></div>
 <h3>Перегляд</h3>
 <pre><span class="cmd">git status</span>                 <span class="c"># стан файлів</span>
 <span class="cmd">git log</span> <span class="arg">--oneline --graph</span> <span class="c"># історія + дерево</span>
 <span class="cmd">git diff</span>                   <span class="c"># зміни ще не в staging</span>
 <span class="cmd">git diff</span> <span class="arg">--staged</span>         <span class="c"># що піде в коміт</span></pre>
+<div class="cmdanim" data-ca="git_log"></div>
 <h3>Як коміти будують ланцюг</h3>
 <p>Кожен коміт зберігає посилання на батька (попередній коміт). Послідовні коміти утворюють лінію; <code>HEAD</code> і гілка рухаються разом на новий tip (найновіший коміт). Гортай:</p>
 <div class="widget"><div class="wtitle">Візуалізація: лінійна історія</div><div class="gplayer" data-p="commits"></div></div>
@@ -130,6 +132,9 @@
 <span class="cmd">git switch</span> <span class="arg">main</span>                 <span class="c"># перейти на існуючу</span>
 <span class="cmd">git merge</span> <span class="arg">feature/svg-badge</span>     <span class="c"># влити в поточну</span>
 <span class="cmd">git branch</span> <span class="arg">-d feature/svg-badge</span>  <span class="c"># видалити після злиття</span></pre>
+<div class="cmdanim" data-ca="git_branch"></div>
+<div class="cmdanim" data-ca="git_switch"></div>
+<div class="cmdanim" data-ca="git_merge"></div>
 <h3>Візуалізація: створення гілки й розгалуження</h3>
 <div class="widget"><div class="wtitle">Гілкування крок за кроком</div><div class="gplayer" data-p="branching"></div></div>
 <h3>Два типи злиття</h3>
@@ -141,6 +146,7 @@
 <div class="widget"><div class="wtitle">Реальна історія з розгалуженням і злиттям</div><div class="gplayer" data-p="complex"></div></div>
 <div class="note"><b>switch vs checkout.</b> Стара універсальна команда — <code>git checkout</code>. Нові розділені: <code>git switch</code> (гілки), <code>git restore</code> (файли).</div>
 
+<div class="dobox">Створи в реальному репозиторії гілку для експерименту: <code>git switch -c feature/назва-експерименту</code>, зроби пробну правку і закомить її. Потім <code>git log --oneline --graph</code> покаже нову лінію поруч з main. Симулятор нижче — лише розминка, звичка формується руками.</div>
 <h3>Симулятор: спробуй сам</h3>
 <div class="csim" data-cs="cs_branch"></div>
 </section>
@@ -186,20 +192,25 @@
 <div class="tdef"><div class="t">origin / main / origin/main</div>
 <div class="d"><code>origin</code> — назва сервера. <code>main</code> — твоя локальна основна гілка. <code>origin/main</code> — локальне «відображення» серверної гілки на момент останнього обміну (не сам сервер у реальному часі).</div>
 <div class="plain"><b>Простими словами:</b> <code>origin/main</code> — це «фотографія» стану сервера, яку ти останній раз бачив. Щоб оновити фото — роби fetch.</div></div>
+<div class="uimock" data-um="github_repo"></div>
 
 <h4 class="sub">git clone — отримати копію вперше</h4>
 <p>Завантажує весь віддалений репозиторій локально й під'єднує <code>origin</code>.</p>
 <div class="widget"><div class="wtitle">Візуалізація: clone (сервер → твій комп'ютер)</div><div class="gplayer" data-p="clone"></div></div>
 <div class="note tip"><b>Звідки взяти URL.</b> В Azure DevOps на сторінці репозиторію є кнопка Clone: вона показує адресу для <code>git clone</code> (скопіював — і команда готова) і одразу пропонує варіант «Clone in VS Code».</div>
+<div class="cmdanim" data-ca="git_clone"></div>
 
 <h4 class="sub">git fetch / git pull — забрати чужі зміни</h4>
 <div class="tdef"><div class="t">fetch vs pull</div><div class="d"><code>fetch</code> завантажує коміти з сервера, але НЕ чіпає твої робочі файли. <code>pull</code> = fetch + одразу merge у поточну гілку.</div><div class="plain"><b>Простими словами:</b> fetch — «подивитись, що нового на сервері». pull — «подивитись і одразу собі забрати».</div></div>
 <div class="widget"><div class="wtitle">Візуалізація: pull (сервер ↔ твій комп'ютер)</div><div class="gplayer" data-p="pull"></div></div>
+<div class="cmdanim" data-ca="git_fetch"></div>
+<div class="cmdanim" data-ca="git_pull"></div>
 
 <h4 class="sub">git push — відправити свої зміни</h4>
 <div class="widget"><div class="wtitle">Візуалізація: push (твій комп'ютер → сервер)</div><div class="gplayer" data-p="remote"></div></div>
 <div class="note tip"><b>Кнопковий еквівалент.</b> У Sourcetree це кнопки Pull і Push на верхній панелі: цифра на Pull показує, скільки чужих комітів чекає на сервері, на Push — скільки твоїх ще не відправлено. Клік виконує той самий <code>git pull</code> чи <code>git push</code>.</div>
 <div class="note tip"><b>Якщо репозиторій починався з git init, а не clone.</b> Локальний репозиторій ще не знає, куди пушити — <code>origin</code> у ньому не налаштований. Один раз під'єднай сервер: <code>git remote add origin &lt;url&gt;</code>. Пропустиш цей крок — <code>git push</code> відповість <code>fatal: No configured push destination</code>.</div>
+<div class="cmdanim" data-ca="git_push"></div>
 
 <h4 class="sub">Коли двоє пушать одночасно — конфлікт синхронізації</h4>
 <p>Найчастіша ситуація в команді з двох розробників: обидва зробили коміти й намагаються запушити. Хто перший — той пройде. Другому push відхилять.</p>
@@ -213,6 +224,7 @@
 <span class="cmd">git push</span> <span class="arg">-u origin feature/x</span>  <span class="c"># перший push нової гілки (-u запам'ятає зв'язок)</span></pre>
 
 <div class="qcheck" data-qc="qc_fetch"></div>
+<div class="dobox">Маєш підключений <code>origin</code>? Зроби реальний <code>git push</code> для свого останнього коміту й онови сторінку репозиторію в браузері — побачиш цей коміт нагорі історії. Якщо сервер ще не підключений — спершу <code>git remote add origin &lt;url&gt;</code>.</div>
 <h3>Симулятор: спробуй сам</h3>
 <div class="csim" data-cs="cs_clone"></div>
 <div class="csim" data-cs="cs_push"></div>
@@ -247,6 +259,7 @@
 <pre><span class="cmd">git stash</span>                    <span class="c"># сховати зміни</span>
 <span class="cmd">git stash pop</span>                <span class="c"># повернути назад</span>
 <span class="cmd">git stash list</span>               <span class="c"># список схованок</span></pre>
+<div class="cmdanim" data-ca="git_stash"></div>
 <div class="tdef"><div class="t">cherry-pick</div><div class="d">Копіює ОДИН конкретний коміт з іншої гілки в поточну (як новий коміт із новим SHA), не зливаючи всю гілку.</div><div class="plain"><b>Простими словами:</b> «зірвати одну вишеньку» — узяти лише потрібний коміт, а не весь кошик.</div></div>
 <pre><span class="cmd">git cherry-pick</span> <span class="arg">&lt;sha&gt;</span></pre>
 <div class="widget"><div class="wtitle">Візуалізація: cherry-pick одного коміту</div><div class="gplayer" data-p="cherry"></div></div>

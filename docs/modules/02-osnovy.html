@@ -73,9 +73,9 @@
 <h3>Git ≠ GitHub ≠ Sourcetree</h3>
 <p>Ці три речі часто плутають. Вони різні:</p>
 <div class="cards">
-<div class="card"><h4>Git</h4><p>Сама програма контролю версій. Працює локально, без інтернету.</p><div class="ex">Як двигун автомобіля.</div></div>
-<div class="card"><h4>GitHub / Azure DevOps</h4><p>Хмарні сервіси, що зберігають копію репозиторію онлайн для спільної роботи та резервування.</p><div class="ex">Як гараж, де машину бачить уся команда.</div></div>
-<div class="card"><h4>Sourcetree</h4><p>Графічна програма (GUI) з кнопками замість команд. Кожна кнопка викликає Git під капотом.</p><div class="ex">Як зручна панель приладів над двигуном.</div></div>
+<div class="card"><h4><span class="ticon" data-i="git"></span>Git</h4><p>Сама програма контролю версій. Працює локально, без інтернету.</p><div class="ex">Як двигун автомобіля.</div></div>
+<div class="card"><h4><span class="ticon" data-i="github"></span><span class="ticon" data-i="azuredevops"></span>GitHub / Azure DevOps</h4><p>Хмарні сервіси, що зберігають копію репозиторію онлайн для спільної роботи та резервування.</p><div class="ex">Як гараж, де машину бачить уся команда.</div></div>
+<div class="card"><h4><span class="ticon" data-i="sourcetree"></span>Sourcetree</h4><p>Графічна програма (GUI) з кнопками замість команд. Кожна кнопка викликає Git під капотом.</p><div class="ex">Як зручна панель приладів над двигуном.</div></div>
 </div>
 <div class="note tip"><b>Як це виглядає у щоденній роботі.</b> Відкриваєш звіт у Power BI Desktop → зберігаєш → переглядаєш зміни в Sourcetree → комітиш → пушиш у GitHub чи Azure DevOps, а якщо виник конфлікт — вирішуєш його в merge-редакторі VS Code. Усі ці інструменти ти вже налаштував у модулі <a href="00-start.html#s6">00 «Старт та інструменти»</a>.</div>
 <div class="note tip"><b>Для Power BI це критично.</b> Бінарний <code>.pbix</code> Git бачить як один нероздільний блок. Формат <span class="term">PBIP</span> (текст + JSON + TMDL) робить кожну зміну DAX-міри чи візуала видимою. Цьому присвячені модулі E–F.</div>
@@ -88,10 +88,11 @@
 <h2>Базові поняття</h2>
 <p class="lead">Сім термінів-фундаментів. Кожен пояснено так, ніби ти бачиш Git уперше.</p>
 <div class="goalbox"><b>Ціль уроку</b>без плутанини розуміти слова репозиторій, коміт, гілка, remote.</div>
-<div class="tdef"><div class="t">Repository (репозиторій, скорочено «репо»)</div>
+<div class="tdef"><div class="t"><span class="ticon" data-i="folder"></span>Repository (репозиторій, скорочено «репо»)</div>
 <div class="d">Папка проєкту, за якою стежить Git. Усередині неї Git створює приховану підпапку <code>.git</code>, де зберігає всю історію.</div>
 <div class="plain"><b>Простими словами:</b> звичайна папка проєкту + невидимий «чорний ящик» <code>.git</code>, що пам'ятає кожну зміну.</div>
 <div class="ex">Напр. папка <code>C:\Repos\PDP</code>.</div></div>
+<div class="uimock" data-um="explorer_git"></div>
 <div class="tdef"><div class="t">Commit (коміт)</div>
 <div class="d">Збережений знімок усіх файлів у певний момент разом із метаданими: хто, коли, з яким описом. Кожен коміт має унікальний номер — SHA.</div>
 <div class="plain"><b>Простими словами:</b> «фотографія» проєкту з підписом. Серія фотографій = історія.</div>
@@ -132,7 +133,7 @@
 <div class="tdef"><div class="t">Знімок (snapshot)</div><div class="d">Повний стан усіх файлів на момент коміту. Якщо файл не змінився — Git зберігає лише посилання на попередню копію.</div><div class="plain"><b>Простими словами:</b> як повне фото проєкту щоразу; незмінні файли — це «те саме фото, дивись туди».</div></div>
 <div class="cards">
 <div class="card"><h4>Старі системи (дельти)</h4><p>Базовий файл + ланцюг різниць. Щоб дістати версію — застосувати всі дельти послідовно. Економить місце, але повільніше.</p></div>
-<div class="card"><h4>Git (знімки)</h4><p>Повний знімок на кожен коміт; незмінні файли — посилання. Порівняння й перемикання дуже швидкі. Сховище стискається у pack-файли.</p></div>
+<div class="card"><h4><span class="ticon" data-i="git"></span>Git (знімки)</h4><p>Повний знімок на кожен коміт; незмінні файли — посилання. Порівняння й перемикання дуже швидкі. Сховище стискається у pack-файли.</p></div>
 </div>
 <pre><span class="c"># Дельти: версія = база + delta + delta + delta …</span>
 <span class="c"># Git: кожен коміт — знімок; file2 не змінився → посилання на попередній</span>
@@ -177,8 +178,12 @@
 <span class="cmd">git commit</span> <span class="arg">-m "Додано міру Salary Range Position"</span>  <span class="c"># зафіксувати</span>
 <span class="cmd">git push</span>                   <span class="c"># відправити на сервер</span></pre>
 <div class="note"><b>Навіщо аж дві зони (staging + commit)?</b> Кошик дозволяє зібрати коміт вибірково: змінив багато — закомітив лише пов'язане між собою. Так історія лишається логічною й читабельною.</div>
+<div class="cmdanim" data-ca="git_status"></div>
+<div class="cmdanim" data-ca="git_add"></div>
+<div class="cmdanim" data-ca="git_commit"></div>
 <h3>Спробуй сам: перші команди руками</h3>
 <p>Ці команди виконуються у тій самій папці проєкту, куди ти перейшов через <code>cd</code> (модуль 01) — Git завжди дивиться на поточну робочу папку.</p>
+<div class="dobox">Відкрий термінал у папці свого PBIP-проєкту (ПКМ на папці → <b>Open Git Bash here</b>) і повторюй команди <code>git status</code> та <code>git add</code> у справжньому терміналі — симулятори нижче лише для тренування, звичка формується руками.</div>
 <div class="csim" data-cs="cs_02_status"></div>
 <div class="csim" data-cs="cs_02_add_one"></div>
 <div class="qcheck" data-qc="qc_a_zones"></div>

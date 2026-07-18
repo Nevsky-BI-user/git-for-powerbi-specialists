@@ -89,18 +89,18 @@
 <h2>Карта інструментів: хто за що відповідає</h2>
 <p class="lead">«Git» у розмовах — це часто ціла екосистема з пʼяти-шести програм. Розкладемо її по поличках, щоб далі не плутатись.</p>
 <div class="goalbox"><b>Ціль уроку</b>розрізняти двигун (Git), сховище (GitHub / Azure DevOps) і клієнти (Git Bash, VS Code, Sourcetree) — і розуміти, де в цій картині Power BI.</div>
-<div class="tdef"><div class="t">Git (двигун)</div><div class="d">Програма без вікон, яка веде історію версій у прихованій папці <code>.git</code>. Усе інше — лише способи натискати на неї.</div><div class="plain"><b>Аналогія:</b> двигун автомобіля. Сам по собі невидимий, але саме він везе.</div></div>
-<div class="tdef"><div class="t">Хостинг репозиторіїв (GitHub, Azure DevOps Repos)</div><div class="d">Сервер, де лежить спільна копія репозиторію, плюс вебінтерфейс: перегляд історії, налаштування доступів, автоматизації.</div><div class="plain"><b>Аналогія:</b> хмарний диск для проєкту + офіс, де команда домовляється про правила.</div></div>
-<div class="tdef"><div class="t">Клієнт Git (Git Bash, VS Code, Sourcetree)</div><div class="d">Програма, через яку ти віддаєш команди двигуну: текстом у терміналі або кнопками у графічному інтерфейсі.</div><div class="plain"><b>Аналогія:</b> кермо і педалі. Обираєш, що зручніше саме тобі, — їде однаково той самий двигун.</div></div>
+<div class="tdef"><div class="t"><span class="ticon" data-i="git"></span>Git (двигун)</div><div class="d">Програма без вікон, яка веде історію версій у прихованій папці <code>.git</code>. Усе інше — лише способи натискати на неї.</div><div class="plain"><b>Аналогія:</b> двигун автомобіля. Сам по собі невидимий, але саме він везе.</div></div>
+<div class="tdef"><div class="t">Хостинг репозиторіїв (<span class="ticon" data-i="github"></span>GitHub, <span class="ticon" data-i="azuredevops"></span>Azure DevOps Repos)</div><div class="d">Сервер, де лежить спільна копія репозиторію, плюс вебінтерфейс: перегляд історії, налаштування доступів, автоматизації.</div><div class="plain"><b>Аналогія:</b> хмарний диск для проєкту + офіс, де команда домовляється про правила.</div></div>
+<div class="tdef"><div class="t">Клієнт Git (<span class="ticon" data-i="gitbash"></span>Git Bash, <span class="ticon" data-i="vscode"></span>VS Code, <span class="ticon" data-i="sourcetree"></span>Sourcetree)</div><div class="d">Програма, через яку ти віддаєш команди двигуну: текстом у терміналі або кнопками у графічному інтерфейсі.</div><div class="plain"><b>Аналогія:</b> кермо і педалі. Обираєш, що зручніше саме тобі, — їде однаково той самий двигун.</div></div>
 <h3>Хто є хто в екосистемі</h3>
 <ul>
-<li><strong>Power BI Desktop</strong> — тут ти редагуєш звіт і модель; у форматі PBIP він зберігає проєкт текстовими файлами, які розуміє Git.</li>
-<li><strong>Git</strong> — рушій версій: коміти, гілки, історія. Працює локально на твоєму компʼютері.</li>
-<li><strong>Git Bash</strong> — термінал для Windows, встановлюється разом із Git. Саме тут вводяться команди з цього курсу.</li>
-<li><strong>GitHub</strong> — найпопулярніший хостинг: особисті проєкти, портфоліо, відкритий код.</li>
-<li><strong>Azure DevOps Repos</strong> — корпоративний хостинг від Microsoft: єдиний вхід компанії, політики гілок, pipelines. Типовий вибір там, де вже є Power BI і Fabric.</li>
-<li><strong>VS Code</strong> — безплатний редактор коду: перегляд diff, правка TMDL/JSON, вирішення конфліктів.</li>
-<li><strong>Sourcetree</strong> — графічний Git-клієнт: історія у вигляді графа, commit і push кнопками.</li>
+<li><strong><span class="ticon" data-i="powerbi"></span>Power BI Desktop</strong> — тут ти редагуєш звіт і модель; у форматі PBIP він зберігає проєкт текстовими файлами, які розуміє Git.</li>
+<li><strong><span class="ticon" data-i="git"></span>Git</strong> — рушій версій: коміти, гілки, історія. Працює локально на твоєму компʼютері.</li>
+<li><strong><span class="ticon" data-i="gitbash"></span>Git Bash</strong> — термінал для Windows, встановлюється разом із Git. Саме тут вводяться команди з цього курсу.</li>
+<li><strong><span class="ticon" data-i="github"></span>GitHub</strong> — найпопулярніший хостинг: особисті проєкти, портфоліо, відкритий код.</li>
+<li><strong><span class="ticon" data-i="azuredevops"></span>Azure DevOps Repos</strong> — корпоративний хостинг від Microsoft: єдиний вхід компанії, політики гілок, pipelines. Типовий вибір там, де вже є Power BI і Fabric.</li>
+<li><strong><span class="ticon" data-i="vscode"></span>VS Code</strong> — безплатний редактор коду: перегляд diff, правка TMDL/JSON, вирішення конфліктів.</li>
+<li><strong><span class="ticon" data-i="sourcetree"></span>Sourcetree</strong> — графічний Git-клієнт: історія у вигляді графа, commit і push кнопками.</li>
 <li><strong>Tabular Editor</strong> — просунута робота з семантичною моделлю (детально в модулі 06).</li>
 <li><strong>Fabric Git integration</strong> — міст між репозиторієм і workspace Power BI (детально в модулі 07).</li>
 </ul>
@@ -120,7 +120,8 @@
 <li>Запусти і тисни Next: стандартні налаштування підходять. Пункт про кінці рядків залиш як є (значення за замовчуванням підходить) — що таке checkout і commit, розберемо в модулях 02–03.</li>
 <li>Після встановлення у меню «Пуск» зʼявиться <strong>Git Bash</strong> — термінал, у якому працюватимеш весь курс.</li>
 </ul>
-<div class="tdef"><div class="t">Git Bash</div><div class="d">Термінал для Windows з Unix-командами (pwd, ls, cd), який іде в комплекті з Git.</div><div class="plain"><b>Простими словами:</b> вікно, куди ти друкуєш команди. На Windows воно дає ті самі команди, що бачать колеги на macOS чи Linux, — тому всі інструкції в інтернеті працюють однаково.</div></div>
+<div class="dobox">Відкрий <a href="https://git-scm.com" target="_blank" rel="noopener">git-scm.com</a>, натисни <strong>Download for Windows</strong>, запусти завантажений інсталятор і клацай Next до кінця — типові налаштування підходять.</div>
+<div class="tdef"><div class="t"><span class="ticon" data-i="gitbash"></span>Git Bash</div><div class="d">Термінал для Windows з Unix-командами (pwd, ls, cd), який іде в комплекті з Git.</div><div class="plain"><b>Простими словами:</b> вікно, куди ти друкуєш команди. На Windows воно дає ті самі команди, що бачать колеги на macOS чи Linux, — тому всі інструкції в інтернеті працюють однаково.</div></div>
 <h3>Перевірка і перше налаштування</h3>
 <p>Відкрий Git Bash (Пуск → напиши "Git Bash" → Enter) і введи по черзі:</p>
 <div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-cm"># чи встановився Git: має вивести номер версії</span>
@@ -143,13 +144,14 @@
 <div class="tdef"><div class="t">Віддалений репозиторій (remote)</div><div class="d">Копія репозиторію на сервері хостингу. Ти надсилаєш туди коміти (push) і забираєш чужі (pull).</div><div class="plain"><b>Аналогія:</b> спільна шафа з документами в офісі. Кожен працює за своїм столом (локально), а результат складають у шафу, звідки його бачать усі.</div></div>
 <h3>Який хостинг обрати</h3>
 <ul>
-<li><strong>GitHub</strong> — для особистих проєктів, навчання, портфоліо. Реєструєшся, тиснеш <em>New repository</em>, обираєш private або public — репозиторій готовий за хвилину.</li>
-<li><strong>Azure DevOps Repos</strong> — стандарт у компаніях з Microsoft-стеком: вхід через робочий обліковий запис, політики гілок, pipelines для автоматизації і пряма інтеграція з Fabric (Git sync workspace). Репозиторій створюється в межах проєкту: <em>Project → Repos → New repository</em>.</li>
+<li><strong><span class="ticon" data-i="github"></span>GitHub</strong> — для особистих проєктів, навчання, портфоліо. Реєструєшся, тиснеш <em>New repository</em>, обираєш private або public — репозиторій готовий за хвилину.</li>
+<li><strong><span class="ticon" data-i="azuredevops"></span>Azure DevOps Repos</strong> — стандарт у компаніях з Microsoft-стеком: вхід через робочий обліковий запис, політики гілок, pipelines для автоматизації і пряма інтеграція з Fabric (Git sync workspace). Репозиторій створюється в межах проєкту: <em>Project → Repos → New repository</em>.</li>
 </ul>
 <p>Для курсу підійде будь-який: команди Git однакові. Далі в прикладах здебільшого Azure DevOps — бо саме він найчастіше зустрічається в корпоративній роботі з Power BI.</p>
 <h3>Забираємо репозиторій собі</h3>
 <pre><span class="c"># адресу дає кнопка Clone на сайті хостингу</span>
 <span class="cmd">git clone</span> <span class="arg">https://dev.azure.com/org/project/_git/pbi-reports</span></pre>
+<div class="cmdanim" data-ca="git_clone"></div>
 <p>Під час першого push або clone хостинг попросить увійти: зазвичай відкриється вікно браузера (за це відповідає Git Credential Manager). Про SSH-ключі та Personal Access Token — окремий урок <a href="03-komandy.html#s5">у модулі 03</a>.</p>
 <div class="qcheck" data-qc="qc_hosting"></div>
 
@@ -160,7 +162,8 @@
 <h2>VS Code: редактор із вбудованим Git</h2>
 <p class="lead">PBIP — це текстові файли. А для роботи з текстом потрібен хороший редактор.</p>
 <div class="goalbox"><b>Ціль уроку</b>використовувати VS Code для перегляду змін у PBIP-файлах і вирішення конфліктів.</div>
-<div class="tdef"><div class="t">VS Code (Visual Studio Code)</div><div class="d">Безплатний редактор коду від Microsoft із вбудованою підтримкою Git: панель Source Control, перегляд diff, merge-редактор для конфліктів.</div><div class="plain"><b>Простими словами:</b> «блокнот на стероїдах». Відкриваєш папку PBIP-проєкту — і бачиш, що саме змінилось у моделі, рядок у рядок.</div></div>
+<div class="tdef"><div class="t"><span class="ticon" data-i="vscode"></span>VS Code (Visual Studio Code)</div><div class="d">Безплатний редактор коду від Microsoft із вбудованою підтримкою Git: панель Source Control, перегляд diff, merge-редактор для конфліктів.</div><div class="plain"><b>Простими словами:</b> «блокнот на стероїдах». Відкриваєш папку PBIP-проєкту — і бачиш, що саме змінилось у моделі, рядок у рядок.</div></div>
+<div class="uimock" data-um="vscode_scm"></div>
 <h3>Що ти робитимеш у VS Code найчастіше</h3>
 <ul>
 <li><strong>Дивитись зміни:</strong> панель Source Control (Ctrl+Shift+G) показує змінені файли; клік по файлу — і бачиш diff: що було ліворуч, що стало праворуч.</li>
@@ -183,7 +186,7 @@
 <h2>Sourcetree та інші графічні клієнти</h2>
 <p class="lead">Команди — це точно і швидко. Але дивитись історію та збирати коміт по файлах часто зручніше мишкою.</p>
 <div class="goalbox"><b>Ціль уроку</b>виконувати щоденний цикл (pull → зміни → commit → push) у графічному клієнті й розуміти, коли GUI зручніший за термінал.</div>
-<div class="tdef"><div class="t">Sourcetree</div><div class="d">Безплатний графічний Git-клієнт від Atlassian: історія комітів у вигляді графа, список змінених файлів, кнопки Stage / Commit / Push / Pull.</div><div class="plain"><b>Аналогія:</b> автоматична коробка передач. Усередині той самий Git, але керування — двома кнопками. Для щоденної рутини цього достатньо.</div></div>
+<div class="tdef"><div class="t"><span class="ticon" data-i="sourcetree"></span>Sourcetree</div><div class="d">Безплатний графічний Git-клієнт від Atlassian: історія комітів у вигляді графа, список змінених файлів, кнопки Stage / Commit / Push / Pull.</div><div class="plain"><b>Аналогія:</b> автоматична коробка передач. Усередині той самий Git, але керування — двома кнопками. Для щоденної рутини цього достатньо.</div></div>
 <h3>Типовий цикл у Sourcetree</h3>
 <ul>
 <li>Зранку — кнопка <strong>Pull</strong>: забрав свіжі зміни колег.</li>
@@ -195,7 +198,7 @@
 <ul>
 <li><strong>GitHub Desktop</strong> — ще простіший, ідеальний у парі з GitHub.</li>
 <li><strong>Fork</strong> — швидкий і охайний клієнт для Windows/macOS.</li>
-<li><strong>Вбудований Source Control у VS Code</strong> — якщо не хочеш ставити окрему програму.</li>
+<li><strong>Вбудований Source Control у <span class="ticon" data-i="vscode"></span>VS Code</strong> — якщо не хочеш ставити окрему програму.</li>
 </ul>
 <div class="note tip">Практичне правило: рутина (подивитись зміни, закомітити, запушити) — у GUI; точні або рідкісні операції (rebase, reflog, bisect) — у терміналі. Курс навчить обох способів.</div>
 <div class="order" data-o="or_setup"></div>
@@ -210,10 +213,10 @@
 <div class="goalbox"><b>Ціль уроку</b>бачити повний шлях зміни: Power BI Desktop → Git → Azure DevOps → робоча область Power BI — і знати, який інструмент відповідає за кожен крок.</div>
 <h3>Один робочий день — покроково</h3>
 <ul>
-<li><strong>1. Power BI Desktop.</strong> Відкриваю PBIP-проєкт, виправляю міру Sales YTD, зберігаю. Desktop переписує текстові файли у папці проєкту.</li>
-<li><strong>2. Sourcetree (або VS Code).</strong> Бачу, які саме файли змінились, переглядаю diff: у <code>measure.tmdl</code> змінився один рядок DAX.</li>
+<li><strong>1. <span class="ticon" data-i="powerbi"></span>Power BI Desktop.</strong> Відкриваю PBIP-проєкт, виправляю міру Sales YTD, зберігаю. Desktop переписує текстові файли у папці проєкту.</li>
+<li><strong>2. <span class="ticon" data-i="sourcetree"></span>Sourcetree (або <span class="ticon" data-i="vscode"></span>VS Code).</strong> Бачу, які саме файли змінились, переглядаю diff: у <code>measure.tmdl</code> змінився один рядок DAX.</li>
 <li><strong>3. Коміт.</strong> Stage потрібних файлів → повідомлення <code>fix: correct YTD filter</code> → Commit. Кнопкою в Sourcetree чи командою в Git Bash — результат однаковий.</li>
-<li><strong>4. Push в Azure DevOps.</strong> Зміна тепер на сервері, її бачить уся команда.</li>
+<li><strong>4. Push в <span class="ticon" data-i="azuredevops"></span>Azure DevOps.</strong> Зміна тепер на сервері, її бачить уся команда.</li>
 <li><strong>5. Git sync.</strong> Робоча область у Power BI Service підтягує зміну з гілки (Update from Git) — звіт опубліковано, бізнес бачить виправлення. Для звичайної публікації це фініш.</li>
 <li><strong>6. (За потреби) Deployment pipeline.</strong> Якщо команда тримає окремі області Dev і Prod, додається ще один крок: після перевірки в Dev натискаю Deploy — pipeline промоутить вміст у Prod. Це опційний рівень, а не обовʼязкова частина процесу.</li>
 </ul>
