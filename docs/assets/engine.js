@@ -1894,6 +1894,94 @@ const CMDANIM={
       {t:'fx',op:'recv',n:2},
       {t:'note',s:`fetch і pull відрізняються так: fetch лише розвідує, що нового на сервері (подивитись), а pull ще й одразу вливає ці зміни у твою гілку (влити). Після fetch робочі файли не зміняться, поки ти сам не зробиш merge чи pull.`}
     ]
+  },
+  git_rebase:{
+    title:`git rebase main — переносить гілку на нову основу`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'c3',msg:`нова міра Total Sales`,par:['c2'],br:'main'},
+      {id:'f1',msg:`чернетка KPI-картки`,par:['c1'],br:'feature'}
+    ],head:'feature'},
+    steps:[
+      {t:'type',s:`git rebase main`},
+      {t:'out',s:[`First, rewinding head to replay your work on top of it...`,`Applying: чернетка KPI-картки`]},
+      {t:'fx',op:'commit',id:'f1r',msg:`чернетка KPI-картки`,par:['c3'],br:'feature'},
+      {t:'fx',op:'mark',id:'f1r'},
+      {t:'note',s:`rebase «переносить» коміт на нову основу — але насправді це КОПІЯ з новим SHA: f1r замінив f1 на гілці feature, а старий f1 лишився сірим у минулому, бо на нього більше не веде жодна гілка. Тому rebase вже запушених гілок небезпечний: у колег, які мали старий f1, історія розійдеться з твоєю.`}
+    ]
+  },
+  git_cherry_pick:{
+    title:`git cherry-pick — забирає один коміт з іншої гілки`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'f1',msg:`чернетка KPI-картки`,par:['c1'],br:'feature'},
+      {id:'f2',msg:`виправлення кольору KPI-картки`,par:['f1'],br:'feature'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git cherry-pick a1b2c3d`},
+      {t:'out',s:[`[main 9f3e21a] виправлення кольору KPI-картки`,` 1 file changed, 1 insertion(+)`]},
+      {t:'fx',op:'commit',id:'f2c',msg:`виправлення кольору KPI-картки`,par:['c2'],br:'main'},
+      {t:'fx',op:'mark',id:'f2c'},
+      {t:'note',s:`cherry-pick бере лише ОДНУ «вишеньку» з чужої гілки: f2c — новий коміт із власним SHA і батьком c2 (не f1), хоча вміст той самий, що й у f2. Гілка feature лишається незмінною — f1 у main так і не потрапив.`}
+    ]
+  },
+  git_amend:{
+    title:`git commit --amend — підміняє останній коміт`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'c3',msg:`fix: crrect YTD fitler in Sales`,par:['c2'],br:'main'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git commit --amend -m "fix: correct YTD filter in Sales"`},
+      {t:'out',s:[`[main f9e2a1c] fix: correct YTD filter in Sales`,` 1 file changed, 1 insertion(+), 1 deletion(-)`]},
+      {t:'fx',op:'commit',id:'c3a',msg:`fix: correct YTD filter in Sales`,par:['c2'],br:'main'},
+      {t:'fx',op:'mark',id:'c3a'},
+      {t:'note',s:`amend ПІДМІНЯЄ останній коміт новим: c3a має новий SHA і виправлене повідомлення, а старий c3 (з одруківкою) лишився в базі даних Git, тільки на нього вже не вказує жодна гілка — на схемі він сірий. Це працює лише до push: якщо c3 вже потрапив на GitHub, amend ламає історію для колег.`}
+    ]
+  },
+  git_bisect:{
+    title:`git bisect — шукає винний коміт навпіл`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'c3',msg:`нова міра Total Sales`,par:['c2'],br:'main'},
+      {id:'c4',msg:`рефактор моделі`,par:['c3'],br:'main'},
+      {id:'c5',msg:`реліз: числа не сходяться`,par:['c4'],br:'main'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git bisect start`},
+      {t:'out',s:[`status: waiting for both good and bad commits`]},
+      {t:'type',s:`git bisect bad`},
+      {t:'type',s:`git bisect good c1`},
+      {t:'out',s:[`Bisecting: 1 revision left to test after this (roughly 2 steps)`,`[f0a35e2] нова міра Total Sales`]},
+      {t:'fx',op:'mark',id:'c3'},
+      {t:'type',s:`git bisect bad`},
+      {t:'out',s:[`Bisecting: 0 revisions left to test after this (roughly 1 step)`,`[b7e4f21] нова таблиця Sales`]},
+      {t:'fx',op:'mark',id:'c2'},
+      {t:'type',s:`git bisect good`},
+      {t:'out',s:[`f0a35e2 is the first bad commit`,`commit f0a35e2`,`    нова міра Total Sales`]},
+      {t:'fx',op:'mark',id:'c3'},
+      {t:'note',s:`git bisect — це знайома гра «відгадай число»: кожна відповідь good/bad ділить залишок навпіл. З 5 комітів вистачило 2 перевірок; зі 128 комітів вистачило б лише 7 — бо 2 в сьомому степені дає 128. Двійковий пошук завжди швидший за перегляд комітів поспіль.`}
+    ]
+  },
+  git_worktree:{
+    title:`git worktree add — друга робоча папка тієї самої історії`,
+    panel:'explorer',
+    fs0:{path:`C:\\PBI`,items:[{n:`report.pbip`,k:'file'},{n:`definition`,k:'folder'}]},
+    steps:[
+      {t:'type',s:`git worktree add ../hotfix main`},
+      {t:'out',s:[`Preparing worktree (checking out 'main')`,`HEAD is now at 3f1a02d нова міра Total Sales`]},
+      {t:'fx',op:'add',n:`hotfix (друга робоча копія)`,k:'folder'},
+      {t:'fx',op:'mark',n:`hotfix (друга робоча копія)`},
+      {t:'note',s:`Це та сама історія — просто друга незалежна папка на диску. У hotfix можна лагодити терміновий баг, не чіпаючи report.pbip, який уже відкритий у Power BI Desktop у первинній папці.`}
+    ]
   }
 };
 function caWait(ms){return new Promise(res=>setTimeout(res,ms));}
@@ -3028,6 +3116,114 @@ const UIMOCK={
 <text x="56" y="360" font-size="12" fill="#1f2430">що вже влито в main.</text>
 </g>
 <path d="M380,340 C395,330 400,325 414,316" fill="none" stroke="#5b5bd6" stroke-width="2" marker-end="url(#arr-pgs)"/>
+</svg>`},
+  vscode_merge:{title:`VS Code: маркери конфлікту злиття`,
+    cap:`Так виглядає конфлікт злиття у VS Code: файл model.tmdl відкрито після git merge чи git pull, і в редакторі видно маркери &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD, ======= та &gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/kpi-cards. З'являється, коли дві гілки змінили той самий рядок TMDL — клікаєш потрібний варіант, і маркери зникають.`,
+    svg:`<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs><clipPath id="cvsm"><rect x="20" y="20" width="680" height="380" rx="10"/></clipPath></defs>
+<rect x="20" y="20" width="680" height="380" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cvsm)">
+<rect x="20" y="20" width="680" height="32" fill="#f4f5f8"/>
+<text x="40" y="41" font-size="12" font-weight="700" fill="#1f2430">Visual Studio Code — merge conflict</text>
+<text x="695" y="41" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<rect x="20" y="52" width="680" height="32" fill="#f4f5f8"/>
+<rect x="20" y="52" width="150" height="32" fill="#ffffff"/>
+<rect x="20" y="52" width="150" height="2" fill="#5b5bd6"/>
+<text x="40" y="72" font-size="11" font-weight="700" font-family="monospace" fill="#1f2430">model.tmdl</text>
+<circle cx="158" cy="68" r="4" fill="#e5484d"/>
+<line x1="170" y1="52" x2="170" y2="84" stroke="#e7e8ee"/>
+<text x="190" y="72" font-size="11" font-family="monospace" fill="#5b6473">measures.tmdl</text>
+<line x1="20" y1="84" x2="700" y2="84" stroke="#e7e8ee"/>
+<text x="60" y="101" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">9</text>
+<text x="72" y="101" font-size="12" font-family="monospace" fill="#1f2430">measure 'Total Sales' = SUM(Sales[Amount])</text>
+<text x="60" y="125" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">10</text>
+<text x="72" y="149" font-size="11" font-weight="600" fill="#5b5bd6">Accept Current Change</text>
+<text x="214" y="149" font-size="11" fill="#c1c4cf">|</text>
+<text x="222" y="149" font-size="11" font-weight="600" fill="#5b5bd6">Accept Incoming Change</text>
+<text x="372" y="149" font-size="11" fill="#c1c4cf">|</text>
+<text x="380" y="149" font-size="11" font-weight="600" fill="#5b5bd6">Accept Both Changes</text>
+<rect x="20" y="156" width="680" height="24" fill="#b7791f" fill-opacity="0.12"/>
+<text x="60" y="173" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">11</text>
+<text x="72" y="173" font-size="12" font-weight="700" font-family="monospace" fill="#b7791f">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</text>
+<text x="168" y="173" font-size="10.5" font-style="italic" fill="#9aa0ad">(Current Change)</text>
+<rect x="20" y="180" width="680" height="24" fill="#0e9f6e" fill-opacity="0.12"/>
+<text x="60" y="197" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">12</text>
+<text x="72" y="197" font-size="12" font-family="monospace" fill="#1f2430">  measure 'KPI Cards Count' = 4</text>
+<rect x="20" y="204" width="680" height="24" fill="#b7791f" fill-opacity="0.12"/>
+<text x="60" y="221" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">13</text>
+<text x="72" y="221" font-size="12" font-weight="700" font-family="monospace" fill="#b7791f">=======</text>
+<text x="132" y="221" font-size="10.5" font-style="italic" fill="#9aa0ad">(Incoming Change)</text>
+<rect x="20" y="228" width="680" height="24" fill="#6b76a8" fill-opacity="0.18"/>
+<text x="60" y="245" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">14</text>
+<text x="72" y="245" font-size="12" font-family="monospace" fill="#1f2430">  measure 'KPI Cards Count' = 6</text>
+<rect x="20" y="252" width="680" height="24" fill="#b7791f" fill-opacity="0.12"/>
+<text x="60" y="269" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">15</text>
+<text x="72" y="269" font-size="12" font-weight="700" font-family="monospace" fill="#b7791f">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/kpi-cards</text>
+<text x="60" y="293" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">16</text>
+<text x="72" y="293" font-size="12" font-family="monospace" fill="#1f2430">formatString: 0</text>
+<line x1="20" y1="306" x2="700" y2="306" stroke="#e7e8ee"/>
+<rect x="40" y="316" width="620" height="68" rx="8" fill="#f4f5f8" stroke="#5b5bd6" stroke-width="1.5"/>
+<text x="56" y="340" font-size="12" font-weight="700" fill="#5b5bd6">Клікни потрібний варіант вище —</text>
+<text x="56" y="360" font-size="12" fill="#1f2430">маркери &lt;&lt;&lt;, ===, &gt;&gt;&gt; зникнуть самі.</text>
+</g>
+</svg>`},
+  sourcetree_main:{title:`Sourcetree: головне вікно і граф комітів`,
+    cap:`Sourcetree — безплатний графічний клієнт Git: та сама історія комітів, тільки замість тексту в терміналі — кольоровий граф із кружечками. Ліворуч — список гілок (жирним показано активну), згори — кнопки Commit / Pull / Push замість команд у Git Bash.`,
+    svg:`<svg viewBox="0 0 720 450" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs><clipPath id="cst"><rect x="20" y="20" width="680" height="410" rx="10"/></clipPath></defs>
+<rect x="20" y="20" width="680" height="410" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cst)">
+<rect x="20" y="20" width="680" height="32" fill="#f4f5f8"/>
+<text x="40" y="41" font-size="12" font-weight="700" fill="#1f2430">Sourcetree — pbi-reports</text>
+<text x="695" y="41" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<rect x="40" y="64" width="110" height="36" rx="6" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<circle cx="60" cy="82" r="9" fill="#0e9f6e"/>
+<path d="M55,82 L59,86 L66,77" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="78" y="86" font-size="12" font-weight="600" fill="#1f2430">Commit</text>
+<rect x="160" y="64" width="100" height="36" rx="6" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<circle cx="180" cy="82" r="9" fill="#5b5bd6"/>
+<path d="M180,76 L180,88 M175,83 L180,88 L185,83" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="196" y="86" font-size="12" font-weight="600" fill="#1f2430">Pull</text>
+<rect x="270" y="64" width="100" height="36" rx="6" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<circle cx="290" cy="82" r="9" fill="#5b5bd6"/>
+<path d="M290,88 L290,76 M285,81 L290,76 L295,81" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="306" y="86" font-size="12" font-weight="600" fill="#1f2430">Push</text>
+<circle cx="366" cy="66" r="9" fill="#e5484d"/>
+<text x="366" y="70" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<rect x="20" y="112" width="170" height="318" fill="#f4f5f8"/>
+<line x1="20" y1="112" x2="700" y2="112" stroke="#e7e8ee"/>
+<line x1="190" y1="112" x2="190" y2="430" stroke="#e7e8ee"/>
+<text x="36" y="134" font-size="10" letter-spacing="1" font-weight="700" fill="#9aa0ad">BRANCHES</text>
+<circle cx="36" cy="165" r="4" fill="#5b5bd6"/>
+<text x="50" y="169" font-size="12" font-family="monospace" fill="#5b5bd6">main</text>
+<rect x="20" y="178" width="170" height="26" fill="#6b76a8" fill-opacity="0.15"/>
+<circle cx="36" cy="191" r="4" fill="#6b76a8"/>
+<text x="50" y="195" font-size="10.5" font-weight="700" font-family="monospace" fill="#6b76a8">feature/kpi-cards</text>
+<text x="226" y="134" font-size="10" font-weight="700" fill="#9aa0ad">GRAPH</text>
+<text x="340" y="134" font-size="10" font-weight="700" fill="#9aa0ad">DESCRIPTION</text>
+<line x1="210" y1="142" x2="700" y2="142" stroke="#e7e8ee"/>
+<line x1="240" y1="238" x2="240" y2="318" stroke="#5b5bd6" stroke-width="2.5"/>
+<line x1="300" y1="158" x2="300" y2="198" stroke="#6b76a8" stroke-width="2.5"/>
+<path d="M300,198 C300,213 260,223 240,238" fill="none" stroke="#6b76a8" stroke-width="2.5"/>
+<circle cx="300" cy="158" r="10" fill="none" stroke="#6b76a8" stroke-width="1.5" stroke-dasharray="2 2"/>
+<circle cx="300" cy="158" r="7" fill="#6b76a8" stroke="#ffffff" stroke-width="2"/>
+<text x="340" y="162" font-size="11"><tspan font-family="monospace" fill="#9aa0ad">a3f21c9</tspan><tspan fill="#1f2430" dx="8">Додав KPI-картки</tspan></text>
+<rect x="565" y="150" width="115" height="18" rx="9" fill="#6b76a8" fill-opacity="0.15" stroke="#6b76a8"/>
+<text x="622" y="163" font-size="9.5" font-weight="700" fill="#6b76a8" text-anchor="middle">feature/kpi-cards</text>
+<circle cx="300" cy="198" r="7" fill="#6b76a8" stroke="#ffffff" stroke-width="2"/>
+<text x="340" y="202" font-size="11"><tspan font-family="monospace" fill="#9aa0ad">9c04e21</tspan><tspan fill="#1f2430" dx="8">Виправив формат чисел</tspan></text>
+<circle cx="240" cy="238" r="7" fill="#5b5bd6" stroke="#ffffff" stroke-width="2"/>
+<text x="340" y="242" font-size="11"><tspan font-family="monospace" fill="#9aa0ad">5e19a02</tspan><tspan fill="#1f2430" dx="8">Нове джерело даних</tspan></text>
+<rect x="600" y="230" width="50" height="18" rx="9" fill="#5b5bd6" fill-opacity="0.15" stroke="#5b5bd6"/>
+<text x="625" y="243" font-size="9.5" font-weight="700" fill="#5b5bd6" text-anchor="middle">main</text>
+<circle cx="240" cy="278" r="7" fill="#5b5bd6" stroke="#ffffff" stroke-width="2"/>
+<text x="340" y="282" font-size="11"><tspan font-family="monospace" fill="#9aa0ad">22b6f10</tspan><tspan fill="#1f2430" dx="8">Виправив назву міри</tspan></text>
+<circle cx="240" cy="318" r="7" fill="#5b5bd6" stroke="#ffffff" stroke-width="2"/>
+<text x="340" y="322" font-size="11"><tspan font-family="monospace" fill="#9aa0ad">0a1c3f4</tspan><tspan fill="#1f2430" dx="8">Initial commit</tspan></text>
+<rect x="210" y="346" width="470" height="56" rx="8" fill="#f4f5f8" stroke="#5b5bd6" stroke-width="1.5"/>
+<text x="226" y="368" font-size="12" font-weight="700" fill="#5b5bd6">Це той самий git log --graph —</text>
+<text x="226" y="388" font-size="12" fill="#1f2430">тільки клацаєш мишкою, а не читаєш термінал.</text>
+</g>
 </svg>`}
 };
 function buildUimock(){

@@ -66,6 +66,7 @@
 <span class="cmd">git bisect</span> <span class="arg">good</span>   <span class="c"># або</span>   <span class="cmd">git bisect</span> <span class="arg">bad</span>
 <span class="c"># … повторюєш, доки: "&lt;sha&gt; is the first bad commit"</span>
 <span class="cmd">git bisect</span> <span class="arg">reset</span>          <span class="c"># повернутися на свою гілку</span></pre>
+<div class="cmdanim" data-ca="git_bisect"></div>
 <div class="note tip"><span class="ticon" data-i="pbip"></span><b>PBIP-сценарій.</b> Звіт «раптом» порахувався інакше — bisect швидко вкаже коміт, де змінилась міра чи зв'язок, навіть серед сотень комітів.</div>
 <div class="order" data-o="or_08_bisect"></div>
 <div class="note tip"><b>Як це виглядає на практиці.</b> bisect — територія термінала Git Bash: у Sourcetree такої команди немає. Зате перевірка кожного кроку — звична: Git уже підмінив файли на диску, тож відкриваєш PBIP у Power BI Desktop, дивишся, чи є баг, закриваєш файл і відповідаєш <code>good</code> чи <code>bad</code>.</div>
@@ -107,6 +108,7 @@
 <span class="c"># … правиш і комітиш hotfix у ../project-hotfix …</span>
 <span class="cmd">git worktree</span> <span class="arg">list</span>                                <span class="c"># перелік робочих директорій</span>
 <span class="cmd">git worktree</span> <span class="arg">remove ../project-hotfix</span>             <span class="c"># прибрати, коли готово</span></pre>
+<div class="cmdanim" data-ca="git_worktree"></div>
 <div class="note tip"><b>Альтернатива stash.</b> Замість «згорнути все вбік» — відкрити hotfix в окремій папці; основна директорія з недоробленою фічею лишається недоторканою. Команди worktree теж живуть у терміналі Git Bash, а далі все як завжди: PBIP із сусідньої папки відкриваєш у Power BI Desktop, файли правиш у VS Code.</div>
 <div class="csim" data-cs="cs_08_worktree_add"></div>
 

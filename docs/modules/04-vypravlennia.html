@@ -167,6 +167,7 @@
 <span class="c"># 2) забув файл: зберіг у Power BI Desktop лише модель, а зміну сторінки — ні</span>
 <span class="cmd">git add</span> <span class="arg">report/definition/pages/okr.json</span>
 <span class="cmd">git commit --amend</span> <span class="arg">--no-edit</span>   <span class="c"># файл доїхав тим самим комітом, повідомлення без змін</span></pre>
+<div class="cmdanim" data-ca="git_amend"></div>
 <div class="note warn"><b>Головне правило: amend — лише до push.</b> Amend переписує SHA, тобто історію. Якщо коміт уже на сервері, після amend push вимагатиме <code>--force-with-lease</code>, а це ламає копії колег — та сама логіка, що й у золотому правилі rebase (модуль 05). Коміт уже запушено? Виправляй наступним комітом або <a href="#s2">revert-ом</a>.</div>
 <div class="note tip"><b>Де це у GUI:</b> у <span class="ticon" data-i="sourcetree"></span>Sourcetree під полем повідомлення є прапорець <em>Amend latest commit</em>; у <span class="ticon" data-i="vscode"></span>VS Code — команда «Commit (Amend)». Обидва роблять той самий <code>git commit --amend</code>.</div>
 <div class="dobox">Зроби це просто зараз: у наступному коміті навмисно залиш одруківку в повідомленні — і одразу виправ через <code>git commit --amend</code>, поки коміт ще не запушено. Так рука звикне: виправляти можна одразу, а не другим комітом «fix typo».</div>
