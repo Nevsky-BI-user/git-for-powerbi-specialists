@@ -107,6 +107,7 @@
 <span class="out">e4f5a6b fix: correct YTD filter   ← оцей ламає підсумок</span>
 <span class="cmd">git revert</span> <span class="arg">e4f5a6b</span>            <span class="c"># Git створює коміт "Revert …" з протилежними змінами</span>
 <span class="cmd">git push</span>                       <span class="c"># колеги отримають скасування звичайним pull</span></pre>
+<div class="note tip">Після <code>git revert &lt;sha&gt;</code> Git відкриє вкладку VS Code (той самий редактор із модуля 03, налаштований через <code>core.editor</code>) із готовим повідомленням «Revert …» — збережи (Ctrl+S) і закрий вкладку, термінал продовжить сам. У цей момент термінал виглядає «завислим» — це нормально, він просто чекає на редактор. Якщо повідомлення за замовчуванням влаштовує, пропусти цей крок одразу: <code>git revert --no-edit &lt;sha&gt;</code>.</div>
 <p>Після push робоча область підтягне скасування через Git sync — звіт повернеться до робочої версії, а в історії буде видно і помилку, і виправлення.</p>
 <h3>Що варто знати наперед</h3>
 <ul>
@@ -161,7 +162,7 @@
 <span class="c"># 2) забув файл: зберіг у Power BI Desktop лише модель, а зміну сторінки — ні</span>
 <span class="cmd">git add</span> <span class="arg">report/definition/pages/okr.json</span>
 <span class="cmd">git commit --amend</span> <span class="arg">--no-edit</span>   <span class="c"># файл доїхав тим самим комітом, повідомлення без змін</span></pre>
-<div class="note warn"><b>Головне правило: amend — лише до push.</b> Amend переписує SHA, тобто історію. Якщо коміт уже на сервері, після amend push вимагатиме <code>--force</code>, а це ламає копії колег — та сама логіка, що й у золотому правилі rebase (модуль 05). Коміт уже запушено? Виправляй наступним комітом або <a href="#s2">revert-ом</a>.</div>
+<div class="note warn"><b>Головне правило: amend — лише до push.</b> Amend переписує SHA, тобто історію. Якщо коміт уже на сервері, після amend push вимагатиме <code>--force-with-lease</code>, а це ламає копії колег — та сама логіка, що й у золотому правилі rebase (модуль 05). Коміт уже запушено? Виправляй наступним комітом або <a href="#s2">revert-ом</a>.</div>
 <div class="note tip"><b>Де це у GUI:</b> у Sourcetree під полем повідомлення є прапорець <em>Amend latest commit</em>; у VS Code — команда «Commit (Amend)». Обидва роблять той самий <code>git commit --amend</code>.</div>
 <div class="csim" data-cs="cs_amend"></div>
 <div class="order" data-o="or_04_amend"></div>

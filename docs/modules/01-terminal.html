@@ -90,6 +90,7 @@
 <span class="tw-p">$</span> <span class="tw-c">cd ..</span>
 <span class="tw-p">$</span> <span class="tw-c">pwd</span>
 <span class="tw-o">/home/ivan</span></div></div>
+<div class="note tip">У Git Bash на Windows шлях виглядатиме інакше, наприклад <code>/c/Users/Ivan</code> — це нормально, <code>/c/</code> означає диск C:.</div>
 <table class="cmdtable">
 <tr><td>pwd</td><td>Показати поточну папку.</td></tr>
 <tr><td>ls</td><td>Список вмісту поточної папки.</td></tr>
@@ -114,9 +115,10 @@
 <p class="lead">Перш ніж робити Git-репозиторій, треба вміти створити папку проєкту й файли в ній.</p>
 <div class="goalbox"><b>Ціль уроку</b>створювати папки й файли та записувати текст у файл з термінала.</div>
 <div class="tdef"><div class="t">mkdir &lt;назва&gt;</div><div class="d">Створює нову папку. mkdir = make directory.</div><div class="plain"><b>Простими словами:</b> «зроби папку». <code>mkdir reports</code> створює папку reports.</div></div>
-<div class="tdef"><div class="t">touch &lt;файл&gt;</div><div class="d">Створює порожній файл (на Windows аналог — <code>New-Item файл</code> у PowerShell).</div><div class="plain"><b>Простими словами:</b> «створи порожній файл» із заданою назвою.</div></div>
+<div class="tdef"><div class="t">touch &lt;файл&gt;</div><div class="d">Створює порожній файл. У Git Bash (термінал цього курсу) команда <code>touch</code> працює як є — PowerShell чи CMD у курсі не знадобляться.</div><div class="plain"><b>Простими словами:</b> «створи порожній файл» із заданою назвою.</div></div>
 <div class="tdef"><div class="t">echo "текст" &gt; файл</div><div class="d">Записує текст у файл. Один <code>&gt;</code> перезаписує файл; два <code>&gt;&gt;</code> дописують у кінець.</div><div class="plain"><b>Простими словами:</b> echo — «вивести текст»; стрілка <code>&gt;</code> перенаправляє цей текст не на екран, а у файл.</div></div>
 <div class="tdef"><div class="t">cat &lt;файл&gt;</div><div class="d">Показує вміст файлу в терміналі.</div><div class="plain"><b>Простими словами:</b> «покажи, що всередині файлу».</div></div>
+<div class="note tip">Виконуй ці команди у зрозумілій папці, напр. спершу <code>cd ~/Documents</code> — тоді створену папку легко знайти у Провіднику Windows (Документи) і вибрати в Power BI Desktop при збереженні PBIP.</div>
 <div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">mkdir pdp-report</span>      <span class="tw-cm"># створили папку</span>
 <span class="tw-p">$</span> <span class="tw-c">cd pdp-report</span>
 <span class="tw-p">$</span> <span class="tw-c">touch README.md</span>       <span class="tw-cm"># порожній файл</span>

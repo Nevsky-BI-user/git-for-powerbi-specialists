@@ -117,17 +117,18 @@
 <h3>Кроки встановлення</h3>
 <ul>
 <li>Завантаж інсталятор з офіційного сайту <a href="https://git-scm.com" target="_blank" rel="noopener">git-scm.com</a>.</li>
-<li>Запусти і тисни Next: стандартні налаштування підходять. Єдине, на що варто звернути увагу, — пункт про кінці рядків: обери рекомендований <em>Checkout Windows-style, commit Unix-style</em>.</li>
+<li>Запусти і тисни Next: стандартні налаштування підходять. Пункт про кінці рядків залиш як є (значення за замовчуванням підходить) — що таке checkout і commit, розберемо в модулях 02–03.</li>
 <li>Після встановлення у меню «Пуск» зʼявиться <strong>Git Bash</strong> — термінал, у якому працюватимеш весь курс.</li>
 </ul>
 <div class="tdef"><div class="t">Git Bash</div><div class="d">Термінал для Windows з Unix-командами (pwd, ls, cd), який іде в комплекті з Git.</div><div class="plain"><b>Простими словами:</b> вікно, куди ти друкуєш команди. На Windows воно дає ті самі команди, що бачать колеги на macOS чи Linux, — тому всі інструкції в інтернеті працюють однаково.</div></div>
 <h3>Перевірка і перше налаштування</h3>
-<pre><span class="c"># чи встановився Git: має вивести номер версії</span>
-<span class="cmd">git --version</span>
+<p>Відкрий Git Bash (Пуск → напиши "Git Bash" → Enter) і введи по черзі:</p>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-cm"># чи встановився Git: має вивести номер версії</span>
+<span class="tw-p">$</span> <span class="tw-c">git --version</span>
 
-<span class="c"># представся: це імʼя та email підписуватимуть кожен твій коміт</span>
-<span class="cmd">git config</span> <span class="arg">--global user.name "Ім'я Прізвище"</span>
-<span class="cmd">git config</span> <span class="arg">--global user.email "you@company.com"</span></pre>
+<span class="tw-cm"># представся: це імʼя та email підписуватимуть кожен твій коміт</span>
+<span class="tw-p">$</span> <span class="tw-c">git config --global user.name "Ім'я Прізвище"</span>
+<span class="tw-p">$</span> <span class="tw-c">git config --global user.email "you@company.com"</span></div></div>
 <div class="note tip">Порада: у корпоративному ноутбуці Git може бути вже встановлений або ставиться через ІТ-відділ. Просто відкрий Git Bash і перевір <code>git --version</code> — якщо версія вивелась, крок виконано.</div>
 <div class="csim" data-cs="cs_gitversion"></div>
 <div class="qcheck" data-qc="qc_gitbash"></div>

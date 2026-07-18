@@ -70,7 +70,7 @@
 <div class="card"><h4>PBIP</h4><p>Папка текстових файлів. Кожна міра, таблиця, візуал — окремо й читабельно. Git показує точні зміни.</p></div>
 </div>
 <h3>Як зберегти</h3>
-<p>Power BI Desktop → <strong>File → Save As → «Power BI project files (*.pbip)»</strong>. Desktop створить структуру папок і <code>.gitignore</code> автоматично.</p>
+<p>Power BI Desktop → <strong>File → Save As → «Power BI project files (*.pbip)»</strong>. Desktop створить структуру папок і <code>.gitignore</code> автоматично. Під час Save As ти сам обираєш папку на диску — саме вона стане коренем майбутнього Git-репозиторію.</p>
 <div class="note tip"><b>Стан на 2026.</b> Звітна частина PBIP за замовчуванням використовує формат <span class="term">PBIR</span> (нова модульна структура). <code>.pbix</code> лишається основним контейнером і нікуди не зникає — він теж усередині перейшов на PBIR-метадані.</div>
 
 <div class="qcheck" data-qc="qc_pbip_what"></div>
@@ -175,21 +175,24 @@
 <p class="lead">Покрокова послідовність: від .pbix до спільного репозиторію на сервері.</p>
 <div class="goalbox"><b>Ціль уроку</b>провести проєкт від збереження як PBIP до першого push.</div>
 <h3>Крок 1 — зберегти як PBIP</h3>
-<p>У Power BI Desktop: <strong>File → Save As → «Power BI project files (*.pbip)»</strong>, обери папку. Desktop створить структуру й <code>.gitignore</code>. Далі працюєш як звик: відкриваєш <code>.pbip</code>, правиш звіт, тиснеш Ctrl+S — Power BI Desktop перезаписує текстові файли в цій папці, і Git одразу бачить зміни.</p>
+<p>У Power BI Desktop: <strong>File → Save As → «Power BI project files (*.pbip)»</strong>, обери папку. Desktop створить структуру й <code>.gitignore</code>. Далі працюєш як звик: відкриваєш <code>.pbip</code>, правиш звіт, тиснеш Ctrl+S — Power BI Desktop перезаписує текстові файли в цій папці.</p>
 <h3>Крок 2 — увімкнути Git у папці</h3>
-<pre><span class="cmd">cd</span> <span class="arg">C:\Repos\PDP</span>          <span class="c"># перейти в папку проєкту</span>
+<pre><span class="cmd">cd</span> <span class="arg">&lt;шлях_до_папки_з_кроку_1&gt;</span>          <span class="c"># перейти в папку проєкту</span>
 <span class="cmd">git init</span>                  <span class="c"># увімкнути контроль версій</span>
 <span class="cmd">git add</span> <span class="arg">.</span>                 <span class="c"># усі файли проєкту у staging</span>
 <span class="cmd">git commit</span> <span class="arg">-m "Початковий стан PDP"</span></pre>
+<div class="note tip"><b>Де взяти свій шлях?</b> Подивись у заголовку вікна Power BI Desktop або в Провіднику — саме туди Desktop зберіг папку на Кроці 1.</div>
+<div class="note"><b>Перевірка перед першим комітом:</b> виконай <code>git status</code> і переконайся, що <code>cache.abf</code> та <code>localSettings.json</code> НЕ потрапили у список (їх має ховати .gitignore). Якщо вони видні — див. модуль F, кейс про <code>git rm --cached</code>.</div>
 <div class="note tip"><b>Подивись очима перед комітом.</b> Перш ніж виконати <code>git commit</code>, відкрий папку проєкту в Sourcetree — на вкладці File Status видно список змінених файлів і diff кожного. Те саме у VS Code: панель Source Control (Ctrl+Shift+G), клік по файлу відкриває порівняння. Так ти комітиш усвідомлено, а не «все, що назбиралося».</div>
+<p>Тепер, після <code>git init</code>, Desktop-збереження одразу видно у <code>git status</code> — Git стежить за папкою.</p>
 <h3>Крок 3 — під'єднати сервер і відправити</h3>
-<div class="widget"><div class="wtitle">Що відбувається: локально → сервер</div><div class="gplayer" data-p="clone"></div></div>
+<div class="widget"><div class="wtitle">Що відбувається: локально → сервер</div><div class="gplayer" data-p="remote"></div></div>
 <pre><span class="cmd">git remote</span> <span class="arg">add origin &lt;url&gt;</span>   <span class="c"># під'єднати сервер (Azure DevOps / GitHub)</span>
 <span class="cmd">git push</span> <span class="arg">-u origin main</span>       <span class="c"># відправити перший раз</span></pre>
 <p>Спробуй сам: сервер уже створено, лишилося підʼєднати його до локального PBIP-репозиторію.</p><div class="csim" data-cs="cs_06_remote_add"></div>
 <h3>Крок 4 — колега забирає копію</h3>
+<div class="widget"><div class="wtitle">Що відбувається: git clone</div><div class="gplayer" data-p="clone"></div></div>
 <pre><span class="cmd">git clone</span> <span class="arg">&lt;url&gt;</span>            <span class="c"># колега завантажує проєкт собі</span></pre>
-<div class="note"><b>Перевірка перед першим комітом:</b> виконай <code>git status</code> і переконайся, що <code>cache.abf</code> та <code>localSettings.json</code> НЕ потрапили у список (їх має ховати .gitignore). Якщо вони видні — див. модуль F, кейс про <code>git rm --cached</code>.</div>
 <div class="note tip"><b>Щоденний цикл після налаштування.</b> Відкриваєш звіт у Power BI Desktop → вносиш зміни → Ctrl+S → переглядаєш diff у Sourcetree або VS Code → <code>git add .</code> і <code>git commit</code> → <code>git push</code>. Якщо при <code>git pull</code> виникне конфлікт — вирішуєш його у merge-редакторі VS Code; типові конфлікти PBIP розібрано в <a href="07-komanda.html#s2">модулі 07</a>.</div>
 
 </section>
@@ -208,7 +211,7 @@
 <pre><span class="cmd">git add</span> <span class="arg">.</span>
 <span class="cmd">git commit</span> <span class="arg">-m "Міграція звіту: .pbix → PBIP"</span>
 <span class="cmd">git push</span></pre>
-<p>Опублікований звіт при цьому <strong>не ламається</strong>: якщо назви елементів (звіту й семантичної моделі) збігаються, то після підключення робочої області до гілки <strong>Update from Git</strong> оновить наявний звіт, а не створить дубль — посилання користувачів і підписки збережуться.</p>
+<p>Опублікований звіт при цьому <strong>не ламається</strong>: якщо назви елементів (звіту й семантичної моделі) збігаються, то після підключення робочої області до гілки <strong>Update from Git</strong> оновить наявний звіт, а не створить дубль — посилання користувачів і підписки збережуться. Детальніше про механізм синхронізації — в уроці <a href="07-komanda.html#s12">модуль 07 · Fabric Git integration</a>.</p>
 <div class="note warn"><b>Куди подіти старий .pbix?</b> Прибери його з робочої папки: в історію він однаково не потрапить (<code>*.pbix</code> уже в .gitignore), а лежачи поруч — плутатиме команду, «яка версія справжня». Поклади в архівну папку поза репозиторієм і тримай там, доки не перевіриш, що PBIP-версія в Service працює як слід.</div>
 <p>Закріпи послідовність — розстав кроки міграції у правильному порядку.</p><div class="order" data-o="or_06_pbix_migration"></div>
 <h3>Тонкі звіти: коли моделі всередині немає</h3>

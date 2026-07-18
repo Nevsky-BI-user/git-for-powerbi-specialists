@@ -90,7 +90,8 @@
   <div class="gcap" id="rbExp"></div>
   <div class="pnav"><button class="ghost" id="rbPrev">← Назад</button><button id="rbNext">Далі →</button><span class="cnt" id="rbCnt"></span></div>
 </div>
-<div class="note tip"><b>Термінал чи Sourcetree?</b> Interactive rebase зручніше робити в терміналі: <code>git rebase -i HEAD~4</code> у Git Bash відкриває todo-список як звичайний текст — переставляєш рядки, міняєш <code>pick</code> на потрібну дію, зберігаєш і закриваєш. Sourcetree теж уміє (правий клік по коміту → «Rebase children… interactively»), відповідність його кнопок командам Git — у таблиці нижче.</div>
+<div class="note tip"><b>Термінал чи Sourcetree?</b> Interactive rebase зручніше робити в терміналі: <code>git rebase -i HEAD~4</code> у Git Bash відкриває todo-список як <b>текстовий файл</b> — у тій самій вкладці VS Code, що й повідомлення комітів (<code>core.editor</code> з модуля 03). Редагуєш рядки (<code>pick</code> → потрібна дія), зберігаєш, закриваєш вкладку — rebase продовжиться сам. Sourcetree теж уміє (правий клік по коміту → «Rebase children… interactively»), відповідність його кнопок командам Git — у таблиці нижче.</div>
+<div class="note warn"><b>Гілку вже пушив?</b> Interactive rebase змінює SHA комітів, тому звичайний <code>git push</code> після нього Git відхилить (розбіжність з віддаленою гілкою). Потрібен <code>git push --force-with-lease</code> — детальніше про нього в модулі 07.</div>
 <h3>Дії Sourcetree → Git</h3>
 <table class="cmdtable">
 <tr><td>(за замовч.)</td><td><code>pick</code> — застосувати без змін.</td></tr>
@@ -129,6 +130,7 @@ measure 'Total Sales' = SUMX(Sales, Sales[Qty] * Sales[Price])
 <span class="cmd">git rebase</span> <span class="arg">--continue</span>   <span class="c"># rebase</span></pre>
 <div class="note tip"><b>Робочий сценарій з інструментами.</b> Робиш <code>git pull</code> у Git Bash (або тиснеш Pull у Sourcetree) — і бачиш <code>CONFLICT (content): Merge conflict in model.tmdl</code>. Відкриваєш файл у VS Code: він сам підсвічує маркери й пропонує merge-редактор із кнопками Accept Current / Accept Incoming — одним кліком обираєш свою чи чужу версію (або поєднуєш вручну). Далі стандартно: <code>git add</code>, <code>git commit</code>, <code>git push</code>. Усі ці інструменти ти ставив у модулі <a href="00-start.html">00 — Старт та інструменти</a>.</div>
 <div class="note"><b>Під час rebase конфлікт спрацьовує покомітно.</b> Переносиш 4 коміти — конфлікт може виникнути до 4 разів. Sourcetree: Resolve Conflicts → Continue Rebase.</div>
+<div class="note tip"><b>Заплутався в конфлікті?</b> <code>git merge --abort</code> поверне все як було до merge/pull (для rebase — <code>git rebase --abort</code>) — можна видихнути і спробувати ще раз. Потренувати це безпечно можна в тренажері практикуму: <a href="pr2-hilky.html#s3">П2 · Конфлікт і detached HEAD</a>.</div>
 
 <div class="order" data-o="or_conflict"></div>
 </section>

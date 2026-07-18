@@ -369,14 +369,30 @@ function gradeMulti(qel,q){
   qel.querySelector('.q-check').disabled=true;
   qel.querySelector('.q-why').classList.add('show');
 }
+let lcCur=0;
 function lcPlace(z){
+  lcCur=z;
   document.querySelectorAll('#lcZones .chiphold').forEach(h=>h.innerHTML='');
   document.querySelectorAll('#lcZones .zone').forEach(zz=>zz.classList.remove('lit'));
   const zone=document.querySelector(`#lcZones .zone[data-z="${z}"]`);if(!zone)return;
   zone.querySelector('.chiphold').innerHTML='<span class="filechip">model.tmdl</span>';zone.classList.add('lit');
 }
 const LC_EXP={add:'git add — зміни переміщено у Staging. Увійдуть у наступний коміт.',commit:'git commit — створено коміт у локальному репозиторії. Staging очищено.',push:'git push — коміти відправлено на сервер. Тепер їх бачить команда.',fetch:'git fetch — завантажено коміти з сервера, робочі файли не змінено.',restore:'git restore — зміни у робочій директорії відкинуто.',reset:'git reset — вказівник пересунуто; зміни повернулись у робочу директорію (mixed).'};
-function lc(z,act){lcPlace(z);const e=document.getElementById('lcExp');if(e)e.textContent=LC_EXP[act];}
+// звідки дозволена кожна дія (щоб віджет не вчив «push без коміту»)
+const LC_REQ={add:[0],commit:[1],push:[2],fetch:[3],restore:[0],reset:[2]};
+const LC_BLOCK={
+  add:'git add бере зміни з Working Dir — зараз файл уже далі по циклу. Натисни git reset, щоб повернути його назад.',
+  commit:'Нічого комітити: у Staging порожньо — спершу git add.',
+  push:'Нема що відправляти: push шле КОМІТИ, а їх ще немає — спершу git add, потім git commit.',
+  fetch:'git fetch забирає нове з сервера — спершу доведи файл до сервера (add → commit → push).',
+  restore:'git restore відкидає незакомічені зміни у Working Dir — зараз файл не там.',
+  reset:'git reset працює із закоміченим — спершу доведи файл до Repository (add → commit).'
+};
+function lc(z,act){
+  const e=document.getElementById('lcExp');
+  if(LC_REQ[act]&&LC_REQ[act].indexOf(lcCur)<0){if(e)e.textContent='⛔ '+LC_BLOCK[act];return;}
+  lcPlace(z);if(e)e.textContent=LC_EXP[act];
+}
 const RS={
   soft:{head:['wipe','✕ скинуто'],stage:['keep','✓ збережено'],work:['keep','✓ збережено'],t:'--soft: пересуває лише вказівник. Зміни лишаються у Staging — готові до перезбірки в новий коміт.'},
   mixed:{head:['wipe','✕ скинуто'],stage:['wipe','✕ скинуто'],work:['keep','✓ збережено'],t:'--mixed (за замовч.): вказівник назад + очистка Staging. Зміни лишаються у робочій директорії як unstaged.'},

@@ -87,6 +87,7 @@
 <div class="note tip"><b>Те саме кнопками.</b> У VS Code панель Source Control робить це за два кліки: «+» біля файлу — це <code>git add</code>, поле повідомлення і кнопка Commit — це <code>git commit -m</code>. Під капотом виконуються ті самі команди, тому спершу зрозумій їх у терміналі — далі кнопки перестануть бути магією.</div>
 
 <h3>Симулятор: спробуй сам</h3>
+<div class="note tip"><b>Це тренажер прямо на сторінці.</b> Команду вводиш текстом — система перевірить її як справжній Git. Коли розбереш синтаксис, відкрий справжній Git Bash у папці свого проєкту (модуль 01) і повтори ці ж команди насправді.</div>
 <div class="csim" data-cs="cs_init"></div>
 <div class="csim" data-cs="cs_status"></div>
 <div class="csim" data-cs="cs_addall"></div>
@@ -198,6 +199,7 @@
 <h4 class="sub">git push — відправити свої зміни</h4>
 <div class="widget"><div class="wtitle">Візуалізація: push (твій комп'ютер → сервер)</div><div class="gplayer" data-p="remote"></div></div>
 <div class="note tip"><b>Кнопковий еквівалент.</b> У Sourcetree це кнопки Pull і Push на верхній панелі: цифра на Pull показує, скільки чужих комітів чекає на сервері, на Push — скільки твоїх ще не відправлено. Клік виконує той самий <code>git pull</code> чи <code>git push</code>.</div>
+<div class="note tip"><b>Якщо репозиторій починався з git init, а не clone.</b> Локальний репозиторій ще не знає, куди пушити — <code>origin</code> у ньому не налаштований. Один раз під'єднай сервер: <code>git remote add origin &lt;url&gt;</code>. Пропустиш цей крок — <code>git push</code> відповість <code>fatal: No configured push destination</code>.</div>
 
 <h4 class="sub">Коли двоє пушать одночасно — конфлікт синхронізації</h4>
 <p>Найчастіша ситуація в команді з двох розробників: обидва зробили коміти й намагаються запушити. Хто перший — той пройде. Другому push відхилять.</p>

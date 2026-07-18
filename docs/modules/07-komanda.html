@@ -109,7 +109,7 @@ Thumbs.db
 <div class="tdef"><div class="t">CI (Continuous Integration)</div><div class="d">Автоматичні перевірки, що запускаються на сервері при push (напр. валідація моделі, Best Practice Analyzer).</div><div class="plain"><b>Простими словами:</b> «робот-контролер», що перевіряє зміни без участі людини.</div></div>
 <h3>Потік фічі у графі</h3>
 <div class="widget"><div class="wtitle">feature → merge у main</div><div class="gplayer" data-p="branching"></div></div>
-<div class="note tip"><b>Fabric / Power BI Git integration.</b> Гілку <code>main</code> прив'язують до робочої області. Після push у main роблять Update from Git — звіт опубліковано; для звичайної публікації цього достатньо. Команди з окремими Dev і Prod додають другий етап: deployment pipeline промоутить Dev → Prod.</div>
+<div class="note tip"><b>Fabric / Power BI Git integration.</b> Гілку <code>main</code> прив'язують до робочої області. Після push у main роблять Update from Git — звіт опубліковано; для звичайної публікації цього достатньо. Команди з окремими Dev і Prod додають другий етап: deployment pipeline промоутить Dev → Prod. Update from Git — це кнопка В БРАУЗЕРІ, у Power BI Service (не термінал і не Desktop) — детальніше в уроці <a href="#s12">«Fabric Git integration»</a>.</div>
 
 <div class="order" data-o="or_feature"></div>
 </section>
@@ -356,9 +356,7 @@ Thumbs.db
 <div class="scn"><span class="cat">Deploy / Fabric / CI</span><h4><span class="num">21</span>Fabric workspace розходиться з гілкою</h4>
 <p><b>Проблема:</b> у Fabric Git integration workspace показує uncommitted changes, що не збігаються з гілкою.</p>
 <p><b>Причина:</b> хтось правив прямо у workspace, оминаючи Git.</p>
-<pre><span class="c"># джерело істини — Git. Або закомітити зміни workspace у гілку,</span>
-<span class="c"># або відкинути їх і зробити Update from Git у Fabric</span>
-<span class="cmd">git pull</span> && <span class="cmd">git push</span></pre>
+<p><b>Дії в браузері</b> (Power BI Service → Source control): якщо зміна з робочої області потрібна — відкрий вкладку <b>Changes</b> і зроби <b>Commit</b>; якщо не потрібна — <b>Undo</b>/<b>Discard</b> цю зміну, а потім у вкладці <b>Updates</b> натисни <b>Update from Git</b>. Детальніше — урок <a href="#s12">«Fabric Git integration»</a>.</p>
 <p class="sol"><b>Підсумок:</b> не правити workspace напряму, повз Git.</p></div>
 
 <div class="scn"><span class="cat">Deploy / Fabric / CI</span><h4><span class="num">22</span>Deployment pipeline перезаписав міру з Service</h4>
@@ -532,11 +530,12 @@ PBI_CLIENT_SECRET=
 
 <div class="crumb">Модуль F — командна робота</div>
 <h2>Fabric Git integration: підключаємо робочу область</h2>
-<p class="lead">Фініш усього циклу курсу: merge у main → push → Update from Git. Тут розберемо, де саме в Power BI Service живе ця кнопка і що означають статуси поруч із нею. Це та частина процесу, яку аналітик робить у браузері, а не в терміналі.</p>
+<p class="lead">Фініш усього циклу курсу: merge у main → push → Update from Git. Тут розберемо, де саме в Power BI Service живе ця кнопка і що означають статуси поруч із нею. Це та частина процесу, яку аналітик робить у браузері, а не в терміналі. Git-хостинг (dev.azure.com / github.com — куди йде git push, «сервер» зі сценаріїв) і app.powerbi.com (робоча область, де тиснеш Update from Git) — це ДВА РІЗНІ сайти; вони не синхронізуються самі, поки не натиснеш Update from Git.</p>
 <div class="goalbox"><b>Ціль уроку</b>підключити робочу область до гілки main і впевнено читати статуси панелі Source control.</div>
 <div class="tdef"><div class="t">Fabric Git integration</div><div class="d">Вбудований звʼязок робочої області Power BI / Fabric із гілкою Git-репозиторію: область уміє підтягувати коміти з гілки (Update from Git) і комітити зміни, зроблені в Service, назад у гілку.</div><div class="plain"><b>Простими словами:</b> «підписка» робочої області на гілку — натиснув Update, і область стала такою самою, як main.</div><div class="ex">Гілку <code>main</code> підключають до робочої області; після push у main достатньо натиснути Update from Git — і звіт опубліковано.</div></div>
 <p>Передумови — дві, і обидві поза Git: робоча область має бути на ємності Fabric або Premium (на особистій My workspace чи звичайній Pro-області Git integration недоступна), а адміністратор tenant має дозволити Git integration у налаштуваннях (Admin portal → Tenant settings). Якщо чогось із цього немає — питання не до Git і не до тебе, а до адміністратора.</p>
 <h3>Підключення — робиться один раз</h3>
+<p><b>Крок 0, у браузері:</b> відкрий <code>app.powerbi.com</code>, увійди робочим акаунтом; зліва в меню Workspaces обери робочу область.</p>
 <ol>
 <li>Відкрий робочу область → Workspace settings → вкладка Git integration.</li>
 <li>Обери провайдера: Azure DevOps (або GitHub).</li>
@@ -622,7 +621,7 @@ PBI_CLIENT_SECRET=
 <p>Ментальна модель: Git привозить «креслення» — визначення моделі та звіту (TMDL і PBIR). Самих ДАНИХ у репозиторії немає і бути не може: таблиці наповнюються вже в Power BI Service, коли датасет виконує refresh і сам іде в джерела. Тому одразу після першої синхронізації звіт цілком законно порожній.</p>
 <h3>Після першої синхронізації датасету</h3>
 <ol>
-<li>Налаштування датасету: Settings → Semantic models → Data source credentials — задай облікові дані кожного джерела (Edit credentials).</li>
+<li>У браузері, в Power BI Service (не в Desktop): у робочій області — Settings → Semantic models → Data source credentials — задай облікові дані кожного джерела (Edit credentials).</li>
 <li>Якщо джерело on-prem — наприклад, SQL Server у локальній мережі компанії — привʼяжи датасет до gateway (див. нижче).</li>
 <li>Запусти refresh разово (Refresh now) і переконайся, що він пройшов без помилок; потім налаштуй розклад (Scheduled refresh).</li>
 </ol>
