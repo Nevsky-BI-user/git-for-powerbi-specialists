@@ -401,6 +401,12 @@ a.mcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .dg-again{font-family:inherit;font-size:12px;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
 .dg-again:hover{border-color:var(--blue);color:var(--blue)}
 
+/* === місток теорія → практика === */
+.prac-link{border:1px solid var(--line);border-left:3px solid var(--new);border-radius:11px;background:var(--panel-2);padding:13px 16px;margin:24px 0 6px}
+.prac-link b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--new);margin-bottom:8px}
+.prac-link a{display:inline-block;font-size:12.5px;color:var(--txt);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 11px;margin:0 6px 6px 0;background:var(--panel)}
+.prac-link a:hover{border-color:var(--new);color:var(--new)}
+
 /* === diff-віджет: прочитай diff === */
 .diffq{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:11px;padding:14px 16px;margin:16px 0;background:var(--panel)}
 .diffq.solved{border-left-color:var(--new)}
