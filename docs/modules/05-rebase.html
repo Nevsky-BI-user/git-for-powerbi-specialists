@@ -69,8 +69,10 @@
 <span class="cmd">git rebase</span> <span class="arg">-i HEAD~4</span>      <span class="c"># інтерактивно: останні 4 коміти</span>
 <span class="cmd">git rebase</span> <span class="arg">--continue</span>     <span class="c"># після вирішення конфлікту</span>
 <span class="cmd">git rebase</span> <span class="arg">--abort</span>        <span class="c"># скасувати rebase</span></pre>
+<p>Спробуй базову команду сам.</p><div class="csim" data-cs="cs_05_rebase_main"></div>
 <div class="note tip"><b>Де запускати.</b> Rebase найпростіше робити в терміналі Git Bash — Git на кожному кроці пише підказку, що робити далі. У Sourcetree те саме — правий клік по гілці <code>main</code> → «Rebase current changes onto main», а якщо щось пішло не так, кнопка Abort робить те саме, що <code>git rebase --abort</code>.</div>
 <div class="note warn"><b>Золоте правило rebase.</b> Не роби rebase комітів, які вже на сервері й спільні. Rebase — для локальних, ще не опублікованих комітів.</div>
+<p>Склади повний робочий цикл: оновити гілку через rebase і чисто злити її у main.</p><div class="order" data-o="or_05_rebase_flow"></div>
 
 </section>
 <section class="lesson show" id="s1" data-n="s1">
@@ -97,6 +99,7 @@
 <tr><td>Delete</td><td><code>drop</code> — не відтворювати.</td></tr>
 <tr><td>Move Up/Down</td><td>зміна порядку рядків todo.</td></tr>
 </table>
+<p>Закріпи команду входу в interactive rebase — саме з неї починається чистка історії.</p><div class="csim" data-cs="cs_05_irebase"></div>
 
 <div class="qcheck" data-qc="qc_irebase"></div>
 </section>

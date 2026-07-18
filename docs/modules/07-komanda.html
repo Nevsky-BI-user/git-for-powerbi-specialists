@@ -127,6 +127,8 @@ Thumbs.db
 </table>
 <div class="note warn"><b>Після вирішення TMDL-конфлікту відкрий проєкт у Power BI Desktop або провалідуй у Tabular Editor.</b> Git перевіряє лише текст, не валідність моделі.</div>
 <div class="note tip"><b>Інструмент для вирішення.</b> Конфліктний TMDL/JSON відкривай у VS Code: вбудований merge-редактор показує «свою» та «чужу» версії поруч і дає кнопки Accept Current / Accept Incoming / Accept Both — не треба вручну вишукувати маркери <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>.</div>
+<p>Склади повний ланцюжок: від CONFLICT до валідної моделі.</p>
+<div class="order" data-o="or_07_tmdl_conflict"></div>
 <h3>Профілактика</h3>
 <ul>
 <li>Короткоживучі feature-гілки.</li>
@@ -148,6 +150,8 @@ Thumbs.db
 <p>Найфундаментальніше: як один коміт мандрує від A через сервер до B. Це основа, на якій тримаються всі інші сценарії.</p>
 <div class="widget"><div class="wtitle">commit → push → pull</div><div class="scplayer" data-s="basic1"></div></div>
 <div class="note tip"><b>Ті самі кроки в інструментах.</b> Розробник A вносить зміну і зберігає проєкт у Power BI Desktop, потім у Sourcetree переглядає diff змінених TMDL/JSON-файлів, комітить і натискає Push. Розробник B натискає Pull у Sourcetree — і бачить коміт A в історії та оновлені файли у своєму проєкті.</div>
+<p>Спробуй сам: ти — Розробник B, колега щойно запушив коміт на сервер.</p>
+<div class="csim" data-cs="cs_07_pull"></div>
 <h3>Сценарій 2 — паралельна робота, push відхилено</h3>
 <p>Двоє комітять одночасно різні файли. Хто пушить другим — отримує відмову <code>non-fast-forward</code> і робить <code>pull --rebase</code>. Конфлікту немає, бо файли різні.</p>
 <div class="widget"><div class="wtitle">паралельні коміти + pull --rebase</div><div class="scplayer" data-s="parallel"></div></div>
@@ -268,6 +272,8 @@ Thumbs.db
 <pre><span class="cmd">git rm</span> <span class="arg">--cached path/to/file</span>
 <span class="cmd">git commit</span> <span class="arg">-m "apply gitignore"</span></pre>
 <p class="sol"><b>Підсумок:</b> після rm --cached ignore починає діяти.</p></div>
+<p>Спробуй сам — типовий PBIP-випадок із кейсів 8–10:</p>
+<div class="csim" data-cs="cs_07_rm_cached"></div>
 
 <div class="scn"><span class="cat">Форматування / інструменти</span><h4><span class="num">11</span>Whitespace-churn через різні версії Tabular Editor</h4>
 <p><b>Проблема:</b> у diff сотні «змін» — лише відступи й порядок рядків, логіка та сама.</p>

@@ -65,6 +65,5 @@ Source of truth — файли в `docs/`. Разовий міграційний
 
 ## Backlog
 
-- csim/order-покриття у модулях 04–08 (зараз найгустіше в 01/03).
-- termlab: конфлікти при pull/rebase (merge-конфлікти вже органічні) + більше задач у практикумі.
 - Задачі «прочитай diff» реалізовано в банку `prE1` (pr5-ekzamen); окремий віджет із підсвіткою diff — можливе продовження.
+- Закрито: csim/order-покриття 04–08 (по 2 csim + 1 order на модуль); rebase-конфлікти в termlab (pull --rebase → could not apply → edit/add → `git rebase --continue`, або `--abort`).

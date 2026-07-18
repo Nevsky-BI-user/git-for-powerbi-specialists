@@ -153,6 +153,7 @@
 <span class="c"># tables/Sales.tmdl — зміст: змінився DAX міри, це і є твоя правка</span>
 - measure 'Total Sales' = <span class="out">SUM(Sales[Amount])</span>
 + measure 'Total Sales' = <span class="out">CALCULATE(SUM(Sales[Amount]), USERELATIONSHIP(Dates[Date], Sales[ShipDate]))</span></pre>
+<p>Спробуй сам: Desktop щойно перезаписав файли проєкту, і перед комітом ти хочеш глянути зміни конкретного файлу.</p><div class="csim" data-cs="cs_06_diff_tmdl"></div>
 <h3>Правила на щодень</h3>
 <ul>
 <li><strong>Перед комітом дивись список файлів</strong> у Sourcetree (вкладка File Status): чи очікував ти кожен змінений файл.</li>
@@ -182,6 +183,7 @@
 <div class="widget"><div class="wtitle">Що відбувається: локально → сервер</div><div class="gplayer" data-p="clone"></div></div>
 <pre><span class="cmd">git remote</span> <span class="arg">add origin &lt;url&gt;</span>   <span class="c"># під'єднати сервер (Azure DevOps / GitHub)</span>
 <span class="cmd">git push</span> <span class="arg">-u origin main</span>       <span class="c"># відправити перший раз</span></pre>
+<p>Спробуй сам: сервер уже створено, лишилося підʼєднати його до локального PBIP-репозиторію.</p><div class="csim" data-cs="cs_06_remote_add"></div>
 <h3>Крок 4 — колега забирає копію</h3>
 <pre><span class="cmd">git clone</span> <span class="arg">&lt;url&gt;</span>            <span class="c"># колега завантажує проєкт собі</span></pre>
 <div class="note"><b>Перевірка перед першим комітом:</b> виконай <code>git status</code> і переконайся, що <code>cache.abf</code> та <code>localSettings.json</code> НЕ потрапили у список (їх має ховати .gitignore). Якщо вони видні — див. модуль F, кейс про <code>git rm --cached</code>.</div>
@@ -205,6 +207,7 @@
 <span class="cmd">git push</span></pre>
 <p>Опублікований звіт при цьому <strong>не ламається</strong>: якщо назви елементів (звіту й семантичної моделі) збігаються, то після підключення робочої області до гілки <strong>Update from Git</strong> оновить наявний звіт, а не створить дубль — посилання користувачів і підписки збережуться.</p>
 <div class="note warn"><b>Куди подіти старий .pbix?</b> Прибери його з робочої папки: в історію він однаково не потрапить (<code>*.pbix</code> уже в .gitignore), а лежачи поруч — плутатиме команду, «яка версія справжня». Поклади в архівну папку поза репозиторієм і тримай там, доки не перевіриш, що PBIP-версія в Service працює як слід.</div>
+<p>Закріпи послідовність — розстав кроки міграції у правильному порядку.</p><div class="order" data-o="or_06_pbix_migration"></div>
 <h3>Тонкі звіти: коли моделі всередині немає</h3>
 <div class="tdef"><div class="t">Тонкий звіт (live connection)</div><div class="d">Звіт без власної семантичної моделі: він підключений наживо до спільної моделі, опублікованої окремо.</div><div class="plain"><b>Простими словами:</b> квартира без власної котельні — тепло приходить із міської мережі. Приклад із Power BI: пʼять звітів відділів читають одну спільну модель продажів.</div></div>
 <p>У PBIP такий звіт виглядає незвично: лише папка <code>.Report</code> та файл <code>definition.pbir</code> із посиланням на датасет — папки <code>.SemanticModel</code> немає взагалі. Комітиться й пушиться так само, як звичайний.</p>

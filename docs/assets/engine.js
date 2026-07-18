@@ -875,7 +875,7 @@ function tlTokens(s){
 function tlNewState(init){
   init=init||{};
   const st={initialized:init.initialized!==false,commits:{},order:[],branches:{},head:null,
-    files:{},stash:[],remote:null,tracking:{},conflict:null,conflictSnap:null,conflictOn:init.conflictOn||null,hadConflict:false,mergeAborted:false,
+    files:{},stash:[],remote:null,tracking:{},conflict:null,conflictSnap:null,conflictOn:init.conflictOn||null,hadConflict:false,mergeAborted:false,rebasing:null,
     cseq:0,mseq:0,brMeta:{main:{lane:0,color:'main'}}};
   Object.keys(init.files||{}).forEach(f=>st.files[f]=init.files[f]);
   if(!st.initialized)return st;
@@ -912,6 +912,32 @@ function tlMergeBase(st,a,b){
 function tlTouchedSince(st,tip,base){
   const rb=tlReach(st,base),rt=tlReach(st,tip),out=new Set();
   st.order.forEach(id=>{if(rt.has(id)&&!rb.has(id))st.commits[id].files.forEach(f=>out.add(f));});
+  return out;
+}
+function tlRebaseStep(st){
+  const R=st.rebasing,out=[];
+  while(R.queue.length){
+    const c=R.queue[0];
+    const confl=(c.files||[]).filter(f=>R.remoteTouched.indexOf(f)>=0);
+    if(confl.length&&!c._resolved){
+      confl.forEach(f=>{st.files[f]='conflict';});
+      st.conflict={files:confl,from:`rebase`,edited:{},resolved:false,rebase:true};
+      st.hadConflict=true;
+      confl.forEach(f=>{out.push(`Auto-merging ${f}`);out.push(`CONFLICT (content): Merge conflict in ${f}`);});
+      out.push(`error: could not apply ${c.id} (${c.msg})`);
+      out.push(`підказка: edit → git add для кожного файлу, потім git rebase --continue (або git rebase --abort)`);
+      return out;
+    }
+    R.queue.shift();
+    const nid=c.id+`'`;
+    st.commits[nid]={id:nid,parents:[R.base],msg:c.msg,color:'rebased',lane:c.lane,known:true,files:c.files,br:c.br};
+    st.order.push(nid);R.created.push(nid);R.base=nid;
+  }
+  st.branches[R.branch]=R.base;
+  const made=R.created.join(', ');
+  st.rebasing=null;
+  out.push(`Successfully rebased and updated refs/heads/${tlCurBranch(st)}.`);
+  if(made)out.push(`(коміти переграно поверх серверних: ${made})`);
   return out;
 }
 function tlDirtyFiles(st){return Object.keys(st.files).filter(f=>['modified','staged','stagedNew','conflict'].indexOf(st.files[f])>=0);}
@@ -959,13 +985,13 @@ function tlFilesHtml(st){
   if(st.remote)Object.keys(st.remote.branches).forEach(b=>{extra+=`<span class="tl-badge">☁ сервер: ${b} → ${st.remote.branches[b]}</span>`;});
   return `<div class="tl-files-row">${chips}</div>`+(extra?`<div class="tl-badges">${extra}</div>`:'');
 }
-const TL_KNOWN_OTHER=['rebase','cherry-pick','blame','diff','tag','remote','clone','config','show','rm','mv','reflog','commit-tree'];
+const TL_KNOWN_OTHER=['cherry-pick','blame','diff','tag','remote','clone','config','show','rm','mv','reflog','commit-tree'];
 function tlHelp(){
   return [
     `Команди тренажера:`,
     `  git init | status | add <файл>|. | commit -m "..." | log [--oneline]`,
     `  git branch [<назва>] | switch [-c] <гілка> | checkout [-b] <гілка|коміт>`,
-    `  git merge <гілка> [--abort] | fetch | pull [--rebase] | push [-u origin <гілка>]`,
+    `  git merge <гілка> [--abort] | fetch | pull [--rebase] | rebase --continue|--abort | push [-u origin <гілка>]`,
     `  git reset --soft|--mixed|--hard HEAD~1 | revert HEAD | restore [--staged] <файл>`,
     `  git stash [pop]`,
     `Не git: touch <файл> (створити), edit <файл> (змінити), ls, clear, help`
@@ -987,6 +1013,7 @@ function tlStatusOut(st){
       else out.push(`Your branch is up to date with 'origin/${b}'.`);
     }
   }
+  if(st.rebasing)out.push(`(rebase у процесі — заверши git rebase --continue або скасуй git rebase --abort)`);
   const conf=Object.keys(st.files).filter(f=>st.files[f]==='conflict');
   const staged=Object.keys(st.files).filter(f=>st.files[f]==='staged');
   const stagedNew=Object.keys(st.files).filter(f=>st.files[f]==='stagedNew');
@@ -1014,6 +1041,7 @@ function tlStatusOut(st){
   return out;
 }
 function tlDoCommit(st,msg){
+  if(st.conflict&&st.conflict.rebase)return [`підказка: під час rebase крок завершують командою git rebase --continue, а не commit`];
   if(st.conflict&&!st.conflict.resolved)return [`error: Committing is not possible because you have unmerged files.`];
   const b=tlCurBranch(st);
   if(st.conflict&&st.conflict.resolved){
@@ -1221,6 +1249,30 @@ function tlRun(st,line){
       st.order.push(id);st.branches[b]=id;
       return {out:[`Merge made by the 'ort' strategy.`]};
     }
+    case 'rebase':{
+      const sub2=T[2];
+      if(sub2==='--continue'){
+        if(!st.rebasing)return {out:[`fatal: no rebase in progress`]};
+        if(st.conflict&&!st.conflict.resolved)return {out:[`error: спершу розвʼяжи конфліктні файли (edit → git add), тоді git rebase --continue`]};
+        if(st.conflict&&st.conflict.resolved){
+          st.rebasing.queue[0]._resolved=true;
+          st.conflict.files.forEach(f=>{if(st.files[f]==='staged')st.files[f]='clean';});
+          st.conflict=null;
+        }
+        return {out:tlRebaseStep(st)};
+      }
+      if(sub2==='--abort'){
+        if(!st.rebasing)return {out:[`fatal: no rebase in progress`]};
+        const R=st.rebasing;
+        R.created.forEach(id=>{st.order.splice(st.order.indexOf(id),1);delete st.commits[id];});
+        R.orig.forEach(c=>{delete c._resolved;st.commits[c.id]=c;st.order.push(c.id);});
+        st.branches[R.branch]=R.origTip;
+        st.files=Object.assign({},R.filesSnap);
+        st.conflict=null;st.rebasing=null;st.mergeAborted=true;
+        return {out:[`(rebase скасовано — стан повернуто до початкового)`]};
+      }
+      return {out:[`підказка: у тренажері rebase запускається через git pull --rebase; тут підтримуються git rebase --continue і git rebase --abort`]};
+    }
     case 'fetch':{
       if(!st.remote)return {out:[`fatal: 'origin' does not appear to be a git repository`]};
       const out=[];
@@ -1253,17 +1305,12 @@ function tlRun(st,line){
       if(T.indexOf('--rebase')>=0){
         const rl=tlReach(st,L),rr=tlReach(st,rt);
         const localOnly=st.order.filter(id=>rl.has(id)&&!rr.has(id));
-        localOnly.forEach(id=>{st.order.splice(st.order.indexOf(id),1);});
-        let base=rt;
-        const copies=[];
-        localOnly.forEach(id=>{
-          const c=st.commits[id];delete st.commits[id];
-          const nid=id+`'`;
-          st.commits[nid]={id:nid,parents:[base],msg:c.msg,color:'rebased',lane:c.lane,known:true,files:c.files,br:c.br};
-          st.order.push(nid);copies.push(nid);base=nid;
-        });
-        st.branches[b]=base;
-        return {out:[`Successfully rebased and updated refs/heads/${b}.`,`(${localOnly.length} твоїх комітів переграно поверх серверних: ${copies.join(', ')})`]};
+        const base=tlMergeBase(st,L,rt);
+        const remoteTouched=[...tlTouchedSince(st,rt,base)];
+        const orig=localOnly.map(id=>st.commits[id]);
+        localOnly.forEach(id=>{st.order.splice(st.order.indexOf(id),1);delete st.commits[id];});
+        st.rebasing={branch:b,base:rt,queue:orig.slice(),orig,origTip:L,created:[],filesSnap:Object.assign({},st.files),remoteTouched};
+        return {out:tlRebaseStep(st)};
       }
       return {out:[`fatal: Need to specify how to reconcile divergent branches.`,`підказка: git pull --rebase — переграти твої коміти поверх серверних`]};
     }
@@ -1626,6 +1673,14 @@ const TERMLAB={
     hints:[`Git перерахує ВСІ конфліктні файли у виводі merge. Кожен розвʼязується окремо: edit → add. Коміт пройде лише коли розвʼязані всі.`,`git merge feature/redesign → edit + add для КОЖНОГО з двох файлів → git commit`],
     sol:[`git merge feature/redesign`,`edit definition/model.tmdl`,`git add definition/model.tmdl`,`edit report/pages/main/visual.json`,`git add report/pages/main/visual.json`,`git commit`],
     ok:`Обидва конфлікти розвʼязано, merge-коміт створено. Git не дасть закомітити, поки лишається хоч один нерозвʼязаний файл — тепер ти це бачив на власні очі.`},
+  tl_pull_rebase_conflict:{
+    title:`Rebase-конфлікт: ви з колегою чіпали один файл`,
+    task:`Найжорсткіший сценарій синхронізації: твій незапушений коміт і свіжий коміт колеги на сервері змінюють ОДИН файл — <code>definition/model.tmdl</code>. Спробуй push (відмова), зроби <code>git pull --rebase</code> — реплей зупиниться конфліктом (could not apply). Розвʼяжи його (edit → add), заверши <code>git rebase --continue</code> і допуш. Історія має лишитися лінійною.`,
+    init:{commits:[{id:'C1',msg:`база`},{id:'C2',p:['C1'],msg:`твоя правка міри`,files:['definition/model.tmdl']},{id:'C3',p:['C1'],known:false,msg:`колега теж чіпав модель`,files:['definition/model.tmdl']}],branches:{main:'C2'},remote:{main:'C3'},tracking:{main:'C1'},files:{'definition/model.tmdl':'clean'}},
+    goal:{pushed:true,noMergeCommits:true,conflictSeen:true,commitsAtLeast:3,fileStatus:{'definition/model.tmdl':'clean'}},
+    hints:[`Під час rebase конфлікт завершують НЕ комітом: edit → git add → git rebase --continue.`,`git push → git pull --rebase → edit definition/model.tmdl → git add definition/model.tmdl → git rebase --continue → git push`],
+    sol:[`git push`,`git pull --rebase`,`edit definition/model.tmdl`,`git add definition/model.tmdl`,`git rebase --continue`,`git push`],
+    ok:`Твій коміт переграно поверх коміту колеги з розвʼязаним конфліктом — історія лінійна, push пройшов. Це вершина щоденної синхронізації.`},
   tl_final_capstone:{
     title:`Фінальний бос: повний цикл фічі`,
     task:`Усе разом, як у реальній команді. Репозиторій склоновано з сервера, у тебе змінені <code>report/pages/main/visual.json</code> і <code>definition/model.tmdl</code>. Зроби: гілку <code>feature/report-header</code> → два окремі коміти (спершу visual, потім model) → повернись на main → влий фічу → відправ на сервер. Далі в житті Git sync опублікує зміни в робочу область.`,
@@ -1790,7 +1845,28 @@ Object.assign(ORDERS,{
     `Git sync (Update from Git) публікує зміни в робочу область`,
     `(Опційно) Deployment pipeline розкочує з Dev у Prod`]}
 });
+/* csim/order-покриття модулів 04–08 */
+Object.assign(CSIM,{
+cs_04_reset_soft:{t:`Скасуй останній коміт (<code>HEAD~1</code>) так, щоб усі його зміни лишились у staging.`,a:['^git reset --soft HEAD~1$','^git reset --soft HEAD~$','^git reset --soft HEAD\\^$'],sol:'git reset --soft HEAD~1'},
+cs_04_restore:{t:`Файл <code>visual.json</code> зіпсовано у робочій папці (коміту ще не було). Поверни його до стану останнього коміту.`,a:['^git restore visual\\.json$','^git checkout( --)? visual\\.json$'],sol:'git restore visual.json'},
+cs_05_rebase_main:{t:`Ти в гілці <code>feature/kpi-cards</code>, локальний <code>main</code> щойно оновлено. Перенеси коміти гілки поверх свіжого <code>main</code>.`,a:['^git rebase main$'],sol:'git rebase main'},
+cs_05_irebase:{t:`Відкрий інтерактивний rebase для останніх 4 комітів гілки.`,a:['^git rebase -i HEAD~4$','^git rebase --interactive HEAD~4$'],sol:'git rebase -i HEAD~4'},
+cs_06_remote_add:{t:`Локальний PBIP-репозиторій готовий, порожній репозиторій на сервері створено. Підʼєднай віддалений репозиторій <code>https://dev.azure.com/mhp/pdp</code> під стандартним іменем.`,a:['^git remote add origin \\S+$'],sol:'git remote add origin https://dev.azure.com/mhp/pdp'},
+cs_06_diff_tmdl:{t:`Перед комітом подивись построкові зміни файлу <code>tables/Sales.tmdl</code> (він ще не в staging).`,a:['^git diff tables/Sales\\.tmdl$','^git diff -- tables/Sales\\.tmdl$'],sol:'git diff tables/Sales.tmdl'},
+cs_07_pull:{t:`Колега запушив новий коміт на сервер. Однією командою забери його зміни у свою поточну гілку.`,a:['^git pull$','^git pull --rebase$','^git pull origin \\S+$'],sol:'git pull'},
+cs_07_rm_cached:{t:`Файл <code>cache.abf</code> уже відстежується Git, хоча його додали в .gitignore. Прибери його з відстеження, лишивши файл на диску.`,a:['^git rm --cached cache\\.abf$','^git rm --cached "cache\\.abf"$',"^git rm --cached 'cache\\.abf'$"],sol:'git rm --cached cache.abf'},
+cs_08_bisect_good:{t:`Bisect перемкнув репозиторій на середній коміт: ти відкрив звіт у Power BI Desktop — міра рахує правильно, бага ще немає. Повідом результат Git.`,a:['^git bisect good$'],sol:'git bisect good'},
+cs_08_worktree_add:{t:`Терміновий hotfix: не чіпаючи поточну роботу, створи поруч другу робочу папку <code>../sales-hotfix</code> на наявній гілці <code>hotfix/kpi-cards</code>.`,a:['^git worktree add \\.\\./sales-hotfix hotfix/kpi-cards$','^git worktree add "\\.\\./sales-hotfix" hotfix/kpi-cards$'],sol:'git worktree add ../sales-hotfix hotfix/kpi-cards'}
+});
+Object.assign(ORDERS,{
+or_04_amend:{title:`Забутий файл: полагодити останній коміт`,steps:[`Закомітив зміну міри, але помітив: файл сторінки звіту в коміт не потрапив`,`Переконався, що коміт ще не запушено — amend дозволений`,`git add report/definition/pages/okr.json`,`git commit --amend --no-edit — файл доїхав тим самим комітом`,`git push — на сервер поїхав уже повний коміт`]},
+or_05_rebase_flow:{title:`Оновити гілку через rebase перед злиттям`,steps:[`git switch main і git pull — забрати свіжий main із сервера`,`git switch feature/kpi-cards — повернутись у робочу гілку`,`git rebase main — replay твоїх комітів поверх свіжого main`,`git log --oneline — перевірити: історія лінійна, твої коміти згори`,`git switch main і git merge feature/kpi-cards — злиття без merge-коміту`,`git push — main з лінійною історією на сервері`]},
+or_06_pbix_migration:{title:`Віднови порядок: міграція опублікованого .pbix у PBIP`,steps:[`Відкрити наявний .pbix у Power BI Desktop`,`File → Save As → «Power BI project files (*.pbip)» у папку репозиторію`,`git status — переконатися, що cache.abf і localSettings.json не у списку`,`git add . та git commit -m "Міграція звіту: .pbix → PBIP"`,`git push — PBIP-версія на сервері`,`Старий .pbix — в архівну папку поза репозиторієм`]},
+or_07_tmdl_conflict:{title:`Вирішення TMDL-конфлікту: від CONFLICT до валідної моделі`,steps:[`git merge main → CONFLICT у tables/Sales.tmdl`,`Відкрити конфліктний файл у merge-редакторі VS Code`,`Обрати чи поєднати версії кнопками Accept Current / Incoming / Both`,`git add tables/Sales.tmdl — конфлікт позначено вирішеним`,`git commit — merge завершено`,`Відкрити проєкт у Power BI Desktop і перевірити, що модель валідна`]},
+or_08_bisect:{title:`Порядок пошуку винного коміту через git bisect`,steps:[`git bisect start`,`git bisect bad і git bisect good a1b2c3d — задав межі: де зламано і де ще працювало`,`Відкрив PBIP середнього коміту в Power BI Desktop, перевірив міру і відповів good або bad`,`Повторював, доки Git не назвав перший поганий коміт`,`git bisect reset — повернувся на свою гілку`]}
+});
 window.__TL__={bank:TERMLAB,newState:tlNewState,run:tlRun,check:tlCheckGoal,goalKeys:TL_GOAL_KEYS};
+window.__CSIM__=CSIM;
 
 /* === 13. ПРОГРЕС (localStorage) === */
 const LS_PREFIX='gfp:';

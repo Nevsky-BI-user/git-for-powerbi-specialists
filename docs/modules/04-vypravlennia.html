@@ -86,7 +86,11 @@
 <tr><td>git reset --hard &lt;commit&gt;</td><td><b style="color:var(--drop)">Небезпечно.</b> Усі три зони назад. Незакомічене втрачається.</td></tr>
 <tr><td>git revert &lt;commit&gt;</td><td>НОВИЙ коміт, що скасовує зміни. Безпечно для спільних гілок.</td></tr>
 </table>
+<p>Спробуй сам: коміт зроблено зарано — відкоти його, але всі зміни збережи.</p>
+<div class="csim" data-cs="cs_04_reset_soft"></div>
 <div class="note tip"><b>Де це у VS Code:</b> «Discard Changes» (іконка ↶ біля файлу в панелі Source Control) — це і є git restore. Типовий сценарій: зіпсував міру у звіті в Power BI Desktop, зберіг PBIP, глянув diff — і одним кліком повернув файл до стану останнього коміту. Огляд самих клієнтів — в <a href="00-start.html#s5">уроці «Sourcetree та інші графічні клієнти»</a>.</div>
+<p>А тепер найчастіша щоденна ситуація: файл зіпсовано ще до коміту.</p>
+<div class="csim" data-cs="cs_04_restore"></div>
 <div class="note warn"><b>reset переписує історію, revert — ні.</b> На спільних гілках (main) — лише revert. reset --hard — локально й усвідомлено. Три наступні уроки розбирають revert, reflog і amend докладно.</div>
 
 </section>
@@ -160,6 +164,7 @@
 <div class="note warn"><b>Головне правило: amend — лише до push.</b> Amend переписує SHA, тобто історію. Якщо коміт уже на сервері, після amend push вимагатиме <code>--force</code>, а це ламає копії колег — та сама логіка, що й у золотому правилі rebase (модуль 05). Коміт уже запушено? Виправляй наступним комітом або <a href="#s2">revert-ом</a>.</div>
 <div class="note tip"><b>Де це у GUI:</b> у Sourcetree під полем повідомлення є прапорець <em>Amend latest commit</em>; у VS Code — команда «Commit (Amend)». Обидва роблять той самий <code>git commit --amend</code>.</div>
 <div class="csim" data-cs="cs_amend"></div>
+<div class="order" data-o="or_04_amend"></div>
 <div class="qcheck" data-qc="qc_amend"></div>
 
 </section>
