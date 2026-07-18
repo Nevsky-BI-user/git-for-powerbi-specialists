@@ -31,7 +31,7 @@ function loadDom(file) {
 
 const allFiles = ['index.html', ...pages.map(p => p.file)];
 const anchorMap = {};
-const attrKinds = [['data-p', 'PLAYERS'], ['data-q', 'QUIZ'], ['data-qc', 'QCHECKS'], ['data-cs', 'CSIM'], ['data-o', 'ORDERS'], ['data-s', 'SCEN'], ['data-tl', 'TERMLAB']];
+const attrKinds = [['data-p', 'PLAYERS'], ['data-q', 'QUIZ'], ['data-qc', 'QCHECKS'], ['data-cs', 'CSIM'], ['data-o', 'ORDERS'], ['data-s', 'SCEN'], ['data-tl', 'TERMLAB'], ['data-dq', 'DIFFQ']];
 
 await new Promise(res => setTimeout(res, 0));
 for (const file of allFiles) {
@@ -50,9 +50,9 @@ for (const file of allFiles) {
     });
   });
   // widgets actually rendered (non-empty)
-  [['.gplayer', 'svg'], ['.quiz', '.qcard'], ['.qcheck', '.qc-opt'], ['.csim', '.cs-inp'], ['.order', '.or-chip'], ['.scplayer', '.repo'], ['.termlab', '.tl-inp']].forEach(([w, inner]) => {
+  [['.gplayer', 'svg'], ['.quiz', '.qcard'], ['.qcheck', '.qc-opt'], ['.csim', '.cs-inp'], ['.order', '.or-chip'], ['.scplayer', '.repo'], ['.termlab', '.tl-inp'], ['.diffq', '.dq-opt']].forEach(([w, inner]) => {
     doc.querySelectorAll(w).forEach(el => {
-      if (!el.querySelector(inner)) F(`G2 ${file}: ${w}[${el.dataset.p || el.dataset.q || el.dataset.qc || el.dataset.cs || el.dataset.o || el.dataset.s || el.dataset.tl}] не відрендерився`);
+      if (!el.querySelector(inner)) F(`G2 ${file}: ${w}[${el.dataset.p || el.dataset.q || el.dataset.qc || el.dataset.cs || el.dataset.o || el.dataset.s || el.dataset.tl || el.dataset.dq}] не відрендерився`);
     });
   });
   // collect anchors
@@ -70,7 +70,7 @@ for (const file of allFiles) {
     // G6 coverage: goal + interactive per lesson
     doc.querySelectorAll('section.lesson').forEach(sec => {
       if (!sec.querySelector('.goalbox')) W(`G6 ${file}#${sec.id}: без блоку "Ціль"`);
-      if (!sec.querySelector('.gplayer,.quiz,.qcheck,.csim,.order,.scplayer,.termlab,.rbwrap,#lcExp,.gloss-list,#glossList,#cheatList,.tree'))
+      if (!sec.querySelector('.gplayer,.quiz,.qcheck,.csim,.order,.scplayer,.termlab,.diffq,.rbwrap,#lcExp,.gloss-list,#glossList,#cheatList,.tree'))
         W(`G6 ${file}#${sec.id}: без інтерактиву (${sec.querySelector('h2')?.textContent.trim().slice(0, 40)})`);
     });
   } else {

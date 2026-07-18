@@ -154,6 +154,9 @@
 - measure 'Total Sales' = <span class="out">SUM(Sales[Amount])</span>
 + measure 'Total Sales' = <span class="out">CALCULATE(SUM(Sales[Amount]), USERELATIONSHIP(Dates[Date], Sales[ShipDate]))</span></pre>
 <p>Спробуй сам: Desktop щойно перезаписав файли проєкту, і перед комітом ти хочеш глянути зміни конкретного файлу.</p><div class="csim" data-cs="cs_06_diff_tmdl"></div>
+<p>А тепер потренуй саме ЧИТАННЯ. Нижче — два реальні PBIP-diff з підсвіткою: зелене — додано, червоне — прибрано. Прочитай кожен і дай відповідь.</p>
+<div class="diffq" data-dq="dq_format_noise"></div>
+<div class="diffq" data-dq="dq_measure_rename"></div>
 <h3>Правила на щодень</h3>
 <ul>
 <li><strong>Перед комітом дивись список файлів</strong> у Sourcetree (вкладка File Status): чи очікував ти кожен змінений файл.</li>

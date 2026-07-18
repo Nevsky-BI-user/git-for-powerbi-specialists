@@ -859,6 +859,69 @@ function buildDiag(){
 }
 window.__DIAG__={count:DIAG.length,pages:DIAG.map(d=>d.page)};
 
+/* === 12ab. DIFF-ВІДЖЕТ: прочитай diff === */
+const DIFFQ={
+  dq_format_noise:{file:`definition/tables/Sales.tmdl`,
+    diff:[`@@ -12,9 +12,9 @@`,`   measure 'Total Sales' = SUM(Sales[Amount])`,`-      formatString: #,0.00`,`+      formatString: #,0`,`-      displayFolder: Міри`,`+      displayFolder: Міри\\Продажі`,`-      lineageTag: 4f21-88ab`,`+      lineageTag: 9c03-12ef`],
+    q:`Що з цього diff РЕАЛЬНО побачить користувач звіту?`,
+    opts:[`Числа міри показуватимуться без копійок — формат змінився з #,0.00 на #,0`,`Зміниться сама формула розрахунку Total Sales`,`Зламається звʼязок таблиці Sales з іншими`,`Нічого: усі три зміни — технічний шум`],
+    correct:0,
+    why:`formatString — видима зміна (зникнуть копійки). displayFolder — лише організація полів для розробника, lineageTag — технічний шум. А формулу SUM(...) diff не чіпав: рядок без +/− ліворуч — це незмінений контекст.`},
+  dq_measure_rename:{file:`definition/tables/Sales.tmdl`,
+    diff:[`@@ -20,7 +20,7 @@`,`-  measure 'Маржа' =`,`+  measure 'Маржа %' =`,`       DIVIDE([Прибуток], [Дохід])`,`       formatString: 0.0%`],
+    q:`Міру перейменовано з «Маржа» на «Маржа %» прямо у TMDL. Що станеться з візуалами звіту, які використовували стару назву?`,
+    opts:[`Вони зламаються: у файлах звіту поля привʼязані за НАЗВОЮ міри, а старої назви більше не існує`,`Нічого: Power BI автоматично оновить назву в усіх візуалах`,`Візуали покажуть нулі замість значень`,`Зламаються лише візуали на прихованих сторінках`],
+    correct:0,
+    why:`PBIR-файли звіту посилаються на міру за назвою. Перейменування лише в моделі = биті посилання у visual.json. Тому перейменовуй через Power BI Desktop (він каскадно оновлює звіт) і завжди переглядай ПОВНИЙ diff перед комітом.`},
+  dq_gitignore_late:{file:`.gitignore`,
+    diff:[`@@ -1,2 +1,4 @@`,`   *.pbix`,`   .DS_Store`,`+  cache.abf`,`+  localSettings.json`],
+    q:`У .gitignore додали cache.abf — але цей файл УЖЕ відстежується Git (його закомітили раніше). Що станеться після цього коміту?`,
+    opts:[`Git продовжить відстежувати cache.abf: ignore діє лише на нові (untracked) файли — потрібен ще git rm --cached cache.abf`,`Git одразу перестане бачити зміни cache.abf`,`Git видалить cache.abf з диска`,`Git видалить cache.abf з усієї історії комітів`],
+    correct:0,
+    why:`.gitignore — фільтр для файлів, яких Git ЩЕ не відстежує. Уже закомічений файл лишається під наглядом, доки не виконати git rm --cached — тоді він піде з відстеження, але залишиться на диску.`},
+  dq_visual_type:{file:`report/pages/sales/visuals/chart1/visual.json`,
+    diff:[`@@ -4,8 +4,8 @@`,`   "visual": {`,`-    "visualType": "barChart",`,`+    "visualType": "columnChart",`,`     "position": {`,`-      "width": 480,`,`+      "width": 640,`],
+    q:`Що зміниться на сторінці звіту після цього коміту?`,
+    opts:[`Візуал стане стовпчиковим (вертикальним) замість смугового і ширшим — 640 пікселів замість 480`,`Зміняться дані, які показує візуал`,`Візуал переїде на іншу сторінку звіту`,`Нічого: visual.json — технічний файл, який не впливає на вигляд`],
+    correct:0,
+    why:`visualType задає тип візуала (barChart — горизонтальні смуги, columnChart — вертикальні стовпці), width — ширину. Поля й дані цей diff не чіпав. PBIR-файли — це і Є звіт: їхній diff читається як «що зміниться на сторінці».`}
+};
+function buildDiffq(){
+  document.querySelectorAll('.diffq').forEach(el=>{
+    if(el.dataset.built)return;el.dataset.built='1';
+    const d=DIFFQ[el.dataset.dq];if(!d)return;
+    const lines=d.diff.map(l=>{
+      const cls=l.indexOf('+')===0?'dl-add':l.indexOf('-')===0?'dl-del':l.indexOf('@@')===0?'dl-hunk':'dl-ctx';
+      return `<div class="dl ${cls}">${escapeHTML(l)}</div>`;
+    }).join('');
+    const s=shuffleQ({q:d.q,opts:d.opts,correct:d.correct});
+    el.innerHTML=`<div class="dq-file">${escapeHTML(d.file)}</div><div class="dq-diff">${lines}</div>
+      <div class="dq-q">${s.q}</div>${s.opts.map((o,i)=>`<button class="dq-opt" data-i="${i}">${o}</button>`).join('')}
+      <div class="dq-why">${d.why}</div>`;
+    let done=false;
+    el.querySelectorAll('.dq-opt').forEach(b=>b.onclick=()=>{
+      if(done)return;done=true;
+      el.querySelectorAll('.dq-opt').forEach(x=>{x.disabled=true;if(+x.dataset.i===s.correct)x.classList.add('correct');});
+      if(+b.dataset.i!==s.correct)b.classList.add('wrong');
+      el.querySelector('.dq-why').classList.add('show');
+      el.classList.add('solved');
+    });
+  });
+}
+function colorizeDiffPre(root){
+  root.querySelectorAll('pre').forEach(pre=>{
+    if(pre.dataset.dc)return;
+    const ls=pre.textContent.split('\n');
+    const hasA=ls.some(l=>l.indexOf('+')===0),hasD=ls.some(l=>l.indexOf('-')===0);
+    if(!hasA||!hasD)return;
+    pre.dataset.dc='1';
+    pre.innerHTML=ls.map(l=>{
+      const cls=l.indexOf('+')===0?'dl-add':l.indexOf('-')===0?'dl-del':l.indexOf('@@')===0?'dl-hunk':'';
+      return cls?`<span class="dl ${cls}">${escapeHTML(l)}</span>`:escapeHTML(l);
+    }).join('\n');
+  });
+}
+
 /* === 12b. TERMLAB: ІНТЕРАКТИВНИЙ ТРЕНАЖЕР ТЕРМІНАЛУ === */
 const TL_LANE_COLORS=['feature','feat2','hotfix'];
 function tlTokens(s){
@@ -2033,9 +2096,10 @@ function initPage(){
   if(document.getElementById('glossList'))buildGlossary();
   if(document.getElementById('cheatList'))buildCheatsheet();
   if(document.getElementById('diagBox'))buildDiag();
-  buildQchecks();buildCsim();buildOrders();buildTermlab();buildVideos();
+  buildQchecks();buildCsim();buildOrders();buildTermlab();buildDiffq();buildVideos();
+  colorizeDiffPre(document);
   initSearch();initCollapse();initProgress();initHighlightFromSearch();initVersionCheck();
 }
-window.__GFP__={PLAYERS:Object.keys(PLAYERS),QUIZ:Object.keys(QUIZ),SCEN:Object.keys(SCEN),QCHECKS:Object.keys(QCHECKS),CSIM:Object.keys(CSIM),ORDERS:Object.keys(ORDERS),TERMLAB:Object.keys(TERMLAB)};
+window.__GFP__={PLAYERS:Object.keys(PLAYERS),QUIZ:Object.keys(QUIZ),SCEN:Object.keys(SCEN),QCHECKS:Object.keys(QCHECKS),CSIM:Object.keys(CSIM),ORDERS:Object.keys(ORDERS),TERMLAB:Object.keys(TERMLAB),DIFFQ:Object.keys(DIFFQ)};
 document.addEventListener('DOMContentLoaded',initPage);
 if(document.readyState!=='loading')initPage();

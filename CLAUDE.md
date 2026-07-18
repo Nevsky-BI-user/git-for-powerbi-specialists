@@ -55,7 +55,7 @@ Source of truth — файли в `docs/`. Разовий міграційний
 
 ## Конвенції віджетів
 
-`<div class="gplayer" data-p="key">` покроковий SVG-граф · `<div class="scplayer" data-s="key">` мультирепо-сценарій · `<div class="quiz" data-q="bank">` банк вправ · `<div class="qcheck" data-qc="key">` міні-перевірка · `<div class="csim" data-cs="key">` симулятор команди · `<div class="order" data-o="key">` впорядкування кроків · `<div class="termlab" data-tl="key">` інтерактивний тренажер терміналу (вільне введення git-команд + жива SVG-схема стану репо) · `<div class="ytvideo" data-v="key">` відео українською (клік-фасад → офіційний `youtube-nocookie` embed із таймкодом; дані у `VIDEOS`, спільний ID/канал у константах `YT_*`). Дані — у відповідних об'єктах `engine.js`; ключ без даних = FAIL у QA.
+`<div class="gplayer" data-p="key">` покроковий SVG-граф · `<div class="scplayer" data-s="key">` мультирепо-сценарій · `<div class="quiz" data-q="bank">` банк вправ · `<div class="qcheck" data-qc="key">` міні-перевірка · `<div class="csim" data-cs="key">` симулятор команди · `<div class="order" data-o="key">` впорядкування кроків · `<div class="termlab" data-tl="key">` інтерактивний тренажер терміналу (вільне введення git-команд + жива SVG-схема стану репо) · `<div class="diffq" data-dq="key">` задача «прочитай diff» (файл + розфарбований diff + питання; дані у `DIFFQ`; `colorizeDiffPre` також авто-підсвічує +/− у `<pre>`-diff квізів) · `<div class="ytvideo" data-v="key">` відео українською (клік-фасад → офіційний `youtube-nocookie` embed із таймкодом; дані у `VIDEOS`, спільний ID/канал у константах `YT_*`). Дані — у відповідних об'єктах `engine.js`; ключ без даних = FAIL у QA.
 
 Правила termlab: задача = `{title, task, init, goal, hints[], sol[], ok}`; `init` — декларативний стан (commits/branches/head/files/remote/tracking); `goal` — лише ключі з `TL_GOAL_KEYS` (невідомий ключ = FAIL G2c); `sol` мусить реально розв'язувати `goal` — QA (G2c) програє його через сам симулятор. Merge-конфлікти органічні: конфлікт виникає, коли обидві гілки від merge-base чіпали той самий файл (поле `files` у комітах init), підтримується кілька файлів одночасно і `git merge --abort`; `conflictOn` в init — примусовий override. Схематична задача — не окремий віджет, а патерн: опис ситуації → `gplayer` з ключем `pr_*` → `qcheck`. Дані termlab-задач не мають суперечити критичному правилу процесу. `engine.js` не розбивати на кілька файлів без правки `loadDom` у `qa.mjs` (він інлайнить лише `search-index.js` + `engine.js`).
 
@@ -65,5 +65,4 @@ Source of truth — файли в `docs/`. Разовий міграційний
 
 ## Backlog
 
-- Задачі «прочитай diff» реалізовано в банку `prE1` (pr5-ekzamen); окремий віджет із підсвіткою diff — можливе продовження.
-- Закрито: csim/order-покриття 04–08 (по 2 csim + 1 order на модуль); rebase-конфлікти в termlab (pull --rebase → could not apply → edit/add → `git rebase --continue`, або `--abort`).
+- (порожній — усе заплановане реалізовано; нові ідеї додавати сюди)
