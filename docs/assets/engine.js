@@ -2058,7 +2058,8 @@ const CMDANIM={
     ]
   }
 };
-function caWait(ms){return new Promise(res=>setTimeout(res,ms));}
+const CA_SPEED=1.5; // глобальний множник темпу анімацій (більше = повільніше)
+function caWait(ms){return new Promise(res=>setTimeout(res,ms*CA_SPEED));}
 function caReduced(){try{return typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}}
 async function caType(bodyEl,text,reduced){
   const line=document.createElement('div');line.className='ca-line';

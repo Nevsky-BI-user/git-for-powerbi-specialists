@@ -225,7 +225,6 @@
   /* inline mini-exercise (qcheck) */
   .qcheck{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:11px;padding:15px 17px;margin:20px 0;background:var(--panel-2)}
   .qcheck .qc-q{font-weight:600;font-size:13.5px;margin-bottom:11px;color:var(--txt)}
-  .qcheck .qc-q::before{content:"Міні-вправа";display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent);margin-bottom:7px;font-weight:700}
   .qcheck .qc-opt{display:block;width:100%;text-align:left;font-family:inherit;font-size:13px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-bottom:7px;cursor:pointer;color:var(--txt);transition:.12s}
   .qcheck .qc-opt:hover{border-color:var(--accent)}
   .qcheck .qc-opt:disabled{cursor:default}
@@ -260,7 +259,6 @@ section.lesson:last-of-type{border-bottom:none}
 /* command simulator */
 .csim{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:11px;padding:14px 16px;margin:14px 0;background:var(--panel-2)}
 .csim .cs-task{font-size:13.5px;margin-bottom:10px}
-.csim .cs-task::before{content:"Симулятор";display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent);margin-bottom:6px;font-weight:700}
 .csim .cs-row{display:flex;gap:8px;align-items:center}
 .csim .cs-prompt{font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:700}
 .csim .cs-inp{flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 11px;color:var(--txt)}
@@ -346,8 +344,7 @@ a.mcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .termlab{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:15px 17px;margin:18px 0;background:var(--panel)}
 .termlab.solved{border-left-color:var(--new)}
 .termlab .tl-task{font-size:13.5px;margin-bottom:12px}
-.termlab .tl-task::before{content:"Тренажер";display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent);margin-bottom:6px;font-weight:700}
-.termlab.solved-before .tl-task::before{content:"Тренажер · розв'язано раніше";color:var(--new)}
+.termlab.solved-before .tl-task::before{content:"✓ розв'язано раніше";display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;margin-bottom:6px;font-weight:700;color:var(--new)}
 .termlab .tl-task b{display:block;font-size:14.5px;margin-bottom:5px}
 .termlab .tl-task-text{color:var(--txt);line-height:1.6}
 .termlab .tl-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:13px;align-items:start}
@@ -478,7 +475,6 @@ pre .dl{display:inline-block;width:100%;padding:0 4px;border-radius:3px}
 /* === cmdanim: анімація «що робить команда» === */
 .cmdanim{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:15px 17px;margin:18px 0;background:var(--panel)}
 .cmdanim .ca-title{font-size:14.5px;font-weight:700;margin-bottom:12px}
-.cmdanim .ca-title::before{content:"Анімація команди";display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent);margin-bottom:6px;font-weight:700}
 .cmdanim .ca-desk{display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start}
 .cmdanim .ca-term{margin:0}
 .cmdanim .ca-body{min-height:120px;max-height:220px;overflow-y:auto}
