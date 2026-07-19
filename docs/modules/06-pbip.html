@@ -73,7 +73,7 @@
 <h3>Як зберегти</h3>
 <p>Power BI Desktop → <strong>File → Save As → «Power BI project files (*.pbip)»</strong>. Desktop створить структуру папок і <code>.gitignore</code> автоматично. Під час Save As ти сам обираєш папку на диску — саме вона стане коренем майбутнього Git-репозиторію.</p>
 <div class="note tip"><b>Стан на 2026.</b> Звітна частина PBIP за замовчуванням використовує формат <span class="term">PBIR</span> (нова модульна структура). <code>.pbix</code> лишається основним контейнером і нікуди не зникає — він теж усередині перейшов на PBIR-метадані.</div>
-<div class="lect">Скажу прямо: перехід на .pbip — <b>найкраще рішення, яке ти ухвалиш цього року</b> у роботі зі звітами. Роки я тримав .pbix у Git «про всяк випадок», і Git там був марний — суцільний бінарник, де видно лише «щось змінилось», а що саме — ні.</div>
+<div class="lect">PBIP — формат, що робить звіт версійованим у Git; заради цього й побудований увесь курс. Поки звіт лишається .pbix, Git бачить у ньому суцільний бінарник: видно лише «щось змінилось», а що саме — ні. PBIP розкриває той самий звіт на текстові файли, які можна порівняти рядок за рядком.</div>
 
 <div class="qcheck" data-qc="qc_pbip_what"></div>
 </section>
@@ -105,6 +105,13 @@
 <p>А так ця сама структура виглядає в реальному Провіднику Windows: <code>.pbip</code> як точка входу, поруч — папка з макетом звіту й папка з моделлю даних (усередині — TMDL-файл на кожну таблицю).</p>
 <div class="uimock" data-um="pbip_folder"></div>
 <div class="lect">Не сприймай ці папки як окремі файли, які можна комітити вибірково. Уся ця структура — <b>один звіт як цілісна збірка</b>, тому й комітиться вона <b>завжди цілком</b>: <code>git add .</code> на корені проєкту, а не по одному файлу з <code>definition/</code>.</div>
+<h3>Зробив дію в Desktop → де шукати зміну у файлах</h3>
+<table class="cmdtable">
+<tr><td>Додав нову міру до таблиці <code>Sales</code></td><td>новий блок <code>measure</code> усередині <code>PDP.SemanticModel/definition/tables/Sales.tmdl</code> — саме у файлі тієї таблиці, до якої прикріплена міра, а не в <code>model.tmdl</code> (чому — у наступному уроці).</td></tr>
+<tr><td>Перетягнув візуал на сторінці на кілька пікселів</td><td>змінились <code>x</code>/<code>y</code> у <code>PDP.Report/definition/pages/&lt;сторінка&gt;/visuals/&lt;візуал&gt;/visual.json</code> — саме там PBIR тримає позицію кожного візуала.</td></tr>
+<tr><td>Перейменував сторінку звіту у Desktop</td><td>змінилось лише поле <code>displayName</code> у <code>page.json</code> цієї сторінки; сама папка й внутрішній ідентифікатор сторінки лишаються незмінними.</td></tr>
+</table>
+<p>Це найкорисніша навичка з цього модуля: розумієш, у якому файлі шукати наслідки конкретної дії в Desktop — і одразу бачиш, чи очікуваний перед тобою diff.</p>
 
 </section>
 <section class="lesson show" id="s2" data-n="s2">
@@ -123,9 +130,21 @@
 
     <span class="arg">column</span> Amount
         dataType: <span class="out">double</span></pre>
-<div class="lect">На реальному проєкті я перевіряв: колега тихцем поміняв формулу міри в <code>model.tmdl</code>, і <code>git diff</code> показав рівно два рядки — <b>було й стало</b> — за секунди. З .pbix та сама ситуація означала б відкривати звіт і вручну звіряти кожну міру: .pbix у Git завжди був чорною скринькою.</div>
+<div class="note tip"><b>Що саме в model.tmdl.</b> Цей файл — не «звалище всього», а невеликий маніфест: перелік таблиць моделі, налаштування самої моделі, групи запитів. Усе інше має власне місце: зв'язки між таблицями — у <code>relationships.tmdl</code>, ролі безпеки — у <code>roles/&lt;Назва&gt;.tmdl</code>, мовні метадані — у <code>cultures/&lt;локаль&gt;.tmdl</code>, а колонки й міри конкретної таблиці — лише в її власному файлі <code>tables/&lt;Таблиця&gt;.tmdl</code>. Тому нову міру завжди шукай у файлі саме тієї таблиці, до якої вона прикріплена, — не в <code>model.tmdl</code>.</div>
+<div class="lect">Типова ситуація: хтось тихцем змінив формулу міри в <code>.tmdl</code>-файлі — і <code>git diff</code> одразу показує рівно два рядки, було й стало, за секунди. З .pbix та сама зміна лишилася б непомітною: довелося б відкривати звіт і вручну звіряти кожну міру — бінарник у Git завжди чорна скринька.</div>
 <h3>PBIR — формат звіту</h3>
 <div class="tdef"><div class="t">PBIR (Power BI Enhanced Report Format)</div><div class="d">Модульний JSON-опис звіту: сторінки, візуали, закладки — кожне в окремому файлі в <code>definition/</code>.</div><div class="plain"><b>Простими словами:</b> звіт «по деталях»: кожен візуал — окремий файл, тому Git точно бачить, що саме змінилось.</div></div>
+<pre><span class="c">// definition/pages/Overview/visuals/sales_col_chart/visual.json — фрагмент, спрощено</span>
+{
+  <span class="arg">"position"</span>: { <span class="arg">"x"</span>: <span class="out">240</span>, <span class="arg">"y"</span>: <span class="out">80</span>, <span class="arg">"width"</span>: <span class="out">320</span>, <span class="arg">"height"</span>: <span class="out">180</span> },
+  <span class="arg">"visual"</span>: {
+    <span class="arg">"visualType"</span>: <span class="out">"columnChart"</span>,
+    <span class="arg">"query"</span>: { <span class="arg">"queryState"</span>: { <span class="arg">"Y"</span>: { <span class="arg">"projections"</span>: [
+      { <span class="arg">"field"</span>: { <span class="arg">"Measure"</span>: { <span class="arg">"Property"</span>: <span class="out">"Total Sales"</span> } } }
+    ] } } }
+  }
+}</pre>
+<p>Той самий принцип, що і в TMDL, лише інша мова запису. Посунув візуал мишкою в Desktop → зміняться числа в <code>position</code> (це технічний шум — детальніше в наступному уроці). Замінив у панелі Values міру <code>Total Sales</code> на <code>Total Cost</code> → зміниться рядок усередині <code>query</code> (а це вже справжня, змістовна зміна).</p>
 <div class="tdef"><div class="t">lineageTag</div><div class="d">Унікальний GUID, присвоєний кожному об'єкту моделі. Стабілізує його ідентичність між середовищами.</div><div class="plain"><b>Простими словами:</b> «незмінний серійний номер» міри чи таблиці. Паралельна робота двох гілок робить його типовим джерелом конфліктів (модуль F).</div></div>
 <div class="note tip"><b>Інструмент.</b> TMDL зручно редагувати у VS Code (IntelliSense) або Tabular Editor; PBIR JSON — у VS Code з його схемами для перевірки.</div>
 
@@ -159,6 +178,13 @@
 <span class="c"># tables/Sales.tmdl — зміст: змінився DAX міри, це і є твоя правка</span>
 - measure 'Total Sales' = <span class="out">SUM(Sales[Amount])</span>
 + measure 'Total Sales' = <span class="out">CALCULATE(SUM(Sales[Amount]), USERELATIONSHIP(Dates[Date], Sales[ShipDate]))</span></pre>
+<p>Той самий принцип працює і для PBIR JSON звіту — лише інша мова запису:</p>
+<pre><span class="c"># visual.json — шум: посунув візуал на кілька пікселів, вміст той самий</span>
+- "position": { "x": <span class="out">240</span>, "y": 80, "width": 320, "height": 180 }
++ "position": { "x": <span class="out">244</span>, "y": 80, "width": 320, "height": 180 }
+<span class="c"># visual.json — зміст: замінив міру в панелі Values, це і є твоя правка</span>
+- "field": { "Measure": { "Property": <span class="out">"Total Sales"</span> } }
++ "field": { "Measure": { "Property": <span class="out">"Total Cost"</span> } }</pre>
 <p>Спробуй сам: Desktop щойно перезаписав файли проєкту, і перед комітом ти хочеш глянути зміни конкретного файлу.</p><div class="csim" data-cs="cs_06_diff_tmdl"></div>
 <p>А тепер потренуй саме ЧИТАННЯ. Нижче — два реальні PBIP-diff з підсвіткою: зелене — додано, червоне — прибрано. Прочитай кожен і дай відповідь.</p>
 <div class="diffq" data-dq="dq_format_noise"></div>
@@ -255,7 +281,7 @@
 <li>Дуже велика модель з інтенсивними паралельними правками одних і тих самих таблиць → розглянути роботу через Tabular Editor (стек 2) з чітким розподілом зон.</li>
 <li>Команда без дисципліни короткоживучих гілок → конфлікти накопичуються; спершу впорядкувати процес.</li>
 </ul>
-<div class="lect">Найболючіший кейс, який я бачив: дві людини паралельно перейменували ту саму міру по-різному. Текстовий merge «зжував» обидві правки в один синтаксично коректний, але семантично биту TMDL — Desktop відкрив модель без помилки, а звіт показав пусті картки. Після merge моделі завжди відкривай і перевіряй — не довіряй тільки «зелений merge» у Git.</div>
+<div class="lect">Типовий болючий кейс: двоє людей паралельно перейменували ту саму міру по-різному. Текстовий merge «зжував» обидві правки в один синтаксично коректний, але семантично битий TMDL — Desktop відкрив модель без помилки, а звіт показав пусті картки. Після merge моделі завжди відкривай і перевіряй — не довіряй лише «зеленому merge» у Git.</div>
 <div class="note"><b>Висновок.</b> PBIP лишається основою контролю версій для Power BI; обмеження вирішуються дисципліною (малі гілки, валідація після merge, .gitattributes, LFS для бінарників) та, за потреби, стеком Tabular Editor.</div>
 
 <div class="qcheck" data-qc="qc_limits"></div>
@@ -295,6 +321,7 @@
 <tr><td>Комітити</td><td><code>.pbip</code>, увесь вміст <code>definition/</code> (TMDL і PBIR), <code>.gitignore</code>, <code>.gitattributes</code> — усе, що описує звіт і модель текстом.</td></tr>
 <tr><td>Ігнорувати</td><td><code>**/.pbi/cache.abf</code> — локальний кеш даних (може важити сотні мегабайтів); <code>**/.pbi/localSettings.json</code> — особисті налаштування твого Desktop; <code>*.pbix</code> — бінарні копії поруч із проєктом.</td></tr>
 </table>
+<div class="note"><b>Чому саме ці два файли.</b> <code>cache.abf</code> — закешовані Power BI Desktop дані й результати запитів для швидкого перегляду моделі: не «код» проєкту, а тимчасовий знімок даних, що може важити сотні мегабайтів і на кожній машині відрізняється навіть без жодної змістовної правки. <code>localSettings.json</code> — персональні налаштування твого Desktop (стан підключення, локальні позначки): те саме, що конфіг редактора — корисне тобі, зайве колезі. Закомітиш їх — вони змінюватимуться майже щоразу при відкритті проєкту, по-різному на кожній машині: зайвий шум у diff і гарантовані конфлікти на кожному <code>git pull</code>.</div>
 <h3>Готовий .gitignore для PBIP-репозиторію</h3>
 <pre><span class="c"># створюєш файл .gitignore у корені репозиторію (VS Code: File → New File)</span>
 <span class="c"># Power BI Desktop сам пропонує такий вміст під час збереження у PBIP:</span>

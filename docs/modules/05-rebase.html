@@ -63,6 +63,9 @@
 <div class="note tip">Саме <b>rebase</b> у цьому відео окремо не розглядається — це тема нашого курсу. Фрагмент вище показує суміжне: вирішення конфліктів злиття (на прикладі GitHub).</div>
 <div class="tdef"><div class="t">rebase (перебазування)</div><div class="d">Перенесення комітів з однієї основи на іншу. Git створює нові коміти з тим самим вмістом, але іншим батьком.</div><div class="plain"><b>Простими словами:</b> «переписати свою гілку так, ніби ти починав її від свіжого стану main».</div></div>
 <div class="tdef"><div class="t">replay (відтворення)</div><div class="d">Повторне накладання змін коміту поверх нової основи зі створенням нового коміту.</div><div class="plain"><b>Простими словами:</b> Git ніби «повторно набирає» твої зміни на новому місці.</div></div>
+<h3>Навіщо rebase, якщо є merge</h3>
+<p>Merge нічого не приховує: додає окремий merge-коміт і чесно лишає в історії обидва шляхи розробки — твій і чужий. Rebase свідомо жертвує цією чесністю заради простоти: переписує твої коміти так, ніби гілка від самого початку росла з найсвіжішого main, і в результаті <code>git log</code> показує рівну пряму лінію без зайвих злиттів.</p>
+<div class="note"><b>Чесно: соло-розробнику rebase можна взагалі не займатись.</b> Якщо ведеш PBIP-звіт сам і зливаєш свою гілку в main через <code>git merge</code> раз на день-два — цього досить, а правила rebase можна не тримати в голові. Rebase починає окупатись, коли гілка живе довше кількох днів і встигає розійтись із main, коли над проєктом працює команда і рівна лінія в <code>git log</code> реально допомагає шукати, в якому коміті зламалась міра, або коли хочеш підтягнути свіжі зміни колег у свою гілку без зайвого merge-коміту перед фінальним злиттям.</div>
 <h3>Візуалізація: rebase переносить коміти</h3>
 <div class="widget"><div class="wtitle">До та після rebase</div><div class="gplayer" data-p="rebase"></div></div>
 <div class="lect">Подивись, що старий коміт на анімації вище просто посірів — це і є відповідь, чому <b>спільні гілки не ребейзять</b>: хтось міг уже побудувати роботу поверх нього, а після rebase він лишається сиротою.</div>
@@ -76,6 +79,7 @@
 <p>Спробуй базову команду сам.</p><div class="csim" data-cs="cs_05_rebase_main"></div>
 <div class="note tip"><b>Де запускати.</b> Rebase найпростіше робити в терміналі Git Bash — Git на кожному кроці пише підказку, що робити далі. У Sourcetree те саме — правий клік по гілці <code>main</code> → «Rebase current changes onto main», а якщо щось пішло не так, кнопка Abort робить те саме, що <code>git rebase --abort</code>.</div>
 <div class="note warn"><b>Золоте правило rebase.</b> Не роби rebase комітів, які вже на сервері й спільні. Rebase — для локальних, ще не опублікованих комітів.</div>
+<div class="note tip"><b>Приклад із життя: push відхилено.</b> Тиснеш <code>git push</code>, а у відповідь — <code>! [rejected] main -> main (fetch first)</code>: хтось запушив зміни в main раніше за тебе. Замість <code>git pull</code>, який створить зайвий merge-коміт, зроби <code>git pull --rebase</code> — Git підтягне свіжі коміти колеги, а твої локальні перенесе поверх них. Історія лишається рівною, і вже після цього — звичайний <code>git push</code>.</div>
 <p>Склади повний робочий цикл: оновити гілку через rebase і чисто злити її у main.</p><div class="order" data-o="or_05_rebase_flow"></div>
 
 </section>
@@ -86,6 +90,18 @@
 <p class="lead">Сценарій: <span style="color:var(--accent)">feature</span> = 4 коміти поверх <span style="color:var(--accent)">main</span> (M). План: B→fixup у A, C→reword, D→drop. Гортай кроки.</p>
 <div class="goalbox"><b>Ціль уроку</b>чистити історію: squash, reword, drop перед публікацією.</div>
 <div class="lect">У PBIP-проєктах WIP-коміти множаться швидко — «fix», «fix2», «ну тепер точно fix». <b>Interactive rebase перед push</b> — твій шанс перетворити цей безлад на історію, яку не соромно показати команді.</div>
+<h3>Приклад: три «fix» в один коміт</h3>
+<p>Гілка <code>feature/sales-measures</code> має чотири коміти: <code>Додав міру Total Sales</code>, потім <code>fix</code>, <code>fix2</code>, <code>ще один фікс</code> — типовий слід «клепав на живу, поки не запрацювало». Перед push хочеш лишити один охайний коміт. Команда <code>git rebase -i HEAD~4</code> відкриває todo-список у редакторі:</p>
+<pre>pick a1b2c3d Додав міру Total Sales
+pick e4f5g6h fix
+pick i7j8k9l fix2
+pick m1n2o3p ще один фікс</pre>
+<p>Міняєш дію для трьох останніх рядків на <code>fixup</code> (скорочено <code>f</code>) — це означає «приліпи до попереднього коміту й забудь повідомлення»:</p>
+<pre>pick a1b2c3d Додав міру Total Sales
+fixup e4f5g6h fix
+fixup i7j8k9l fix2
+fixup m1n2o3p ще один фікс</pre>
+<p>Зберігаєш файл — і в гілці лишається один коміт <code>Додав міру Total Sales</code> з усіма чотирма змінами всередині. Саме цю логіку — squash/fixup/reword/drop — і відпрацьовує тренажер нижче.</p>
 <div class="widget">
   <div class="rb-status" id="rbStatus"></div>
   <div class="rb-stage">

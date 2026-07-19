@@ -92,6 +92,7 @@
 <div class="tdef"><div class="t">cd &lt;папка&gt;</div><div class="d">Переходить в іншу папку. <code>cd ..</code> — на рівень вгору, <code>cd ~</code> — у домашню папку.</div><div class="plain"><b>Простими словами:</b> «зайти всередину» папки або «вийти назовні». cd = change directory.</div></div>
 <div class="cmdanim" data-ca="cd"></div>
 <div class="lect">Типова помилка новачків: спершу дивляться на <b>ls</b> і дивуються, що не бачать потрібного файлу — а насправді просто ще не зайшли в потрібну папку через <b>cd</b>. Спершу зайди, потім дивись.</div>
+<div class="tdef"><div class="t">Навіщо взагалі cd, якщо можна просто клікнути папку мишкою</div><div class="d">Бо термінал завжди «стоїть» в одній конкретній папці — поточній директорії — і виконує команди саме там, незалежно від того, яке вікно відкрито в Провіднику.</div><div class="plain"><b>Простими словами:</b> клік мишкою в Провіднику ніяк не повідомляє терміналу, де ти — це два незалежні світи. Коли пізніше дійдеш до Git, кожна команда (<code>git status</code>, <code>git add</code>, <code>git commit</code>) діє лише на папку, в якій зараз стоїть термінал через <code>cd</code>, — не на ту, що відкрита в Power BI Desktop чи в Провіднику. Найчастіша помилка новачка: відкрив звіт у Power BI Desktop, а термінал запустив «звідкись узагалі» (наприклад, з ярлика на робочому столі) — і Git-команди мовчки працюють не з тим проєктом або одразу видають помилку «not a git repository». Правило на все життя з Git: перш ніж вводити будь-яку git-команду, спершу переконайся командою <code>pwd</code>, що стоїш саме в папці цього проєкту, і за потреби зроби <code>cd</code>.</div></div>
 <div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">pwd</span>
 <span class="tw-o">/home/ivan</span>
 <span class="tw-p">$</span> <span class="tw-c">ls</span>
@@ -102,7 +103,7 @@
 <span class="tw-p">$</span> <span class="tw-c">cd ..</span>
 <span class="tw-p">$</span> <span class="tw-c">pwd</span>
 <span class="tw-o">/home/ivan</span></div></div>
-<div class="note tip">У Git Bash на Windows шлях виглядатиме інакше, наприклад <code>/c/Users/Ivan</code> — це нормально, <code>/c/</code> означає диск C:.</div>
+<div class="note tip">У Git Bash на Windows шлях виглядатиме інакше, наприклад <code>/c/Users/Ivan</code> — це нормально, <code>/c/</code> означає диск C:. Коли зайдеш командою <code>cd</code> у папку свого PBIP-звіту, сам рядок запрошення теж покаже, де ти: наприклад, <code>Ivan@DESKTOP MINGW64 ~/Documents/sales-report</code>. Тобто не треба щоразу набирати <code>pwd</code>, аби перевірити своє місце, — досить прочитати запрошення. Після того як зробиш репозиторій (модуль 02), там ще з'явиться назва поточної гілки в дужках, напр. <code>(main)</code>.</div>
 <table class="cmdtable">
 <tr><td>pwd</td><td>Показати поточну папку.</td></tr>
 <tr><td>ls</td><td>Список вмісту поточної папки.</td></tr>
@@ -181,7 +182,7 @@
 <tr><td>rm file</td><td>Видалити файл.</td></tr>
 <tr><td>rm -r dir</td><td>Видалити папку з вмістом.</td></tr>
 </table>
-<div class="lect">З реального проєкту: колега якось написав <b>rm -r report</b> замість <b>rm -r report_old</b> — і за секунду зникла папка з активним звітом, без бекапу. Перед <b>rm -r</b> завжди роби <b>ls</b> і ще раз перевіряй назву.</div>
+<div class="lect">Класична історія: замість <b>rm -r report_old</b> пишуть <b>rm -r report</b> — і за секунду зникає папка з активним звітом, без бекапу. Перед <b>rm -r</b> завжди роби <b>ls</b> і ще раз перевіряй назву.</div>
 <div class="note warn"><b>rm не має кошика.</b> Видалене термінальним rm не потрапляє в «Кошик» — відновити штатними засобами не можна. Перед <code>rm -r</code> двічі перевір шлях. У Git-репозиторії закомічені файли захищені історією: їх можна повернути навіть після rm (урок «reset · restore · revert»).</div>
 <div class="qcheck" data-qc="qc_cp"></div>
 <div class="qcheck" data-qc="qc_rm"></div>
@@ -204,12 +205,18 @@
 <tr><td>Ctrl + C</td><td>Перервати поточну команду, що «зависла».</td></tr>
 <tr><td>Копіювати / вставити</td><td>У більшості терміналів: Ctrl+Shift+C / Ctrl+Shift+V (у Git Bash — права кнопка миші).</td></tr>
 </table>
+<div class="note tip"><b>Коли термінал «завис» і що тоді робити</b><br>Ознака зависання: після Enter новий рядок запрошення (<code>$</code>) не з'являється, а команда просто «висить» без відповіді. Для новачка найчастіша причина — випадково запущена команда, яка чекає ще одного введення, або довгий вивід, що відкрився в повноекранному режимі перегляду (таке трапляється й у Git — деякі команди з довгою історією так роблять). Термінал не зламався, він чекає. Спочатку натисни <code>Ctrl + C</code> — команда перерветься, і повернеться знайоме запрошення. Якщо не спрацювало (буває саме для повноекранного перегляду) — спробуй клавішу <code>q</code> (quit), а вже потім <code>Ctrl + C</code>. Закривати вікно термінала хрестиком — крайній варіант, лише коли нічого інше не допомагає.</div>
+<div class="note tip"><b>Ctrl+C у терміналі — це не «Копіювати»</b><br>У більшості інших програм <code>Ctrl+C</code> копіює виділений текст. У терміналі <code>Ctrl+C</code> означає «перерви команду», яка зараз виконується. Тому для копіювання тексту в Git Bash використовують інше поєднання — <code>Ctrl+Shift+C</code> (див. таблицю вище). Якщо натиснути звичайний <code>Ctrl+C</code>, думаючи, що копіюєш рядок з виводу команди, — можна ненароком перервати саме ту команду, яка щойно почала виконуватись.</div>
 <div class="tdef"><div class="t">Спеціальні позначки шляху</div><div class="d"><code>.</code> — поточна папка; <code>..</code> — на рівень вгору; <code>~</code> — домашня папка; <code>/</code> — роздільник папок (на Windows у багатьох інструментах теж працює <code>/</code>).</div><div class="plain"><b>Простими словами:</b> це «скорочення-адреси». Напр. <code>cd ../data</code> = «вийди на рівень вгору й зайди в data».</div></div>
 <div class="tdef"><div class="t">Шаблон * (зірочка)</div><div class="d">Замінює «будь-які символи». <code>*.tmdl</code> — усі файли з розширенням .tmdl.</div><div class="plain"><b>Простими словами:</b> «усе, що підходить під шаблон». Знадобиться у .gitignore та командах.</div></div>
 <div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">cd pd</span><span class="tw-o">↹</span><span class="tw-cm">  ← натисни Tab, термінал сам допише «pdp-report/»</span>
 <span class="tw-p">$</span> <span class="tw-c">ls *.md</span>          <span class="tw-cm"># показати лише файли .md</span>
 <span class="tw-o">README.md</span></div></div>
 <div class="note tip">Якщо у назві папки є пробіл — бери шлях у лапки: <code>cd "My Reports"</code>. Інакше термінал сприйме це як дві окремі назви.</div>
+<div class="tdef"><div class="t">Чому пробіл у назві папки ламає команду</div><div class="d">Термінал за замовчуванням розбиває введений рядок на окремі частини по пробілу. Кожна частина після команди сприймається як окремий, самостійний аргумент.</div><div class="plain"><b>Простими словами:</b> для термінала <code>Sales Report</code> — це не одна назва папки, а два слова: «Sales» і «Report» окремо. Реальний приклад із Power BI: звіт часто зберігають у папку на кшталт <code>Sales Report Q1</code>. Спроба зайти в неї без лапок ламається:</div></div>
+<div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">cd Sales Report Q1</span>
+<span class="tw-o">bash: cd: too many arguments</span>   <span class="tw-cm"># термінал побачив три окремі аргументи</span>
+<span class="tw-p">$</span> <span class="tw-c">cd "Sales Report Q1"</span>   <span class="tw-cm"># лапки кажуть: це одна назва цілком</span></div></div>
 <div class="qcheck" data-qc="qc_tab"></div>
 <div class="qcheck" data-qc="qc_paths"></div>
 

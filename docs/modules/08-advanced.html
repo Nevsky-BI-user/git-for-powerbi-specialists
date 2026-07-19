@@ -69,7 +69,20 @@
 <span class="c"># … повторюєш, доки: "&lt;sha&gt; is the first bad commit"</span>
 <span class="cmd">git bisect</span> <span class="arg">reset</span>          <span class="c"># повернутися на свою гілку</span></pre>
 <div class="cmdanim" data-ca="git_bisect"></div>
-<div class="lect">З мого проєкту: міра «поїхала» місяць тому, а між робочою і зламаною версією — сорок комітів. Перевіряти кожен вручну — день роботи; <b>bisect знайшов винний коміт за шість кроків</b>.</div>
+
+<div class="scn"><span class="cat">Практичний сценарій</span><h4><span class="num">1</span>Sales YTD показує дивне число</h4>
+<p><b>Ситуація:</b> міра «Sales YTD» рахує невірно. Місяць тому, на релізі <code>v2.4</code>, число було точним — відтоді набігло близько 40 комітів.</p>
+<p><b>Крок 1 — задати межі пошуку:</b></p>
+<pre><span class="cmd">git bisect</span> <span class="arg">start</span>
+<span class="cmd">git bisect</span> <span class="arg">bad</span>              <span class="c"># поточний стан — з багом</span>
+<span class="cmd">git bisect</span> <span class="arg">good v2.4</span>        <span class="c"># на v2.4 число ще було правильним</span></pre>
+<p><b>Крок 2 — що робити руками на кожному кроці:</b> Git сам перемикає робочу папку на середній із цих 40 комітів. Перевірити результат можна двома способами: (а) відкрити <code>.pbip</code> у Power BI Desktop і подивитись число у візуалі; (б) швидше — прочитати формулу без відкриття Desktop прямо в терміналі: <code>git show HEAD:definition/tables/Sales.tmdl | grep -A3 "Sales YTD"</code>.</p>
+<p><b>Крок 3 — повідомити результат і повторити:</b> число правильне → <code>git bisect good</code>; неправильне → <code>git bisect bad</code>. Git знову ділить залишок навпіл і перемикає на новий середній коміт — перевірку повторюєш. Для 40 комітів вистачить приблизно 6 таких ітерацій (2⁶ = 64).</p>
+<p class="sol"><b>Фінал:</b> Git виводить <code>«&lt;sha&gt; is the first bad commit»</code> — це і є коміт-винуватець. <code>git show &lt;sha&gt;</code> показує, що саме змінилось у формулі і в якому коміті. <code>git bisect reset</code> повертає робочу папку на твою гілку — далі <code>git revert &lt;sha&gt;</code> або свідоме виправлення формули.</p>
+</div>
+<div class="note tip"><b>Порада.</b> Перед кожним наступним кроком bisect закривай Power BI Desktop: Git перемикає файли на диску, а Desktop, що тримає їх відкритими, заважає checkout і може показати застарілий кеш замість щойно підміненого коміту.</div>
+
+<div class="lect">Типова історія: міра «поїхала» місяць тому, а між робочою і зламаною версією — сорок комітів. Перевіряти кожен вручну — день роботи; <b>bisect знаходить винний коміт за шість кроків</b>.</div>
 <div class="note tip"><span class="ticon" data-i="pbip"></span><b>PBIP-сценарій.</b> Звіт «раптом» порахувався інакше — bisect швидко вкаже коміт, де змінилась міра чи зв'язок, навіть серед сотень комітів.</div>
 <div class="order" data-o="or_08_bisect"></div>
 <div class="note tip"><b>Як це виглядає на практиці.</b> bisect — територія термінала Git Bash: у Sourcetree такої команди немає. Зате перевірка кожного кроку — звична: Git уже підмінив файли на диску, тож відкриваєш PBIP у Power BI Desktop, дивишся, чи є баг, закриваєш файл і відповідаєш <code>good</code> чи <code>bad</code>.</div>
@@ -95,9 +108,10 @@
   <span class="cmd">exit</span> <span class="arg">1</span>
 <span class="cmd">fi</span></pre>
 <div class="dobox">Поклади цей текст у файл <code>.git/hooks/pre-commit</code> (без розширення) і зроби виконуваним: <code>chmod +x .git/hooks/pre-commit</code> — у Git Bash це працює й на Windows.</div>
-<div class="lect">У мене такий hook стоїть роками — маленький <b>страж</b>, який жодного разу не пустив зламаний TMDL у main. Три рядки скрипта — і цілий клас помилок просто зникає.</div>
+<div class="lect">Такий hook, раз поставлений, працює роками — маленький <b>страж</b>, який жодного разу не пускає зламаний TMDL у main. Три рядки скрипта — і цілий клас помилок просто зникає.</div>
 <div class="note tip"><b>Де це писати.</b> Hook — звичайний скрипт: зручно писати й редагувати його у VS Code (з підсвіткою синтаксису), а перш ніж класти в <code>.git/hooks/</code> — прогнати вручну в терміналі Git Bash і переконатися, що він працює.</div>
 <div class="note"><b>Команді.</b> Локальні hooks не потрапляють у <code>.git</code> репозиторію; щоб поширити їх, тримають скрипти в самому репозиторії (напр. папка <code>hooks/</code>) і підключають, або переносять перевірки в CI (Azure Pipelines) на сервері.</div>
+<div class="note"><b>Коли саме це треба.</b> Приклад 1: у спільному репозиторії постійно проскакують закомічені <code>cache.abf</code> чи <code>localSettings.json</code> — pre-commit hook блокує це раз і назавжди, без нагадувань у чаті команди. Приклад 2: перед кожним push потрібен прогін Tabular Editor BPA (Best Practice Analyzer) на моделі — pre-push hook не дасть запушити модель, яка BPA не пройшла.</div>
 
 <div class="qcheck" data-qc="qc_hooks"></div>
 </section>
@@ -114,7 +128,8 @@
 <span class="cmd">git worktree</span> <span class="arg">remove ../project-hotfix</span>             <span class="c"># прибрати, коли готово</span></pre>
 <div class="cmdanim" data-ca="git_worktree"></div>
 <div class="note tip"><b>Альтернатива stash.</b> Замість «згорнути все вбік» — відкрити hotfix в окремій папці; основна директорія з недоробленою фічею лишається недоторканою. Команди worktree теж живуть у терміналі Git Bash, а далі все як завжди: PBIP із сусідньої папки відкриваєш у Power BI Desktop, файли правиш у VS Code.</div>
-<div class="lect">Роками рятувався <code>git stash</code> перед терміновим хотфіксом — і стільки ж разів потім губився, що там лежить і в якому порядку повертати. Відколи перейшов на worktree, цей клопіт зник: <b>кожна гілка — окрема папка</b>, нічого підмінювати в голові не треба.</div>
+<div class="lect"><code>git stash</code> перед терміновим хотфіксом рятує, але так само часто плутає: що там лежить і в якому порядку повертати. З worktree цей клопіт зникає: <b>кожна гілка — окрема папка</b>, нічого підмінювати в голові не треба.</div>
+<div class="note"><b>Коли саме це треба.</b> Приклад 1: посеред багатоденного рефакторингу моделі (правки в TMDL ще не закомічені) прилітає термінова правка в проді — окрема папка рятує, не чіпаючи незавершене. Приклад 2: треба звірити поточну гілку з release-гілкою (порівняти дві версії міри чи звіту) — відкриваєш обидві папки одночасно в Power BI Desktop замість перемикання гілок туди-сюди.</div>
 <div class="csim" data-cs="cs_08_worktree_add"></div>
 
 <div class="qcheck" data-qc="qc_worktree"></div>
