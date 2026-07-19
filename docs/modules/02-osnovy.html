@@ -109,7 +109,7 @@
 <div class="tdef"><div class="t">Staging Area / Index (зона підготовки)</div>
 <div class="d">Проміжна «коробка». Командою <code>git add</code> ти кладеш туди зміни, які увійдуть у наступний коміт.</div>
 <div class="plain"><b>Простими словами:</b> як кошик у магазині. Спершу складаєш товари (add), потім оплачуєш усе разом (commit). У Sourcetree цей кошик — список Staged files, у VS Code — Staged Changes.</div>
-<div class="ex">Змінив 5 файлів, але хочеш закомітити лише 2 пов'язані — кладеш у кошик саме їх.</div></div>
+<div class="ex">Зберіг звіт — Power BI Desktop змінив одразу 5 файлів. Кладеш у кошик усі одним <code>git add .</code>: це один знімок звіту. Вибірковість лишається для файлів, що звіту не належать.</div></div>
 <div class="tdef"><div class="t">Branch (гілка)</div>
 <div class="d">Рухомий вказівник на коміт; окрема лінія розробки.</div>
 <div class="plain"><b>Простими словами:</b> як паралельний всесвіт проєкту. Можеш експериментувати в окремій гілці, не чіпаючи основну.</div>
@@ -177,10 +177,10 @@
 </div>
 <h3>Стандартний цикл</h3>
 <pre><span class="cmd">git status</span>                 <span class="c"># що змінилось і в якій зоні</span>
-<span class="cmd">git add</span> <span class="arg">model.tmdl</span>        <span class="c"># покласти у staging (кошик)</span>
+<span class="cmd">git add</span> <span class="arg">.</span>                    <span class="c"># весь звіт разом у staging</span>
 <span class="cmd">git commit</span> <span class="arg">-m "Додано міру Salary Range Position"</span>  <span class="c"># зафіксувати</span>
 <span class="cmd">git push</span>                   <span class="c"># відправити на сервер</span></pre>
-<div class="note"><b>Навіщо аж дві зони (staging + commit)?</b> Кошик дозволяє зібрати коміт вибірково: змінив багато — закомітив лише пов'язане між собою. Так історія лишається логічною й читабельною.</div>
+<div class="note"><b>Навіщо аж дві зони (staging + commit)?</b> Кошик дозволяє зібрати коміт вибірково: змінив багато — закомітив лише пов'язане між собою. Для одного звіту «пов'язане між собою» — це всі файли, які зачепив Power BI Desktop: їх кладеш разом, <code>git add .</code>. Вибірковість лишається для файлів, які до звіту не належать. Так історія лишається логічною й читабельною.</div>
 <div class="cmdanim" data-ca="git_status"></div>
 <div class="cmdanim" data-ca="git_add"></div>
 <div class="cmdanim" data-ca="git_commit"></div>

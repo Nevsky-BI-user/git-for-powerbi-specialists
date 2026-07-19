@@ -511,7 +511,7 @@ const GIT_CMDS=[
  {cat:`Перегляд`,c:`git show <sha>`,d:`Повні деталі та зміни конкретного коміту.`},
  {cat:`Перегляд`,c:`git blame <файл>`,d:`Хто й коли востаннє змінив кожен рядок файлу.`},
 
- {cat:`Зміни та коміти`,c:`git add <файл>`,d:`Додати файл у staging — кошик наступного коміту.`},
+ {cat:`Зміни та коміти`,c:`git add <файл>`,d:`Додати файл у staging — кошик наступного коміту (для сторонніх файлів; сам звіт — git add . цілком).`},
  {cat:`Зміни та коміти`,c:`git add .`,d:`Додати всі зміни в поточній папці й нижче у staging.`},
  {cat:`Зміни та коміти`,c:`git restore --staged <файл>`,d:`Прибрати файл зі staging; самі зміни лишаються в робочій директорії.`},
  {cat:`Зміни та коміти`,c:`git commit -m "опис"`,d:`Зафіксувати вміст staging у новий коміт з описом.`},
@@ -2368,21 +2368,21 @@ const TERMLAB={
     sol:[`git init`,`git add .`,`git commit -m "перша версія звіту"`],
     ok:`Репозиторій створено, обидва файли в історії. Тепер кожна зміна звіту може стати комітом.`},
   tl_status_flow:{
-    title:`Два осмислені коміти замість одного великого`,
-    task:`Ти змінив модель (<code>definition/model.tmdl</code>) і додав нову таблицю (<code>definition/tables/Sales.tmdl</code>). Зроби ДВА окремі коміти: спершу зміни моделі, потім нову таблицю — щоб в історії було видно, що і навіщо змінилось.`,
+    title:`Один знімок звіту — один коміт`,
+    task:`Ти зберіг звіт у Power BI Desktop: змінилась модель (<code>definition/model.tmdl</code>) і з'явилась нова таблиця (<code>definition/tables/Sales.tmdl</code>) — Desktop сам вирішує, які файли зачепити при збереженні. Це ОДНА логічна зміна звіту, а не дві. Зроби ОДИН коміт усього разом.`,
     init:{files:{'definition/model.tmdl':'modified','definition/tables/Sales.tmdl':'untracked'}},
-    goal:{commitsAtLeast:3,fileStatus:{'definition/model.tmdl':'clean','definition/tables/Sales.tmdl':'clean'}},
-    hints:[`git add вміє брати один конкретний файл — цим і користуйся.`,`git add definition/model.tmdl → git commit → git add definition/tables/Sales.tmdl → git commit`],
-    sol:[`git add definition/model.tmdl`,`git commit -m "оновлення моделі"`,`git add definition/tables/Sales.tmdl`,`git commit -m "нова таблиця Sales"`],
-    ok:`Дві логічні зміни — два коміти. Колега (і ти через місяць) скаже дякую.`},
+    goal:{commitsAtLeast:2,fileStatus:{'definition/model.tmdl':'clean','definition/tables/Sales.tmdl':'clean'}},
+    hints:[`PBIP комітиться цілком: git add . бере в staging усі зміни одразу — і модель, і нову таблицю.`,`git add . → git commit -m "..."`],
+    sol:[`git add .`,`git commit -m "збережений звіт: оновлена модель і нова таблиця Sales"`],
+    ok:`Звіт — цілісна збірка: один знімок Desktop — один коміт. Різати його по файлах не потрібно.`},
   tl_partial_stage:{
     title:`Закомітити лише частину змін`,
-    task:`Змінені два файли: <code>definition/model.tmdl</code> (нова міра — готова) і <code>diagramLayout.json</code> (просто посовав таблички на діаграмі — комітити не хочеш). Закоміть ЛИШЕ зміну моделі; diagramLayout.json має лишитися незакоміченим.`,
-    init:{files:{'definition/model.tmdl':'modified','diagramLayout.json':'modified'}},
-    goal:{commitsExactly:2,fileStatus:{'definition/model.tmdl':'clean','diagramLayout.json':'modified'}},
-    hints:[`Не використовуй git add . — він забере все.`,`git add definition/model.tmdl → git commit -m "..."`],
+    task:`Змінені два файли: <code>definition/model.tmdl</code> (частина звіту, нова міра — готова) і <code>deploy-notes.md</code> у корені репозиторію (твоя особиста чернетка нотаток, до звіту не належить). Звіт готовий до коміту, а чернетка — ні. Закоміть ЗВІТ повністю; deploy-notes.md має лишитися незакоміченим.`,
+    init:{files:{'definition/model.tmdl':'modified','deploy-notes.md':'modified'}},
+    goal:{commitsExactly:2,fileStatus:{'definition/model.tmdl':'clean','deploy-notes.md':'modified'}},
+    hints:[`git add . забрав би і чернетку — це той рідкісний випадок, коли треба вибірково.`,`git add definition/model.tmdl → git commit -m "..."`],
     sol:[`git add definition/model.tmdl`,`git commit -m "нова міра Total Sales"`],
-    ok:`Staging — це фільтр: у коміт пішло тільки те, що ти свідомо вибрав.`},
+    ok:`Частковий add — для СТОРОННІХ файлів, які не належать звіту. Сам звіт завжди їде цілком.`},
   tl_branch_kpi:{
     title:`Гілка для нових KPI-карток`,
     task:`Керівник просить нові KPI-картки. У тебе вже змінений <code>report/pages/kpi/visual.json</code>. Створи гілку <code>feature/kpi-cards</code>, перейди на неї й закоміть зміну там. main чіпати не можна.`,
@@ -2521,12 +2521,12 @@ const TERMLAB={
     ok:`Твій коміт переграно поверх коміту колеги з розвʼязаним конфліктом — історія лінійна, push пройшов. Це вершина щоденної синхронізації.`},
   tl_final_capstone:{
     title:`Фінальний бос: повний цикл фічі`,
-    task:`Усе разом, як у реальній команді. Репозиторій склоновано з сервера, у тебе змінені <code>report/pages/main/visual.json</code> і <code>definition/model.tmdl</code>. Зроби: гілку <code>feature/report-header</code> → два окремі коміти (спершу visual, потім model) → повернись на main → влий фічу → відправ на сервер. Далі в житті Git sync опублікує зміни в робочу область.`,
+    task:`Усе разом, як у реальній команді. Репозиторій склоновано з сервера, у тебе змінені <code>report/pages/main/visual.json</code> і <code>definition/model.tmdl</code> — обидва файли потрібні для нового хедера звіту, це ОДНА фіча. Зроби: гілку <code>feature/report-header</code> → ОДИН коміт усього разом → повернись на main → влий фічу → відправ на сервер. Далі в житті Git sync опублікує зміни в робочу область.`,
     init:{commits:[{id:'C1',msg:`стан робочої області`}],branches:{main:'C1'},remote:{main:'C1'},files:{'report/pages/main/visual.json':'modified','definition/model.tmdl':'modified'}},
-    goal:{merged:{from:'feature/report-header',into:'main'},headOn:'main',pushed:true,commitsAtLeast:3,commitsOnBranch:{branch:'feature/report-header',atLeast:2},fileStatus:{'report/pages/main/visual.json':'clean','definition/model.tmdl':'clean'}},
-    hints:[`Порядок: switch -c → add+commit → add+commit → switch main → merge → push.`,`git switch -c feature/report-header → git add report/pages/main/visual.json → git commit -m "…" → git add definition/model.tmdl → git commit -m "…" → git switch main → git merge feature/report-header → git push`],
-    sol:[`git switch -c feature/report-header`,`git add report/pages/main/visual.json`,`git commit -m "новий хедер звіту"`,`git add definition/model.tmdl`,`git commit -m "міра для хедера"`,`git switch main`,`git merge feature/report-header`,`git push`],
-    ok:`Повний цикл пройдено: фіча в гілці → merge у main → push. Саме цей потік команда повторює щодня; Git sync далі публікує main у робочу область.`}
+    goal:{merged:{from:'feature/report-header',into:'main'},headOn:'main',pushed:true,commitsAtLeast:2,commitsOnBranch:{branch:'feature/report-header',atLeast:1},fileStatus:{'report/pages/main/visual.json':'clean','definition/model.tmdl':'clean'}},
+    hints:[`Порядок: switch -c → add . → commit → switch main → merge → push.`,`git switch -c feature/report-header → git add . → git commit -m "…" → git switch main → git merge feature/report-header → git push`],
+    sol:[`git switch -c feature/report-header`,`git add .`,`git commit -m "новий хедер звіту"`,`git switch main`,`git merge feature/report-header`,`git push`],
+    ok:`Повний цикл пройдено: одна фіча — один коміт у гілці → merge у main → push. Саме цей потік команда повторює щодня; Git sync далі публікує main у робочу область.`}
 };
 Object.assign(PLAYERS,{
   pr_dag:[
@@ -2709,7 +2709,7 @@ cs_01_cp:{t:`Скопіюй файл <code>sales.csv</code> у папку <code>
 cs_01_mv:{t:`Перейменуй файл <code>draft_report.md</code> на <code>report.md</code>.`,a:['^mv draft_report\.md report\.md$'],sol:'mv draft_report.md report.md'},
 cs_01_rm:{t:`Видали папку <code>temp/</code> разом із усім вмістом. Пам'ятай: <b>rm — без кошика</b>, файли не можна відновити через «Кошик» Windows.`,a:['^rm -r temp/?$','^rm -rf temp/?$','^rm -r -f temp/?$'],sol:'rm -r temp/'},
 cs_02_status:{t:`Подивись стан репозиторію: що змінено і що вже в staging.`,a:['^git status$'],sol:'git status'},
-cs_02_add_one:{t:`Додай у staging лише файл <code>model.tmdl</code> (без інших змінених файлів).`,a:['^git add model\\.tmdl$'],sol:'git add model.tmdl'}
+cs_02_add_one:{t:`У папці зараз дві зміни: <code>model.tmdl</code> (частина звіту) і <code>scratch.txt</code> (твоя особиста чернетка нотаток, не частина звіту). Додай у staging лише файл звіту.`,a:['^git add model\\.tmdl$'],sol:'git add model.tmdl'}
 });
 window.__TL__={bank:TERMLAB,newState:tlNewState,run:tlRun,check:tlCheckGoal,goalKeys:TL_GOAL_KEYS};
 window.__CSIM__=CSIM;
