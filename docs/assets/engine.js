@@ -1557,13 +1557,13 @@ function buildTermlab(){
     el.innerHTML=`<div class="tl-task"><b>${t.title}</b><div class="tl-task-text">${t.task}</div></div>
       <div class="tl-grid">
         <div class="term-win tl-term"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">PBIP — Git Bash</span></div>
-          <div class="tw-body tl-scroll"></div>
-          <div class="tl-row"><span class="tw-p tl-ps"></span><input class="tl-inp" type="text" spellcheck="false" autocomplete="off" placeholder="команда + Enter (help — список)"></div></div>
+          <div class="tw-body tl-scroll"><div class="tl-lines"></div>
+          <div class="tl-row"><span class="tw-p tl-ps"></span><input class="tl-inp" type="text" spellcheck="false" autocomplete="off" placeholder="команда + Enter (help — список)"></div></div></div>
         <div class="tl-state"><div class="tl-gwrap"></div><div class="tl-files"></div></div>
       </div>
       <div class="tl-btns"><button class="tl-hint ghost">Підказка</button><button class="tl-show ghost">Показати розв'язок</button><button class="tl-reset ghost">Скинути</button></div>
       <div class="tl-sol"></div><div class="tl-fb"></div>`;
-    const scroll=el.querySelector('.tl-scroll'),inp=el.querySelector('.tl-inp'),ps=el.querySelector('.tl-ps'),
+    const scroll=el.querySelector('.tl-scroll'),lines=el.querySelector('.tl-lines'),inp=el.querySelector('.tl-inp'),ps=el.querySelector('.tl-ps'),
       gwrap=el.querySelector('.tl-gwrap'),filesEl=el.querySelector('.tl-files'),fb=el.querySelector('.tl-fb'),sol=el.querySelector('.tl-sol');
     let st=tlNewState(t.init),hintIdx=0,hist=[],histPos=-1,solved=false;
     function paint(){
@@ -1571,12 +1571,12 @@ function buildTermlab(){
       filesEl.innerHTML=tlFilesHtml(st);
       ps.textContent=tlPrompt(st);
     }
-    function print(html){const d=document.createElement('div');d.className='tl-line';d.innerHTML=html;scroll.appendChild(d);scroll.scrollTop=scroll.scrollHeight;}
+    function print(html){const d=document.createElement('div');d.className='tl-line';d.innerHTML=html;lines.appendChild(d);scroll.scrollTop=scroll.scrollHeight;}
     function exec(line){
       if(!line.trim())return;
       print(`<span class="tw-p">${escapeHTML(tlPrompt(st))}</span> <span class="tw-c">${escapeHTML(line)}</span>`);
       const res=tlRun(st,line);
-      if(res.clear)scroll.innerHTML='';
+      if(res.clear)lines.innerHTML='';
       (res.out||[]).forEach(l=>print(`<span class="tw-o">${escapeHTML(l)}</span>`));
       paint();
       hist.push(line);histPos=hist.length;
@@ -1608,7 +1608,7 @@ function buildTermlab(){
     };
     el.querySelector('.tl-reset').onclick=()=>{
       st=tlNewState(t.init);solved=false;hintIdx=0;hist=[];histPos=0;
-      scroll.innerHTML='';fb.className='tl-fb';fb.innerHTML='';sol.classList.remove('show');sol.innerHTML='';
+      lines.innerHTML='';fb.className='tl-fb';fb.innerHTML='';sol.classList.remove('show');sol.innerHTML='';
       el.classList.remove('solved');
       print(`<span class="tw-cm"># стан скинуто до початкового</span>`);
       paint();inp.focus();

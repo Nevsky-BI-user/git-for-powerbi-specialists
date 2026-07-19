@@ -351,10 +351,11 @@ a.mcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .termlab .tl-term{margin:0}
 .termlab .tl-scroll{max-height:300px;min-height:120px;overflow-y:auto}
 .termlab .tl-line{white-space:pre-wrap;word-break:break-word}
-.termlab .tl-row{display:flex;gap:8px;align-items:center;padding:9px 15px;border-top:1px solid #2a3040;background:#20242f}
+.termlab .tl-row{display:flex;gap:8px;align-items:baseline;padding:2px 0 0}
 .termlab .tl-ps{white-space:nowrap;font-size:12px}
-.termlab .tl-inp{flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:13px;background:#1b1f2a;border:1px solid #2a3040;border-radius:7px;padding:7px 10px;color:#e6e9f0}
-.termlab .tl-inp:focus{outline:none;border-color:var(--accent)}
+.termlab .tl-inp{flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;background:transparent;border:none;padding:0;color:#e6e9f0;caret-color:#7ee2a8}
+.termlab .tl-inp:focus{outline:none}
+.termlab .tl-inp::placeholder{color:#5a6375}
 .termlab .tl-state{display:flex;flex-direction:column;gap:10px}
 .termlab .tl-gwrap{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);padding:12px;overflow-x:auto;min-height:80px}
 .termlab .tl-files-row{display:flex;flex-wrap:wrap;gap:6px}
