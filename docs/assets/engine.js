@@ -3369,6 +3369,66 @@ const UIMOCK={
 <text x="56" y="458" font-size="12" fill="#1f2430">Обери правильну ФОРМУЛУ (може, варто об'єднати обидві ідеї),</text>
 <text x="56" y="478" font-size="12" fill="#1f2430">прибери маркери, збережи →</text>
 <text x="56" y="498" font-size="12" font-weight="700" font-family="monospace" fill="#5b5bd6">git add → git commit</text>
+</svg>`},
+  remote_concept:{title:`Локальний репозиторій і сервер (origin): хто де`,
+    cap:`Приклад із Power BI: PBIP-проєкт звіту лежить локально в кожного розробника — з ним можна працювати офлайн. А спільна, «офіційна» версія, яку бачить уся команда, лежить на сервері (origin) і оновлюється лише тоді, коли хтось явно робить push.`,
+    svg:`<svg viewBox="0 0 720 350" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs>
+<clipPath id="crc"><rect x="10" y="10" width="700" height="330" rx="14"/></clipPath>
+<marker id="rc-arrP" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#5b5bd6"/></marker>
+<marker id="rc-arrB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#4f6bed"/></marker>
+<marker id="rc-arrG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#9aa0ad"/></marker>
+</defs>
+<rect x="10" y="10" width="700" height="330" rx="14" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#crc)">
+<text x="360" y="32" font-size="11" font-weight="700" letter-spacing="0.5" fill="#9aa0ad" text-anchor="middle">ЯК ПРАЦЮЄ ОБМІН ІЗ СЕРВЕРОМ</text>
+<rect x="24" y="48" width="160" height="160" rx="10" fill="#5b5bd6" fill-opacity="0.07" stroke="#5b5bd6" stroke-width="1.5"/>
+<rect x="82" y="64" width="44" height="30" rx="3" fill="#ffffff" stroke="#5b5bd6" stroke-width="1.5"/>
+<rect x="97" y="94" width="14" height="8" fill="#5b5bd6" fill-opacity="0.35"/>
+<line x1="86" y1="104" x2="122" y2="104" stroke="#5b5bd6" stroke-width="2.2" stroke-linecap="round"/>
+<text x="104" y="126" font-size="13.5" font-weight="800" fill="#5b5bd6" text-anchor="middle">Твій ПК</text>
+<text x="104" y="145" font-size="10.5" fill="#5b6473" text-anchor="middle">Повна копія</text>
+<text x="104" y="159" font-size="10.5" fill="#5b6473" text-anchor="middle">репозиторію</text>
+<text x="104" y="173" font-size="10.5" font-weight="700" fill="#5b5bd6" text-anchor="middle">+ вся історія</text>
+<rect x="266" y="40" width="190" height="176" rx="12" fill="#4f6bed" fill-opacity="0.08" stroke="#4f6bed" stroke-width="2"/>
+<rect x="326" y="52" width="68" height="20" rx="10" fill="#4f6bed" fill-opacity="0.15" stroke="#4f6bed"/>
+<text x="360" y="66" font-size="10.5" font-weight="700" font-family="monospace" fill="#4f6bed" text-anchor="middle">origin</text>
+<rect x="337" y="82" width="48" height="42" rx="4" fill="#ffffff" stroke="#4f6bed" stroke-width="1.5"/>
+<rect x="343" y="90" width="28" height="6" rx="1" fill="#4f6bed" fill-opacity="0.3"/>
+<circle cx="379" cy="93" r="2" fill="#0e9f6e"/>
+<rect x="343" y="101" width="28" height="6" rx="1" fill="#4f6bed" fill-opacity="0.3"/>
+<circle cx="379" cy="104" r="2" fill="#0e9f6e"/>
+<rect x="343" y="112" width="28" height="6" rx="1" fill="#4f6bed" fill-opacity="0.3"/>
+<circle cx="379" cy="115" r="2" fill="#b7791f"/>
+<text x="361" y="146" font-size="14.5" font-weight="800" fill="#4f6bed" text-anchor="middle">Сервер (origin)</text>
+<text x="361" y="163" font-size="10.5" fill="#5b6473" text-anchor="middle">GitHub / Azure DevOps</text>
+<text x="361" y="177" font-size="10.5" font-weight="700" fill="#4f6bed" text-anchor="middle">спільна копія команди</text>
+<rect x="538" y="48" width="160" height="160" rx="10" fill="#6b76a8" fill-opacity="0.08" stroke="#6b76a8" stroke-width="1.5"/>
+<rect x="596" y="64" width="44" height="30" rx="3" fill="#ffffff" stroke="#6b76a8" stroke-width="1.5"/>
+<rect x="611" y="94" width="14" height="8" fill="#6b76a8" fill-opacity="0.35"/>
+<line x1="600" y1="104" x2="636" y2="104" stroke="#6b76a8" stroke-width="2.2" stroke-linecap="round"/>
+<text x="618" y="126" font-size="13.5" font-weight="800" fill="#6b76a8" text-anchor="middle">ПК колеги</text>
+<text x="618" y="145" font-size="10.5" fill="#5b6473" text-anchor="middle">Своя повна</text>
+<text x="618" y="159" font-size="10.5" fill="#5b6473" text-anchor="middle">копія</text>
+<text x="618" y="173" font-size="10.5" font-weight="700" fill="#6b76a8" text-anchor="middle">+ вся історія</text>
+<line x1="190" y1="97" x2="260" y2="97" stroke="#5b5bd6" stroke-width="2.2" marker-end="url(#rc-arrP)"/>
+<text x="225" y="66" font-size="9" font-weight="700" font-family="monospace" fill="#5b5bd6" text-anchor="middle">git push</text>
+<text x="225" y="78" font-size="8" fill="#5b6473" text-anchor="middle">відправити</text>
+<text x="225" y="89" font-size="8" fill="#5b6473" text-anchor="middle">свої коміти</text>
+<line x1="260" y1="150" x2="190" y2="150" stroke="#4f6bed" stroke-width="2.2" marker-end="url(#rc-arrB)"/>
+<text x="225" y="166" font-size="9" font-weight="700" font-family="monospace" fill="#4f6bed" text-anchor="middle">git pull</text>
+<text x="225" y="178" font-size="8" fill="#5b6473" text-anchor="middle">/ fetch</text>
+<text x="225" y="189" font-size="8" fill="#5b6473" text-anchor="middle">забрати чужі</text>
+<line x1="532" y1="97" x2="462" y2="97" stroke="#9aa0ad" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#rc-arrG)"/>
+<text x="497" y="82" font-size="8.5" font-weight="700" font-family="monospace" fill="#9aa0ad" text-anchor="middle">git push</text>
+<line x1="462" y1="150" x2="532" y2="150" stroke="#9aa0ad" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#rc-arrG)"/>
+<text x="497" y="166" font-size="8.5" font-weight="700" font-family="monospace" fill="#9aa0ad" text-anchor="middle">git pull</text>
+<rect x="30" y="236" width="660" height="68" rx="10" fill="#f4f5f8" stroke="#5b5bd6" stroke-width="1.5"/>
+<circle cx="54" cy="256" r="9" fill="#5b5bd6"/>
+<text x="54" y="260" font-size="10" font-weight="800" fill="#ffffff" text-anchor="middle">!</text>
+<text x="72" y="254" font-size="12.5" font-weight="800" fill="#5b5bd6">Само нічого не синхронізується:</text>
+<text x="72" y="272" font-size="12" fill="#1f2430">кожен обмін (push, pull, fetch) — окрема команда, яку запускаєш ти сам.</text>
+</g>
 </svg>`}
 };
 function buildUimock(){
