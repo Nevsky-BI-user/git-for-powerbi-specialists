@@ -1997,6 +1997,65 @@ const CMDANIM={
       {t:'fx',op:'mark',n:`hotfix (друга робоча копія)`},
       {t:'note',s:`Це та сама історія — просто друга незалежна папка на диску. У hotfix можна лагодити терміновий баг, не чіпаючи report.pbip, який уже відкритий у Power BI Desktop у первинній папці.`}
     ]
+  },
+  git_diff:{
+    title:`git diff — що саме зміниться до коміту`,
+    panel:'files',
+    files0:{'definition/model.tmdl':'modified'},
+    steps:[
+      {t:'type',s:`git diff`},
+      {t:'out',s:[
+        `--- a/definition/model.tmdl`,
+        `+++ b/definition/model.tmdl`,
+        `@@ -14,1 +14,1 @@`,
+        `-  SUM(Sales[Amount])`,
+        `+  SUMX(Sales, Sales[Amount] * (1 - Sales[Discount]))`
+      ]},
+      {t:'fx',op:'mark',n:`definition/model.tmdl`},
+      {t:'note',s:`diff показує ЩО саме зміниться ще ДО коміту: рядки з "-" зникнуть, з "+" з'являться. Звичка дивитись сюди перед кожним git add рятує від випадкових правок у коміті.`}
+    ]
+  },
+  git_tag:{
+    title:`git tag — нерухома закладка на коміті`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'c3',msg:`нова міра Total Sales`,par:['c2'],br:'main'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git tag v3.0`},
+      {t:'fx',op:'branch',n:`v3.0`,at:'c3'},
+      {t:'fx',op:'mark',id:'c3'},
+      {t:'type',s:`git commit -m "нова таблиця Inventory"`},
+      {t:'out',s:[`[main f2b7a19] нова таблиця Inventory`,` 1 file changed, 1 insertion(+)`]},
+      {t:'fx',op:'commit',id:'c4',msg:`нова таблиця Inventory`,par:['c3'],br:'main'},
+      {t:'fx',op:'mark',id:'c3'},
+      {t:'note',s:`У цьому й суть: гілка main поїхала далі на c4, а тег v3.0 лишився стояти на c3 — як закладка на релізі. v3.0 = «звіт, який пішов керівництву в липні»: хоч скільки нових комітів зʼявиться пізніше, до цього стану завжди можна повернутися за іменем тега.`}
+    ]
+  },
+  git_reflog:{
+    title:`git reflog — журнал усіх рухів HEAD`,
+    panel:'repo',
+    repo0:{commits:[
+      {id:'c1',msg:`перша версія звіту`,par:[],br:'main'},
+      {id:'c2',msg:`нова таблиця Sales`,par:['c1'],br:'main'},
+      {id:'c3',msg:`нова міра Total Sales`,par:['c2'],br:'main'}
+    ],head:'main'},
+    steps:[
+      {t:'type',s:`git reset --hard HEAD~1`},
+      {t:'out',s:[`HEAD is now at a92e771 нова таблиця Sales`]},
+      {t:'fx',op:'tip',br:'main',to:'c2'},
+      {t:'pause',ms:500},
+      {t:'note',s:`Ой... коміт зник? main тепер вказує на c2, і на схемі c3 посірів — до нього більше не веде жодна стрілка від гілки.`},
+      {t:'type',s:`git reflog`},
+      {t:'out',s:[`a92e771 HEAD@{0}: reset: moving to HEAD~1`,`c3f1a02 HEAD@{1}: commit: нова міра Total Sales`]},
+      {t:'type',s:`git reset --hard HEAD@{1}`},
+      {t:'out',s:[`HEAD is now at c3f1a02 нова міра Total Sales`]},
+      {t:'fx',op:'tip',br:'main',to:'c3'},
+      {t:'fx',op:'mark',id:'c3'},
+      {t:'note',s:`reflog пам'ятає КОЖЕН рух HEAD близько 90 днів — це «чорна скринька» Git. Навіть коли коміт здається втраченим, його SHA ще тут, і git reset --hard на цей SHA повертає все як було.`}
+    ]
   }
 };
 function caWait(ms){return new Promise(res=>setTimeout(res,ms));}
@@ -2012,10 +2071,14 @@ async function caType(bodyEl,text,reduced){
   if(cur)cur.remove();
   await caWait(280);
 }
+function caOutLine(l){
+  const cls=l.indexOf('+')===0?'dl-add':l.indexOf('-')===0?'dl-del':l.indexOf('@@')===0?'dl-hunk':'';
+  return cls?`<span class="dl ${cls}">${escapeHTML(l)}</span>`:escapeHTML(l);
+}
 async function caOut(bodyEl,lines,reduced){
-  if(reduced){(lines||[]).forEach(l=>{bodyEl.insertAdjacentHTML('beforeend',`<div class="ca-line tw-o">${escapeHTML(l)}</div>`);});return;}
+  if(reduced){(lines||[]).forEach(l=>{bodyEl.insertAdjacentHTML('beforeend',`<div class="ca-line tw-o">${caOutLine(l)}</div>`);});return;}
   for(const l of (lines||[])){
-    bodyEl.insertAdjacentHTML('beforeend',`<div class="ca-line tw-o">${escapeHTML(l)}</div>`);
+    bodyEl.insertAdjacentHTML('beforeend',`<div class="ca-line tw-o">${caOutLine(l)}</div>`);
     bodyEl.scrollTop=bodyEl.scrollHeight;
     await caWait(200);
   }
@@ -3239,6 +3302,72 @@ const UIMOCK={
 <text x="226" y="368" font-size="12" font-weight="700" fill="#5b5bd6">Це той самий git log --graph —</text>
 <text x="226" y="388" font-size="12" fill="#1f2430">тільки клацаєш мишкою, а не читаєш термінал.</text>
 </g>
+</svg>`},
+  pbip_conflict:{title:`Конфлікт у PBIP-проєкті очима Power BI-розробника`,
+    cap:`Такий конфлікт виникає, коли колега вже влив зміни в main, а ти паралельно правив ту саму міру у своїй гілці. Power BI Desktop файл із маркерами &lt;&lt;&lt;, === та &gt;&gt;&gt; НЕ відкриє — спершу розв'яжи конфлікт у текстовому редакторі, і лише потім відкривай звіт.`,
+    svg:`<svg viewBox="0 0 720 530" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs>
+<clipPath id="cpcfTop"><rect x="20" y="20" width="680" height="182" rx="10"/></clipPath>
+<clipPath id="cpcfEdit"><rect x="20" y="212" width="680" height="192" rx="10"/></clipPath>
+<marker id="arr-pcfA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#5b5bd6"/></marker>
+<marker id="arr-pcfB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#6b76a8"/></marker>
+</defs>
+<rect x="20" y="20" width="680" height="182" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cpcfTop)">
+<text x="360" y="36" font-size="11" font-weight="700" fill="#9aa0ad" text-anchor="middle" letter-spacing="0.5">ЧОМУ ВИНИКАЄ КОНФЛІКТ</text>
+<rect x="46" y="46" width="290" height="72" rx="8" fill="#5b5bd6" fill-opacity="0.08" stroke="#5b5bd6" stroke-width="1.5"/>
+<rect x="60" y="54" width="52" height="18" rx="9" fill="#5b5bd6" fill-opacity="0.15" stroke="#5b5bd6"/>
+<text x="86" y="67" font-size="10" font-weight="700" font-family="monospace" fill="#5b5bd6" text-anchor="middle">main</text>
+<text x="60" y="93" font-size="12.5" font-weight="700" fill="#1f2430">Колега в main:</text>
+<text x="60" y="111" font-size="12" fill="#1f2430">змінив міру Total Sales</text>
+<rect x="384" y="46" width="290" height="72" rx="8" fill="#6b76a8" fill-opacity="0.1" stroke="#6b76a8" stroke-width="1.5"/>
+<rect x="398" y="54" width="110" height="18" rx="9" fill="#6b76a8" fill-opacity="0.18" stroke="#6b76a8"/>
+<text x="453" y="67" font-size="10" font-weight="700" font-family="monospace" fill="#6b76a8" text-anchor="middle">feature/kpi</text>
+<text x="398" y="93" font-size="12.5" font-weight="700" fill="#1f2430">Ти у feature/kpi:</text>
+<text x="398" y="111" font-size="12" fill="#1f2430">змінив ту саму міру</text>
+<path d="M191,118 C191,145 300,145 351,132" fill="none" stroke="#5b5bd6" stroke-width="2" marker-end="url(#arr-pcfA)"/>
+<path d="M529,118 C529,145 420,145 369,132" fill="none" stroke="#6b76a8" stroke-width="2" marker-end="url(#arr-pcfB)"/>
+<path d="M349,128 L360,128 L367,135 L367,150 L349,150 Z" fill="#9aa0ad" fill-opacity="0.55"/>
+<path d="M360,128 L360,135 L367,135 Z" fill="#ffffff" fill-opacity="0.7"/>
+<text x="358" y="172" font-size="12" font-weight="800" font-family="monospace" fill="#1f2430" text-anchor="middle">model.tmdl</text>
+<text x="358" y="190" font-size="10.5" font-weight="700" fill="#b7791f" text-anchor="middle">обидва торкались цього файлу → конфлікт</text>
+</g>
+<rect x="20" y="212" width="680" height="192" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#cpcfEdit)">
+<rect x="20" y="212" width="680" height="28" fill="#f4f5f8"/>
+<text x="40" y="230" font-size="11.5" font-weight="700" font-family="monospace" fill="#1f2430">definition/model.tmdl</text>
+<text x="695" y="230" font-size="12" fill="#9aa0ad" text-anchor="end">—  ▢  ✕</text>
+<text x="60" y="256" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">39</text>
+<text x="72" y="256" font-size="12" font-family="monospace" fill="#1f2430">measure 'Total Sales' =</text>
+<rect x="20" y="262" width="680" height="22" fill="#b7791f" fill-opacity="0.12"/>
+<text x="60" y="278" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">40</text>
+<text x="72" y="278" font-size="12" font-weight="700" font-family="monospace" fill="#b7791f">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</text>
+<text x="230" y="278" font-size="10" font-style="italic" fill="#9aa0ad">(колега, main)</text>
+<rect x="20" y="284" width="680" height="22" fill="#5b5bd6" fill-opacity="0.12"/>
+<text x="60" y="300" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">41</text>
+<text x="72" y="300" font-size="12" font-family="monospace" fill="#1f2430">    SUM(Sales[Amount])</text>
+<rect x="20" y="306" width="680" height="22" fill="#b7791f" fill-opacity="0.12"/>
+<text x="60" y="322" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">42</text>
+<text x="72" y="322" font-size="12" font-weight="700" font-family="monospace" fill="#b7791f">=======</text>
+<rect x="20" y="328" width="680" height="22" fill="#6b76a8" fill-opacity="0.18"/>
+<text x="60" y="344" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">43</text>
+<text x="72" y="344" font-size="11.5" font-family="monospace" fill="#1f2430">    SUMX(Sales, Sales[Amount] * (1 - Sales[Discount]))</text>
+<rect x="20" y="350" width="680" height="22" fill="#b7791f" fill-opacity="0.12"/>
+<text x="60" y="366" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">44</text>
+<text x="72" y="366" font-size="12" font-weight="700" font-family="monospace" fill="#b7791f">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/kpi</text>
+<text x="270" y="366" font-size="10" font-style="italic" fill="#9aa0ad">(ти, feature/kpi)</text>
+<text x="60" y="388" font-size="10.5" font-family="monospace" fill="#9aa0ad" text-anchor="end">45</text>
+<text x="72" y="388" font-size="12" font-family="monospace" fill="#1f2430">    formatString: "#,##0"</text>
+</g>
+<rect x="20" y="414" width="680" height="100" rx="8" fill="#f4f5f8" stroke="#5b5bd6" stroke-width="1.5"/>
+<circle cx="40" cy="432" r="8" fill="#0e9f6e"/>
+<path d="M36,432 L39,436 L45,428" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="56" y="436" font-size="12" font-weight="700" fill="#1f2430">Це НЕ поламаний файл — Git чесно показує обидві версії.</text>
+<circle cx="40" cy="463" r="8" fill="#b7791f"/>
+<text x="40" y="467" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">!</text>
+<text x="56" y="458" font-size="12" fill="#1f2430">Обери правильну ФОРМУЛУ (може, варто об'єднати обидві ідеї),</text>
+<text x="56" y="478" font-size="12" fill="#1f2430">прибери маркери, збережи →</text>
+<text x="56" y="498" font-size="12" font-weight="700" font-family="monospace" fill="#5b5bd6">git add → git commit</text>
 </svg>`}
 };
 function buildUimock(){

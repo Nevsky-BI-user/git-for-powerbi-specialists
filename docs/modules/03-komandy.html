@@ -268,6 +268,7 @@
 <div class="tdef"><div class="t">tag (мітка)</div><div class="d">Нерухома позначка на коміті, зазвичай для релізної версії.</div><div class="plain"><b>Простими словами:</b> «закладка» на важливому коміті. На відміну від гілки, тег не рухається.</div></div>
 <pre><span class="cmd">git tag</span> <span class="arg">v3.0</span>                <span class="c"># мітка на поточний коміт</span>
 <span class="cmd">git tag</span> <span class="arg">-a v3.0 -m "Реліз 3.0"</span>  <span class="c"># анотована мітка</span></pre>
+<div class="cmdanim" data-ca="git_tag"></div>
 <div class="tdef"><div class="t">reflog (журнал HEAD)</div><div class="d">Показує всі переміщення HEAD за ~90 днів. Рятує після «втрати» комітів через reset/rebase.</div><div class="plain"><b>Простими словами:</b> «чорна скринька» Git — записує кожен твій крок, навіть якщо коміт уже не видно.</div></div>
 <pre><span class="cmd">git reflog</span>                   <span class="c"># історія руху HEAD</span>
 <span class="cmd">git reset</span> <span class="arg">--hard &lt;sha-з-reflog&gt;</span>  <span class="c"># відновити стан</span></pre>
@@ -295,6 +296,7 @@
 <tr><td>git diff main..feature</td><td>Різниця між двома гілками.</td></tr>
 </table>
 <div class="note tip"><b>Щоденний сценарій.</b> Змінив міру в Power BI Desktop, зберіг PBIP-проєкт — і ще до коміту клікаєш по файлу в Sourcetree: він показує той самий <code>git diff</code>, лише з підсвіткою. Побачив зайве — прибрав; усе чисто — комітиш і пушиш.</div>
+<div class="cmdanim" data-ca="git_diff"></div>
 <h3>log — пошук в історії</h3>
 <table class="cmdtable">
 <tr><td>git log --oneline --graph</td><td>Компактна історія з деревом гілок.</td></tr>
