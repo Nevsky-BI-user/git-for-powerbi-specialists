@@ -566,6 +566,84 @@ const GIT_CMDS=[
  {cat:`Схованки та відновлення`,c:`git worktree add <шлях> <гілка>`,d:`Створити окрему робочу директорію на іншій гілці без stash.`},
  {cat:`Інструменти та розширення`,c:`pre-commit / commit-msg / pre-push`,d:`Git hooks — локальні скрипти-перевірки на події коміту чи пушу.`}
 ];
+/* === 8a. ТИПОВІ СЦЕНАРІЇ (готові рецепти з кількох команд) === */
+const CHEAT_FLOWS=[
+ {t:`Новий PBIP-проєкт під Git`,when:`Коли береш уже збережений PBIP-звіт і починаєш його версіювати.`,
+  steps:[
+   {c:`cd шлях/до/проєкту`,note:`Переходиш у папку, де лежить .pbip-проєкт.`},
+   {c:`git init`,note:`Перетворюєш папку на git-репозиторій.`},
+   {c:`git add .`,note:`Додаєш увесь проєкт у staging одним цілісним коміта.`},
+   {c:`git commit -m "Початковий коміт"`,note:`Фіксуєш перший знімок звіту в історії.`}
+  ]},
+ {t:`Щоденний цикл роботи над звітом`,when:`Базовий робочий день: забрати свіже, попрацювати в Desktop, зберегти й відправити.`,
+  steps:[
+   {c:`git pull`,note:`Забираєш свіжі зміни колег перед стартом роботи.`},
+   {c:`# робота в Power BI Desktop`,note:`Редагуєш звіт як завжди — Git поки осторонь.`},
+   {c:`git status`,note:`Дивишся, які файли Power BI Desktop змінив.`},
+   {c:`git add .`,note:`Додаєш усі зміни звіту в staging цілісно.`},
+   {c:`git commit -m "опис зміни"`,note:`Фіксуєш зміну в історії.`},
+   {c:`git push`,note:`Відправляєш коміт на сервер.`}
+  ]},
+ {t:`Нова фіча в окремій гілці`,when:`Коли робиш помітну зміну (сторінка, міра, модель) і не хочеш чіпати main напряму.`,
+  steps:[
+   {c:`git switch -c feature/nazva`,note:`Створюєш гілку під фічу й одразу переходиш на неї.`},
+   {c:`git add .`,note:`Додаєш готові зміни в staging.`},
+   {c:`git commit -m "опис фічі"`,note:`Фіксуєш роботу в гілці.`},
+   {c:`git switch main`,note:`Повертаєшся на основну гілку.`},
+   {c:`git merge feature/nazva`,note:`Вливаєш фічу в main.`},
+   {c:`git push`,note:`Відправляєш оновлену main на сервер (далі колеги зроблять Git sync).`}
+  ]},
+ {t:`Забрати зміни колег`,when:`Коли хочеш побачити, що зʼявилось на сервері, перш ніж застосовувати це собі.`,
+  steps:[
+   {c:`git fetch`,note:`Завантажуєш інформацію з сервера, не чіпаючи робочі файли.`},
+   {c:`git log HEAD..origin/main --oneline`,note:`Дивишся, які коміти зʼявились на сервері, яких у тебе ще нема.`},
+   {c:`git pull`,note:`Застосовуєш ці зміни до своєї гілки.`}
+  ]},
+ {t:`Ой, зіпсував файл до коміту`,when:`Коли зміни ще НЕ закомічені, але файл уже краще повернути як був.`,
+  steps:[
+   {c:`git status`,note:`Перевіряєш, який файл змінено.`},
+   {c:`git restore model.tmdl`,note:`Повертаєш файл до стану останнього коміту — зміни зникають.`}
+  ]},
+ {t:`Відкотити невдалий коміт (уже запушений)`,when:`Коли поганий коміт уже на сервері й бачать колеги — переписувати історію не можна.`,
+  steps:[
+   {c:`git revert HEAD`,note:`Створюєш новий коміт, що скасовує зміни останнього.`},
+   {c:`git push`,note:`Відправляєш коміт-скасування на сервер.`}
+  ]},
+ {t:`Відкотити локальний коміт (ще не пушив)`,when:`Коли закомітив зарано і хочеш забрати коміт назад, лишивши зміни під рукою.`,
+  steps:[
+   {c:`git reset --soft HEAD~1`,note:`Скасовуєш останній коміт; зміни лишаються в staging, нічого не втрачено.`}
+  ]},
+ {t:`Push відхилено (колега встиг раніше)`,when:`Git каже "push rejected", бо хтось запушив свій коміт першим.`,
+  steps:[
+   {c:`git pull --rebase`,note:`Забираєш чужий коміт і переносиш свій поверх нього.`},
+   {c:`git push`,note:`Тепер push проходить — історія лишається лінійною.`}
+  ]},
+ {t:`Терміновий хотфікс посеред незавершеної роботи`,when:`Коли треба щось терміново виправити на main, а поточна робота ще не готова до коміту.`,
+  steps:[
+   {c:`git stash`,note:`Тимчасово ховаєш незакомічені зміни «у кишеню».`},
+   {c:`git switch main`,note:`Переходиш на основну гілку для хотфіксу.`},
+   {c:`# виправляєш і комітиш хотфікс`,note:`git add ., commit, push — як у звичайному циклі.`},
+   {c:`git switch feature/nazva`,note:`Повертаєшся на свою гілку з незавершеною роботою.`},
+   {c:`git stash pop`,note:`Повертаєш сховані зміни назад у робочу директорію.`}
+  ]},
+ {t:`Merge-конфлікт у model.tmdl`,when:`Коли merge чи rebase зупинився, бо ти й колега змінили ті самі рядки.`,
+  steps:[
+   {c:`git status`,note:`Дивишся, який файл у конфлікті.`},
+   {c:`# відкриваєш model.tmdl, прибираєш маркери <<<<<<< / ======= / >>>>>>>`,note:`Вирішуєш конфлікт руками, лишаючи потрібний варіант.`},
+   {c:`git add model.tmdl`,note:`Позначаєш конфлікт вирішеним.`},
+   {c:`git commit`,note:`Завершуєш merge (при rebase — git rebase --continue).`}
+  ]},
+ {t:`Підключити локальний репозиторій до сервера`,when:`Коли вже є локальний репозиторій з історією, а віддаленого ще нема.`,
+  steps:[
+   {c:`git remote add origin <url>`,note:`Прив'язуєш локальний репозиторій до адреси на сервері.`},
+   {c:`git push -u origin main`,note:`Перший push і запам'ятовування зв'язку гілки із сервером.`}
+  ]},
+ {t:`Знайти, коли зламалась міра`,when:`Коли міра видає не той результат і треба знайти коміт, який це вніс.`,
+  steps:[
+   {c:`git log -S "назва міри" --oneline`,note:`Шукаєш коміти, де рядок із назвою міри зʼявився або змінився.`},
+   {c:`git show <sha>`,note:`Переглядаєш, що саме змінилось у підозрілому коміті.`}
+  ]}
+];
 /* ключ CMDANIM для команди глосарія (null, якщо для неї немає анімації) */
 function caKeyFor(cmd){
   const s=(cmd||'').trim();
@@ -601,7 +679,7 @@ function buildGlossary(){
         const cc=raw?emph(x.c,raw):escapeHTML(x.c);
         const dd=raw?emph(x.d,raw):escapeHTML(x.d);
         const caKey=caKeyFor(x.c);
-        const anim=caKey?`<details class="gl-anim"><summary>▶ Анімація: що робить ця команда</summary><div class="cmdanim" data-ca="${caKey}"></div></details>`:'';
+        const anim=caKey?`<div class="cmdanim gl-loop" data-ca="${caKey}"></div>`:'';
         html+=`<div class="gloss-item"><div class="gc">${cc}</div><div class="gd">${dd}${x.ex?`<span class="gex">${escapeHTML(x.ex)}</span>`:''}</div>${anim}</div>`;
       });
     });
@@ -821,6 +899,15 @@ function buildCheatsheet(){
   }).join('');
   const btn=document.getElementById('printBtn');
   if(btn)btn.onclick=()=>window.print();
+}
+
+/* === 12b. ТИПОВІ СЦЕНАРІЇ (сітка карток-рецептів) === */
+function buildCheatFlows(){
+  const box=document.getElementById('cheatFlows');if(!box||box.dataset.built)return;box.dataset.built='1';
+  box.innerHTML=CHEAT_FLOWS.map(f=>{
+    const steps=f.steps.map(s=>`<li><code>${escapeHTML(s.c)}</code><span class="ch-flow-note">${escapeHTML(s.note)}</span></li>`).join('');
+    return `<div class="ch-flowcard"><div class="ch-flow-t">${escapeHTML(f.t)}</div><div class="ch-flow-when">${escapeHTML(f.when)}</div><ol class="ch-flow-steps">${steps}</ol></div>`;
+  }).join('');
 }
 
 /* === 12aa. САМОДІАГНОСТИКА РІВНЯ (головна) === */
@@ -2299,13 +2386,14 @@ function buildCmdanim(){
     if(el.dataset.built)return;el.dataset.built='1';
     const key=el.dataset.ca,t=CMDANIM[key];
     if(!t){el.innerHTML=`<div class="ca-title">Анімацію не знайдено</div>`;return;}
+    const isLoop=el.classList.contains('gl-loop');
     let appName;
     if(t.panel==='repo')appName=`Історія репозиторію`;
     else if(t.panel==='files')appName=`Файли проєкту`;
     else if(t.panel==='remote')appName=`Твій ПК ⇄ GitHub`;
     else appName=`Провідник — ${t.fs0?t.fs0.path:''}`;
     el.innerHTML=`<div class="ca-title">${escapeHTML(t.title)}</div>
-      <div class="ca-desk">
+      <div class="ca-desk" title="Клікни, щоб програти">
         <div class="term-win ca-term"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">Git Bash</span></div>
           <div class="tw-body ca-body"></div></div>
         <div class="ca-app"><div class="tw-bar"><span class="tw-title">${escapeHTML(appName)}</span></div>
@@ -2313,7 +2401,7 @@ function buildCmdanim(){
       </div>
       <div class="ca-note"></div>
       <button class="ca-play">▶ Показати, що робить команда</button>`;
-    const bodyTerm=el.querySelector('.ca-body'),appBody=el.querySelector('.ca-app-body'),noteEl=el.querySelector('.ca-note'),btn=el.querySelector('.ca-play'),titleEl=el.querySelector('.ca-app .tw-title');
+    const bodyTerm=el.querySelector('.ca-body'),appBody=el.querySelector('.ca-app-body'),noteEl=el.querySelector('.ca-note'),btn=el.querySelector('.ca-play'),titleEl=el.querySelector('.ca-app .tw-title'),desk=el.querySelector('.ca-desk');
     let items=null,repoState=null,filesState=null,remoteState=null;
     function resetVisual(){
       items=t.fs0?t.fs0.items.map(x=>({n:x.n,k:x.k})):null;
@@ -2321,7 +2409,7 @@ function buildCmdanim(){
       filesState=t.files0?Object.assign({},t.files0):null;
       remoteState=t.remote0?Object.assign({},t.remote0):null;
       bodyTerm.innerHTML=`<div class="ca-line"><span class="tw-p">$</span> <span class="ca-cursor">▌</span></div>`;
-      noteEl.innerHTML=`Натисни кнопку нижче — побачиш анімацію по кроках.`;
+      noteEl.innerHTML=isLoop?'':`Натисни кнопку нижче — побачиш анімацію по кроках.`;
       if(titleEl)titleEl.textContent=appName;
       if(t.panel==='repo')appBody.innerHTML=caRepoSvg(repoState,null);
       else if(t.panel==='files')appBody.innerHTML=caFilesHtml(filesState);
@@ -2329,13 +2417,15 @@ function buildCmdanim(){
       else appBody.innerHTML=caExplorerHtml(items);
     }
     resetVisual();
-    btn.addEventListener('click',async()=>{
+    async function playAnim(){
+      if(btn.disabled||!el.isConnected)return;
       btn.disabled=true;
       resetVisual();
       bodyTerm.innerHTML='';
       const reduced=caReduced();
       const notes=[];
       for(const step of (t.steps||[])){
+        if(!el.isConnected)return;
         if(step.t==='type')await caType(bodyTerm,step.s,reduced);
         else if(step.t==='out')await caOut(bodyTerm,step.s,reduced);
         else if(step.t==='pause'){if(!reduced)await caWait(step.ms||500);}
@@ -2352,8 +2442,42 @@ function buildCmdanim(){
           }
         }
       }
+      if(!el.isConnected)return;
       btn.disabled=false;btn.textContent='⟲ Ще раз';
+    }
+    btn.addEventListener('click',()=>{playAnim();});
+    desk.addEventListener('click',()=>{
+      if(btn.disabled)return;
+      const sel=(typeof window!=='undefined'&&window.getSelection)?window.getSelection():null;
+      if(sel&&String(sel).length)return;
+      playAnim();
     });
+    if(isLoop){
+      if(caReduced()){
+        playAnim();
+      }else if(typeof IntersectionObserver!=='undefined'){
+        let visible=false,obs=null;
+        function runLoop(){
+          playAnim().then(()=>{
+            if(!el.isConnected){if(obs)obs.disconnect();return;}
+            if(!visible)return;
+            setTimeout(()=>{
+              if(!el.isConnected){if(obs)obs.disconnect();return;}
+              if(!visible)return;
+              runLoop();
+            },1500);
+          });
+        }
+        obs=new IntersectionObserver(entries=>{
+          entries.forEach(entry=>{
+            if(entry.target!==el)return;
+            visible=entry.isIntersecting;
+            if(visible&&!btn.disabled)runLoop();
+          });
+        },{threshold:0.25});
+        obs.observe(el);
+      }
+    }
   });
 }
 
@@ -3458,6 +3582,94 @@ const UIMOCK={
 <text x="72" y="254" font-size="12.5" font-weight="800" fill="#5b5bd6">Само нічого не синхронізується:</text>
 <text x="72" y="272" font-size="12" fill="#1f2430">кожен обмін (push, pull, fetch) — окрема команда, яку запускаєш ти сам.</text>
 </g>
+</svg>`},
+  pbix_to_pbip_flow:{title:`Весь шлях Power BI-розробника: від .pbix до робочої області`,
+    cap:`Головна навігаційна схема курсу: показує, як усі інструменти — Power BI Desktop, PBIP, Git, GitHub/Azure DevOps, Power BI Service — зв'язані між собою в один процес. Це мапа всього курсу: кожен модуль розкриває один крок цього шляху зліва направо.`,
+    svg:`<svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Segoe UI,sans-serif">
+<defs>
+<clipPath id="pbf-clip"><rect x="10" y="10" width="700" height="340" rx="14"/></clipPath>
+<marker id="pbf-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#5b5bd6"/></marker>
+</defs>
+<rect x="10" y="10" width="700" height="340" rx="14" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<g clip-path="url(#pbf-clip)">
+<text x="360" y="34" font-size="12" font-weight="700" letter-spacing="0.5" fill="#9aa0ad" text-anchor="middle">ВЕСЬ ШЛЯХ POWER BI-РОЗРОБНИКА</text>
+<text x="130" y="58" font-size="11" font-weight="700" fill="#5b5bd6" text-anchor="middle">Зберегти як</text>
+<text x="130" y="74" font-size="11" font-weight="700" font-family="monospace" fill="#5b5bd6" text-anchor="middle">→ .pbip</text>
+<text x="130" y="90" font-size="10.5" font-style="italic" fill="#9aa0ad" text-anchor="middle">Power BI Desktop</text>
+<text x="277" y="66" font-size="12" font-weight="700" font-family="monospace" fill="#5b5bd6" text-anchor="middle">git init →</text>
+<text x="277" y="84" font-size="12" font-weight="700" font-family="monospace" fill="#5b5bd6" text-anchor="middle">commit</text>
+<text x="399" y="80" font-size="12" font-weight="700" font-family="monospace" fill="#5b5bd6" text-anchor="middle">push</text>
+<text x="563" y="80" font-size="12" font-weight="700" font-family="monospace" fill="#5b5bd6" text-anchor="middle">Git sync</text>
+<line x1="114" y1="176" x2="143" y2="176" stroke="#5b5bd6" stroke-width="2.2" marker-end="url(#pbf-arr)"/>
+<line x1="261" y1="176" x2="290" y2="176" stroke="#5b5bd6" stroke-width="2.2" marker-end="url(#pbf-arr)"/>
+<line x1="382" y1="176" x2="411" y2="176" stroke="#5b5bd6" stroke-width="2.2" marker-end="url(#pbf-arr)"/>
+<line x1="546" y1="176" x2="575" y2="176" stroke="#5b5bd6" stroke-width="2.2" marker-end="url(#pbf-arr)"/>
+<rect x="24" y="100" width="90" height="150" rx="10" fill="#2b2f3a" stroke="#2b2f3a" stroke-width="1.5"/>
+<text x="69" y="126" font-size="13" font-weight="800" font-family="monospace" fill="#ffffff" text-anchor="middle">.pbix</text>
+<path d="M57,148 h18 l6,6 v24 h-24 z" fill="#ffffff" fill-opacity="0.92"/>
+<path d="M75,148 v6 h6 z" fill="#9aa0ad"/>
+<circle cx="80" cy="176" r="10" fill="#5b5bd6"/>
+<path d="M75,172 v-4 a5,5 0 0 1 10,0 v4" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+<rect x="76" y="174" width="8" height="8" rx="1.5" fill="#ffffff"/>
+<text x="69" y="228" font-size="11" font-weight="600" fill="#c7cad4" text-anchor="middle">чорна</text>
+<text x="69" y="243" font-size="11" font-weight="600" fill="#c7cad4" text-anchor="middle">скринька</text>
+<text x="69" y="262" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">твій звичний</text>
+<text x="69" y="278" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">формат</text>
+<rect x="145" y="100" width="116" height="150" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<text x="203" y="122" font-size="13" font-weight="800" fill="#1f2430" text-anchor="middle">PBIP</text>
+<rect x="166" y="138" width="14" height="12" fill="#9aa0ad" fill-opacity="0.6"/>
+<text x="184" y="149" font-size="10.5" font-family="monospace" fill="#5b6473">report/</text>
+<rect x="166" y="160" width="14" height="12" fill="#6b76a8" fill-opacity="0.55"/>
+<text x="184" y="171" font-size="10.5" font-family="monospace" fill="#5b6473">definition/</text>
+<rect x="176" y="182" width="14" height="12" fill="#6b76a8" fill-opacity="0.55"/>
+<text x="194" y="193" font-size="10.5" font-family="monospace" fill="#5b6473">model.tmdl</text>
+<text x="203" y="228" font-size="11" font-weight="600" fill="#9aa0ad" text-anchor="middle">папка текстових</text>
+<text x="203" y="243" font-size="11" font-weight="600" fill="#9aa0ad" text-anchor="middle">файлів</text>
+<text x="203" y="262" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">той самий звіт,</text>
+<text x="203" y="278" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">але читабельний</text>
+<rect x="292" y="100" width="90" height="150" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<text x="337" y="122" font-size="13" font-weight="800" fill="#1f2430" text-anchor="middle">Git</text>
+<line x1="337" y1="146" x2="337" y2="196" stroke="#5b5bd6" stroke-width="2.2"/>
+<circle cx="337" cy="146" r="6" fill="#5b5bd6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="337" cy="171" r="6" fill="#5b5bd6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="337" cy="196" r="6" fill="#5b5bd6" stroke="#ffffff" stroke-width="2"/>
+<text x="337" y="228" font-size="11" font-weight="600" fill="#9aa0ad" text-anchor="middle">історія</text>
+<text x="337" y="243" font-size="11" font-weight="600" fill="#9aa0ad" text-anchor="middle">знімків</text>
+<text x="337" y="262" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">кожна версія</text>
+<text x="337" y="278" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">збережена</text>
+<rect x="416" y="100" width="130" height="150" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<text x="481" y="118" font-size="12.5" font-weight="800" fill="#1f2430" text-anchor="middle">GitHub /</text>
+<text x="481" y="140" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">Azure DevOps</text>
+<ellipse cx="481" cy="192" rx="34" ry="17" fill="#4f6bed" fill-opacity="0.14" stroke="#4f6bed" stroke-width="1.5"/>
+<circle cx="462" cy="182" r="14" fill="#4f6bed" fill-opacity="0.14" stroke="#4f6bed" stroke-width="1.5"/>
+<circle cx="481" cy="174" r="17" fill="#4f6bed" fill-opacity="0.14" stroke="#4f6bed" stroke-width="1.5"/>
+<circle cx="500" cy="182" r="14" fill="#4f6bed" fill-opacity="0.14" stroke="#4f6bed" stroke-width="1.5"/>
+<rect x="466" y="185" width="30" height="18" rx="2" fill="#ffffff" stroke="#4f6bed" stroke-width="1.5"/>
+<circle cx="472" cy="194" r="1.6" fill="#0e9f6e"/>
+<circle cx="478" cy="194" r="1.6" fill="#b7791f"/>
+<text x="481" y="236" font-size="11" font-weight="600" fill="#9aa0ad" text-anchor="middle">хмара-сервер</text>
+<text x="481" y="262" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">спільний код</text>
+<text x="481" y="278" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">команди</text>
+<rect x="580" y="100" width="110" height="150" rx="10" fill="#ffffff" stroke="#e7e8ee" stroke-width="1.5"/>
+<text x="635" y="118" font-size="12.5" font-weight="800" fill="#1f2430" text-anchor="middle">Power BI</text>
+<text x="635" y="140" font-size="12" font-weight="800" fill="#1f2430" text-anchor="middle">Service</text>
+<rect x="605" y="155" width="60" height="40" rx="4" fill="#ffffff" stroke="#0e9f6e" stroke-width="1.8"/>
+<rect x="615" y="165" width="8" height="24" fill="#0e9f6e" fill-opacity="0.55"/>
+<rect x="629" y="172" width="8" height="17" fill="#0e9f6e" fill-opacity="0.55"/>
+<rect x="643" y="160" width="8" height="29" fill="#0e9f6e" fill-opacity="0.55"/>
+<rect x="655" y="169" width="6" height="20" fill="#0e9f6e" fill-opacity="0.55"/>
+<rect x="627" y="195" width="16" height="8" fill="#0e9f6e" fill-opacity="0.5"/>
+<line x1="613" y1="209" x2="657" y2="209" stroke="#0e9f6e" stroke-width="3" stroke-linecap="round"/>
+<text x="635" y="228" font-size="11" font-weight="600" fill="#9aa0ad" text-anchor="middle">робоча</text>
+<text x="635" y="243" font-size="11" font-weight="600" fill="#9aa0ad" text-anchor="middle">область</text>
+<text x="635" y="262" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">звіт бачить</text>
+<text x="635" y="278" font-size="11" font-weight="700" fill="#5b6473" text-anchor="middle">бізнес</text>
+<rect x="24" y="296" width="672" height="40" rx="8" fill="#5b5bd6" fill-opacity="0.08" stroke="#5b5bd6" stroke-width="1.5"/>
+<circle cx="44" cy="316" r="10" fill="#5b5bd6"/>
+<path d="M40,310 L48,316 L40,322" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="64" y="311" font-size="12.5" font-weight="800" fill="#5b5bd6">Курс проведе цим шляхом зліва направо:</text>
+<text x="64" y="328" font-size="11.5" font-weight="600" fill="#1f2430">ти вже знаєш перший блок — далі по кроку за модуль.</text>
+</g>
 </svg>`}
 };
 function buildUimock(){
@@ -3500,6 +3712,7 @@ function initPage(){
   if(typeof lcPlace==='function'&&document.getElementById('lcExp'))lcPlace(0);
   if(document.getElementById('glossList'))buildGlossary();
   if(document.getElementById('cheatList'))buildCheatsheet();
+  if(document.getElementById('cheatFlows'))buildCheatFlows();
   if(document.getElementById('diagBox'))buildDiag();
   buildQchecks();buildCsim();buildOrders();buildTermlab();buildDiffq();buildVideos();buildTicons();buildCmdanim();buildUimock();
   colorizeDiffPre(document);

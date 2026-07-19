@@ -216,12 +216,7 @@
   .gloss-item .gex{display:block;font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-top:6px}
   .gloss-count{font-size:11px;color:var(--dim);margin-top:12px}
   .gloss-empty{font-size:13px;color:var(--muted);padding:16px;text-align:center}
-  .gl-anim{grid-column:1/-1;margin-top:4px}
-  .gl-anim summary{cursor:pointer;font-size:11.5px;font-weight:700;color:var(--accent);list-style:none;display:inline-block;padding:2px 0}
-  .gl-anim summary::-webkit-details-marker{display:none}
-  .gl-anim summary:hover{text-decoration:underline}
-  .gl-anim[open] summary{margin-bottom:8px}
-  .gl-anim .cmdanim{margin:0;padding:12px 13px}
+  .cmdanim.gl-loop{grid-column:1/-1;margin:8px 0 0;padding:12px 13px}
   /* inline mini-exercise (qcheck) */
   .qcheck{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:11px;padding:15px 17px;margin:20px 0;background:var(--panel-2)}
   .qcheck .qc-q{font-weight:600;font-size:13.5px;margin-bottom:11px;color:var(--txt)}
@@ -448,6 +443,14 @@ pre .dl{display:inline-block;width:100%;padding:0 4px;border-radius:3px}
 .ch-tbl td{border:1px solid var(--line);padding:6px 10px;font-size:12.5px;vertical-align:top;line-height:1.5}
 .ch-c{white-space:nowrap;width:36%}
 .ch-ex{color:var(--dim);font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:3px}
+.ch-flows-title{margin:26px 0 4px}
+.ch-flows{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:14px 0 22px}
+.ch-flowcard{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+.ch-flow-t{font-weight:700;font-size:14px;margin-bottom:4px}
+.ch-flow-when{font-size:12.5px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+.ch-flow-steps{margin:0;padding-left:19px;display:flex;flex-direction:column;gap:6px}
+.ch-flow-steps li{font-size:12.5px;line-height:1.55}
+.ch-flow-steps .ch-flow-note{display:block;color:var(--dim)}
 .print-note{display:none}
 @media print{
   body{display:block;background:#fff;color:#000}
@@ -463,6 +466,15 @@ pre .dl{display:inline-block;width:100%;padding:0 4px;border-radius:3px}
   .ch-tbl tr{page-break-inside:avoid}
   .ch-tbl td{border-color:#bbb;font-size:8.5pt;padding:3pt 6pt;color:#000}
   .ch-ex{color:#555;font-size:7.5pt}
+  .ch-flows-title{page-break-before:auto;page-break-after:avoid;color:#000;font-size:11pt;margin:12pt 0 3pt}
+  .ch-flows-title+p.lead{display:none}
+  .ch-flows{display:block;margin:6pt 0}
+  .ch-flowcard{border:1px solid #bbb;border-radius:0;padding:5pt 8pt;margin:0 0 6pt;page-break-inside:avoid;background:#fff}
+  .ch-flow-t{color:#000;font-size:9.5pt;margin-bottom:2pt}
+  .ch-flow-when{color:#333;font-size:7.5pt;margin-bottom:4pt}
+  .ch-flow-steps{padding-left:14pt}
+  .ch-flow-steps li{color:#000;font-size:7.5pt}
+  .ch-flow-steps .ch-flow-note{color:#555}
   .print-note{display:block;font-size:8pt;color:#777;margin-top:10pt}
 }
 
@@ -476,7 +488,7 @@ pre .dl{display:inline-block;width:100%;padding:0 4px;border-radius:3px}
 /* === cmdanim: анімація «що робить команда» === */
 .cmdanim{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:15px 17px;margin:18px 0;background:var(--panel)}
 .cmdanim .ca-title{font-size:14.5px;font-weight:700;margin-bottom:12px}
-.cmdanim .ca-desk{display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start}
+.cmdanim .ca-desk{display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start;cursor:pointer}
 .cmdanim .ca-term{margin:0}
 .cmdanim .ca-body{min-height:120px;max-height:220px;overflow-y:auto}
 .cmdanim .ca-line{white-space:pre-wrap;word-break:break-word;margin-bottom:2px}
@@ -498,6 +510,7 @@ pre .dl{display:inline-block;width:100%;padding:0 4px;border-radius:3px}
 .cmdanim .ca-play{font-family:inherit;font-size:12.5px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 15px;cursor:pointer}
 .cmdanim .ca-play:hover:not(:disabled){opacity:.92}
 .cmdanim .ca-play:disabled{opacity:.55;cursor:default}
+.cmdanim.gl-loop .ca-play{display:none}
 .cmdanim circle.ca-pulse{animation:caPulseGlow .6s ease-in-out 2}
 .cmdanim circle.ca-cnode-ghost{stroke-dasharray:3 2}
 /* files panel: статус-бейджі */
