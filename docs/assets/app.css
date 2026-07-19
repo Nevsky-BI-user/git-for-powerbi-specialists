@@ -10,7 +10,7 @@
   .brand h1{font-family:'Inter',sans-serif;font-size:20px;font-weight:800;line-height:1.05;margin-top:6px}
   .progress{margin:12px 8px 0;height:4px;background:var(--line);border-radius:4px;overflow:hidden}
   .progress i{display:block;height:100%;background:var(--new);width:0;transition:.3s}
-  .modlabel{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);padding:14px 10px 6px;font-weight:700}
+  .modlabel{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);padding:15px 10px 7px;font-weight:800}
   nav a{display:flex;gap:9px;align-items:baseline;font-size:12.5px;color:var(--muted);text-decoration:none;padding:7px 10px;border-radius:7px;cursor:pointer;transition:.15s}
   nav a .num{color:var(--dim);font-size:10px;font-weight:700;flex:none;width:22px}
   nav a:hover{background:var(--panel);color:var(--txt)}
@@ -545,3 +545,8 @@ pre .dl{display:inline-block;width:100%;padding:0 4px;border-radius:3px}
 .subsec{margin:3px 0 5px 18px;padding-left:10px;border-left:2px solid var(--line)}
 .subsec a{font-size:11.5px;padding:5px 8px}
 .subsec a .num{width:18px;font-size:9px}
+.subsec.closed{display:none}
+.subsec a.cur{background:var(--panel-3);color:var(--txt);font-weight:600}
+.subsec a.cur .num{color:var(--accent)}
+nav a.active .chev{margin-left:auto;font-size:10px;opacity:.85}
+nav .modlabel:not(:first-child){border-top:1px solid var(--line);margin-top:10px}

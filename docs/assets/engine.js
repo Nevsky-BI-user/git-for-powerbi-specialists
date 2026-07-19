@@ -2754,6 +2754,35 @@ function updateAsideProg(){
   const bar=document.getElementById('progbar');if(bar)bar.style.width=(total?n/total*100:0)+'%';
 }
 
+/* === 13b. САЙДБАР: підсвітка поточного підрозділу + згортання === */
+function initSecSpy(){
+  const nav=document.getElementById('nav');if(!nav)return;
+  const links=[...nav.querySelectorAll('a[data-sec]')];if(!links.length)return;
+  const byId={};links.forEach(a=>byId[a.dataset.sec]=a);
+  const secs=[...document.querySelectorAll('section.lesson')].filter(s=>byId[s.id]);
+  if(!secs.length)return;
+  let tick=false;
+  function apply(){
+    tick=false;
+    let cur=secs[0].id;
+    const y=window.scrollY+150;
+    for(const s of secs){if(s.offsetTop<=y)cur=s.id;}
+    links.forEach(a=>a.classList.toggle('cur',a.dataset.sec===cur));
+  }
+  window.addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(apply);}},{passive:true});
+  apply();
+}
+function initSubsecToggle(){
+  const sub=document.querySelector('#nav .subsec');if(!sub)return;
+  const act=sub.previousElementSibling;
+  if(!act||!act.classList.contains('active'))return;
+  const ch=document.createElement('span');ch.className='chev';ch.textContent='▾';act.appendChild(ch);
+  act.addEventListener('click',e=>{
+    e.preventDefault(); // активний пункт = поточна сторінка, перезавантаження не потрібне
+    ch.textContent=sub.classList.toggle('closed')?'▸':'▾';
+  });
+}
+
 /* === 14. ПОШУК ПО ВСЬОМУ САЙТУ === */
 function sitePrefix(){return location.pathname.indexOf('/modules/')>=0?'../':'';}
 function runSearch(q){
@@ -3474,7 +3503,7 @@ function initPage(){
   if(document.getElementById('diagBox'))buildDiag();
   buildQchecks();buildCsim();buildOrders();buildTermlab();buildDiffq();buildVideos();buildTicons();buildCmdanim();buildUimock();
   colorizeDiffPre(document);
-  initSearch();initCollapse();initProgress();initHighlightFromSearch();initVersionCheck();
+  initSearch();initCollapse();initProgress();initSecSpy();initSubsecToggle();initHighlightFromSearch();initVersionCheck();
 }
 window.__GFP__={PLAYERS:Object.keys(PLAYERS),QUIZ:Object.keys(QUIZ),SCEN:Object.keys(SCEN),QCHECKS:Object.keys(QCHECKS),CSIM:Object.keys(CSIM),ORDERS:Object.keys(ORDERS),TERMLAB:Object.keys(TERMLAB),DIFFQ:Object.keys(DIFFQ),ICONS:Object.keys(ICONS),CMDANIM:Object.keys(CMDANIM),UIMOCK:Object.keys(UIMOCK)};
 document.addEventListener('DOMContentLoaded',initPage);
