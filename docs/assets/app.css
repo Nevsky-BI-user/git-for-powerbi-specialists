@@ -216,6 +216,12 @@
   .gloss-item .gex{display:block;font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-top:6px}
   .gloss-count{font-size:11px;color:var(--dim);margin-top:12px}
   .gloss-empty{font-size:13px;color:var(--muted);padding:16px;text-align:center}
+  .gl-anim{grid-column:1/-1;margin-top:4px}
+  .gl-anim summary{cursor:pointer;font-size:11.5px;font-weight:700;color:var(--accent);list-style:none;display:inline-block;padding:2px 0}
+  .gl-anim summary::-webkit-details-marker{display:none}
+  .gl-anim summary:hover{text-decoration:underline}
+  .gl-anim[open] summary{margin-bottom:8px}
+  .gl-anim .cmdanim{margin:0;padding:12px 13px}
   /* inline mini-exercise (qcheck) */
   .qcheck{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:11px;padding:15px 17px;margin:20px 0;background:var(--panel-2)}
   .qcheck .qc-q{font-weight:600;font-size:13.5px;margin-bottom:11px;color:var(--txt)}

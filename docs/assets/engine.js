@@ -566,6 +566,18 @@ const GIT_CMDS=[
  {cat:`Схованки та відновлення`,c:`git worktree add <шлях> <гілка>`,d:`Створити окрему робочу директорію на іншій гілці без stash.`},
  {cat:`Інструменти та розширення`,c:`pre-commit / commit-msg / pre-push`,d:`Git hooks — локальні скрипти-перевірки на події коміту чи пушу.`}
 ];
+/* ключ CMDANIM для команди глосарія (null, якщо для неї немає анімації) */
+function caKeyFor(cmd){
+  const s=(cmd||'').trim();
+  if(!s)return null;
+  if(/^git\s+commit\s+--amend\b/.test(s))return CMDANIM.git_amend?'git_amend':null;
+  const parts=s.split(/\s+/);
+  let base;
+  if(parts[0]==='git')base=parts[1]?`git ${parts[1]}`:'git';
+  else base=parts[0];
+  const key=base.replace(/[-\s]+/g,'_');
+  return CMDANIM[key]?key:null;
+}
 let glossCat='Усі';
 function buildGlossary(){
   const list=document.getElementById('glossList');if(!list||list.dataset.built)return;list.dataset.built='1';
@@ -588,11 +600,14 @@ function buildGlossary(){
       groups[cat].forEach(x=>{
         const cc=raw?emph(x.c,raw):escapeHTML(x.c);
         const dd=raw?emph(x.d,raw):escapeHTML(x.d);
-        html+=`<div class="gloss-item"><div class="gc">${cc}</div><div class="gd">${dd}${x.ex?`<span class="gex">${escapeHTML(x.ex)}</span>`:''}</div></div>`;
+        const caKey=caKeyFor(x.c);
+        const anim=caKey?`<details class="gl-anim"><summary>▶ Анімація: що робить ця команда</summary><div class="cmdanim" data-ca="${caKey}"></div></details>`:'';
+        html+=`<div class="gloss-item"><div class="gc">${cc}</div><div class="gd">${dd}${x.ex?`<span class="gex">${escapeHTML(x.ex)}</span>`:''}</div>${anim}</div>`;
       });
     });
     list.innerHTML=shown?html:`<div class="gloss-empty">Нічого не знайдено</div>`;
     countEl.textContent=`Показано ${shown} з ${GIT_CMDS.length}`;
+    buildCmdanim();
   }
   catsEl.querySelectorAll('.gloss-chip').forEach(b=>b.onclick=()=>{glossCat=b.dataset.c;catsEl.querySelectorAll('.gloss-chip').forEach(x=>x.classList.toggle('on',x===b));render();});
   searchEl.addEventListener('input',render);
