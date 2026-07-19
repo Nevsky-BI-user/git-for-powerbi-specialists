@@ -64,6 +64,7 @@
 <div class="ytvideo" data-v="v_01"></div>
 <div class="tdef"><div class="t"><span class="ticon" data-i="terminal"></span>Термінал / командний рядок (CLI)</div><div class="d">Текстове вікно, де ти друкуєш команду словами, тиснеш Enter — і комп'ютер її виконує, виводячи відповідь текстом.</div><div class="plain"><b>Простими словами:</b> замість того, щоб клікати мишкою по кнопках, ти пишеш коротку інструкцію текстом. Це швидше й точніше для багатьох задач.</div></div>
 <div class="tdef"><div class="t">GUI vs CLI</div><div class="d"><b>GUI</b> — графічний інтерфейс (вікна, кнопки, миша). <b>CLI</b> — текстові команди.</div><div class="plain"><b>Простими словами:</b> GUI — як меню в ресторані з картинками; CLI — як сказати офіціанту точне замовлення словами. Git працює і так, і так, але команди дають повний контроль.</div></div>
+<div class="lect">Спокійно: термінал <b>не кусається</b>. Найгірше, що може статися, — команда не спрацює і сама напише текстом, чому. Тут набагато важче щось зламати випадково, ніж здається на перший погляд.</div>
 <div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-cm"># знак $ або &gt; — це «запрошення»: термінал чекає команду</span>
 <span class="tw-p">$</span> <span class="tw-c">git --version</span>
 <span class="tw-o">git version 2.45.0</span></div></div>
@@ -90,6 +91,7 @@
 <div class="cmdanim" data-ca="ls"></div>
 <div class="tdef"><div class="t">cd &lt;папка&gt;</div><div class="d">Переходить в іншу папку. <code>cd ..</code> — на рівень вгору, <code>cd ~</code> — у домашню папку.</div><div class="plain"><b>Простими словами:</b> «зайти всередину» папки або «вийти назовні». cd = change directory.</div></div>
 <div class="cmdanim" data-ca="cd"></div>
+<div class="lect">Типова помилка новачків: спершу дивляться на <b>ls</b> і дивуються, що не бачать потрібного файлу — а насправді просто ще не зайшли в потрібну папку через <b>cd</b>. Спершу зайди, потім дивись.</div>
 <div class="term-win"><div class="tw-bar"><span class="tw-dot" style="background:#ff5f57"></span><span class="tw-dot" style="background:#febc2e"></span><span class="tw-dot" style="background:#28c840"></span><span class="tw-title">bash</span></div><div class="tw-body"><span class="tw-p">$</span> <span class="tw-c">pwd</span>
 <span class="tw-o">/home/ivan</span>
 <span class="tw-p">$</span> <span class="tw-c">ls</span>
@@ -126,6 +128,7 @@
 <div class="goalbox"><b>Ціль уроку</b>створювати папки й файли та записувати текст у файл з термінала.</div>
 <div class="tdef"><div class="t">mkdir &lt;назва&gt;</div><div class="d">Створює нову папку. mkdir = make directory.</div><div class="plain"><b>Простими словами:</b> «зроби папку». <code>mkdir reports</code> створює папку reports.</div></div>
 <div class="cmdanim" data-ca="mkdir"></div>
+<div class="lect">Подивись анімацію ще раз і зверни увагу: <b>mkdir</b> щойно зробив рівно те саме, що права кнопка миші → «Створити» → «Папка» в Провіднику. Просто без миші й швидше.</div>
 <div class="tdef"><div class="t">touch &lt;файл&gt;</div><div class="d">Створює порожній файл. У Git Bash (термінал цього курсу) команда <code>touch</code> працює як є — PowerShell чи CMD у курсі не знадобляться.</div><div class="plain"><b>Простими словами:</b> «створи порожній файл» із заданою назвою.</div></div>
 <div class="tdef"><div class="t">echo "текст" &gt; файл</div><div class="d">Записує текст у файл. Один <code>&gt;</code> перезаписує файл; два <code>&gt;&gt;</code> дописують у кінець.</div><div class="plain"><b>Простими словами:</b> echo — «вивести текст»; стрілка <code>&gt;</code> перенаправляє цей текст не на екран, а у файл.</div></div>
 <div class="tdef"><div class="t">cat &lt;файл&gt;</div><div class="d">Показує вміст файлу в терміналі.</div><div class="plain"><b>Простими словами:</b> «покажи, що всередині файлу».</div></div>
@@ -178,6 +181,7 @@
 <tr><td>rm file</td><td>Видалити файл.</td></tr>
 <tr><td>rm -r dir</td><td>Видалити папку з вмістом.</td></tr>
 </table>
+<div class="lect">З реального проєкту: колега якось написав <b>rm -r report</b> замість <b>rm -r report_old</b> — і за секунду зникла папка з активним звітом, без бекапу. Перед <b>rm -r</b> завжди роби <b>ls</b> і ще раз перевіряй назву.</div>
 <div class="note warn"><b>rm не має кошика.</b> Видалене термінальним rm не потрапляє в «Кошик» — відновити штатними засобами не можна. Перед <code>rm -r</code> двічі перевір шлях. У Git-репозиторії закомічені файли захищені історією: їх можна повернути навіть після rm (урок «reset · restore · revert»).</div>
 <div class="qcheck" data-qc="qc_cp"></div>
 <div class="qcheck" data-qc="qc_rm"></div>
@@ -237,6 +241,7 @@
 <h2>Вправи: термінал і файли</h2>
 <p class="lead">Перевір базу перед переходом до Git. Обери відповідь — побачиш пояснення.</p>
 <div class="goalbox"><b>Ціль уроку</b>закріпити базу термінала перед стартом Git.</div>
+<div class="lect">Тепер твоя черга. Перш ніж тиснути на відповідь, спробуй подумки (а краще — у відкритому терміналі) прогнати команду власноруч. Помилишся — не страшно, побачиш пояснення і запам'ятаєш ще міцніше.</div>
 <div class="quiz" data-q="modT"></div>
 
 </section>

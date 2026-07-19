@@ -100,6 +100,7 @@ Thumbs.db
 <h2>Стратегія гілок для PBIP-команди</h2>
 <p class="lead">Робоча модель: одна інтеграційна гілка main, feature-гілки, а публікація йде не через гілку, а через робочу область (Git sync); окремий Prod, якщо він є, досягається через deployment pipeline.</p>
 <div class="goalbox"><b>Ціль уроку</b>працювати короткими feature-гілками без хаосу.</div>
+<div class="lect">Домовся з командою про правила гілок <b>до</b> першого конфлікту, а не після. Одна фраза в чаті — «фіча живе в окремій гілці не довше тижня» — рятує більше нервів, ніж будь-який merge-інструмент.</div>
 <div class="cards">
 <div class="card"><h4>main</h4><p>Інтеграційна гілка. Сюди зливають feature-гілки. Під'єднана до Dev робочої області через Git integration.</p></div>
 <div class="card"><h4>feature/*</h4><p>Гілка під кожну зміну. Від main → merge назад у main після перевірки проєкту в Power BI Desktop.</p></div>
@@ -141,6 +142,7 @@ Thumbs.db
 <li>Перевірка моделі в Power BI Desktop перед merge у main (бо review діфів у PR непрактичний).</li>
 <li>CI: автозапуск Best Practice Analyzer (Tabular Editor) на <code>.SemanticModel</code> при push.</li>
 </ul>
+<div class="lect">Конфлікт — це не сварка, а нормальна п'ятниця. Головне тут — не мовчки перетирати чужі зміни своїми, а написати колезі: «бачу, ми обидва чіпали цю міру, давай з'ясуємо, яка версія лишається».</div>
 
 <div class="qcheck" data-qc="qc_conflict_pbip"></div>
 </section>
@@ -184,6 +186,7 @@ Thumbs.db
 <h3>Сценарій 7 — відновлення після reset --hard</h3>
 <p>A помилково скинув два коміти командою <code>reset --hard</code>. Здається, що робота втрачена — але <code>reflog</code> усе повертає.</p>
 <div class="widget"><div class="wtitle">втрата комітів та відновлення через reflog</div><div class="scplayer" data-s="reflog"></div></div>
+<div class="lect">Стер два коміти <code>reset --hard</code>? Перше, що робиш, — не мовчки виправляєш, а пишеш у чат команди: «накосячив, розбираюсь». <code>reflog</code> майже завжди все поверне, а чесність цінують більше за тишу.</div>
 <h3>Сценарій 8 — терміновий hotfix через cherry-pick</h3>
 <p>Треба внести лише один коміт-фікс у prod, не зливаючи всю недороблену гілку. <code>cherry-pick</code> бере рівно один коміт.</p>
 <div class="widget"><div class="wtitle">cherry-pick одного коміту в prod</div><div class="scplayer" data-s="cherry"></div></div>
@@ -464,6 +467,7 @@ update
 fixes
 wip</pre>
 <div class="tdef"><div class="t">Атомарний коміт</div><div class="d">Один коміт — одна логічна зміна.</div><div class="plain"><b>Простими словами:</b> не змішуй виправлення бага й нову міру в одному коміті — їх важко рев'ювити й відкочувати окремо.</div></div>
+<div class="lect">Як тімлід я дивлюсь спершу на назву гілки й перший рядок коміту, а вже потім — на сам код: <code>fix/sales-filter</code> каже мені більше, ніж «wip», ще до того, як я відкрив файл. Привчи команду до цього — і будь-яку розмову про зміну буде простіше почати.</div>
 <h3>Назви гілок</h3>
 <pre><span class="c"># Формат: &lt;type&gt;/&lt;short-description&gt;</span>
 feature/add-revenue-metric
@@ -551,6 +555,7 @@ PBI_CLIENT_SECRET=
 <h3>Панель Source control</h3>
 <p>Після підключення вгорі робочої області зʼявляється кнопка Source control з лічильником. Вона відкриває панель із двома вкладками: <b>Updates</b> — вхідні коміти з гілки, які ще не застосовані до області (саме тут кнопка Update from Git); <b>Changes</b> — зміни, зроблені безпосередньо в Service, які ще не закомічені в гілку.</p>
 <div class="uimock" data-um="pbi_git_sync"></div>
+<div class="lect">Роками тиснув <b>Publish</b> у Power BI Desktop? Забудь цю звичку. У команді з Git твій новий Publish — це <b>merge у main</b>: звіт іде до людей не з твого ноутбука, а з гілки, яку бачать усі.</div>
 <p>Спробуй на практиці, якщо маєш доступ до Fabric-ємності:</p>
 <div class="dobox">Відкрий робочу область Fabric (<code>app.powerbi.com</code>) і перевір Source control: чи є вгорі кнопка з лічильником, і в якій вона зараз вкладці — Updates чи Changes.</div>
 <h3>Статуси елементів</h3>

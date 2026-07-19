@@ -551,3 +551,8 @@ pre .dl{display:inline-block;width:100%;padding:0 4px;border-radius:3px}
 .subsec a.cur .num{color:var(--accent)}
 nav a.active .chev{margin-left:auto;font-size:10px;opacity:.85}
 nav .modlabel:not(:first-child){border-top:1px solid var(--line);margin-top:10px}
+
+/* === lect: репліка лектора === */
+.lect{border:1px solid var(--line);border-left:4px solid var(--reword);border-radius:0 10px 10px 0;background:rgba(183,121,31,.06);padding:12px 16px;margin:14px 0;font-size:13.5px;color:#2b3542;line-height:1.65}
+.lect::before{content:"🎓 ";margin-right:2px}
+.lect b{color:var(--reword)}

@@ -58,12 +58,14 @@
 <h2>Що таке rebase</h2>
 <p class="lead">Rebase бере набір комітів і відтворює (replay) їх на новій основі, роблячи історію лінійною. На відміну від merge, що зберігає розгалуження й додає merge-коміт.</p>
 <div class="goalbox"><b>Ціль уроку</b>розуміти, що робить rebase і чим він відрізняється від merge.</div>
+<div class="lect">Rebase — гостра бритва: голить чисто й лишає рівну лінію історії. Але одне правило тримай залізно — <b>ніколи не rebase того, що вже запушено</b> й бачать колеги, інакше переписуєш чужу реальність.</div>
 <div class="ytvideo" data-v="v_05"></div>
 <div class="note tip">Саме <b>rebase</b> у цьому відео окремо не розглядається — це тема нашого курсу. Фрагмент вище показує суміжне: вирішення конфліктів злиття (на прикладі GitHub).</div>
 <div class="tdef"><div class="t">rebase (перебазування)</div><div class="d">Перенесення комітів з однієї основи на іншу. Git створює нові коміти з тим самим вмістом, але іншим батьком.</div><div class="plain"><b>Простими словами:</b> «переписати свою гілку так, ніби ти починав її від свіжого стану main».</div></div>
 <div class="tdef"><div class="t">replay (відтворення)</div><div class="d">Повторне накладання змін коміту поверх нової основи зі створенням нового коміту.</div><div class="plain"><b>Простими словами:</b> Git ніби «повторно набирає» твої зміни на новому місці.</div></div>
 <h3>Візуалізація: rebase переносить коміти</h3>
 <div class="widget"><div class="wtitle">До та після rebase</div><div class="gplayer" data-p="rebase"></div></div>
+<div class="lect">Подивись, що старий коміт на анімації вище просто посірів — це і є відповідь, чому <b>спільні гілки не ребейзять</b>: хтось міг уже побудувати роботу поверх нього, а після rebase він лишається сиротою.</div>
 <h3>Ключовий механізм</h3>
 <p>Rebase <strong>не пересуває</strong> старі коміти — він <strong>створює нові</strong> з тим самим вмістом, але іншим батьком, отже з <strong>новими SHA</strong>. Старі лишаються orphaned і згодом зникають.</p>
 <pre><span class="cmd">git rebase</span> <span class="arg">main</span>          <span class="c"># перенести гілку поверх main</span>
@@ -83,6 +85,7 @@
 <h2>Interactive rebase: крок за кроком</h2>
 <p class="lead">Сценарій: <span style="color:var(--accent)">feature</span> = 4 коміти поверх <span style="color:var(--accent)">main</span> (M). План: B→fixup у A, C→reword, D→drop. Гортай кроки.</p>
 <div class="goalbox"><b>Ціль уроку</b>чистити історію: squash, reword, drop перед публікацією.</div>
+<div class="lect">У PBIP-проєктах WIP-коміти множаться швидко — «fix», «fix2», «ну тепер точно fix». <b>Interactive rebase перед push</b> — твій шанс перетворити цей безлад на історію, яку не соромно показати команді.</div>
 <div class="widget">
   <div class="rb-status" id="rbStatus"></div>
   <div class="rb-stage">
@@ -116,6 +119,7 @@
 <div class="tdef"><div class="t">conflict (конфлікт злиття)</div><div class="d">Ситуація, коли Git не може автоматично об'єднати два набори змін, бо вони чіпають однакові рядки.</div><div class="plain"><b>Простими словами:</b> двоє написали різний текст в одному рядку — Git питає, чий лишити.</div></div>
 <p>Ось як ця ситуація виглядає в PBIP-проєкті очима Power BI-розробника — і чому вона взагалі трапляється.</p>
 <div class="uimock" data-um="pbip_conflict"></div>
+<div class="lect">Конфлікт — не аварія, а питання від git: «яку з двох версій лишити?». На PBIP-схемі вище видно, що git чесно показує <b>обидві версії</b>, нічого не губить і не вирішує за тебе.</div>
 <h3>Як виглядає у файлі</h3>
 <pre><span class="out">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
 measure 'Total Sales' = SUM(Sales[Amount])
