@@ -93,6 +93,14 @@ const PLAYERS={
     {cap:`Коміт X створено в detached-стані — він НЕ належить жодній гілці. При перемиканні легко загубити.`,nodes:[N('X',1,'feature',['C1'],['HEAD']),N('C3',0,'main',['C2'],['main']),N('C2',0,'main',['C1']),N('C1',0,'main',[])]},
     {cap:`<b>git switch -c rescue</b> — створює гілку на X. Тепер коміт закріплено й він у безпеці.`,nodes:[N('X',1,'rebased',['C1'],['rescue','HEAD']),N('C3',0,'main',['C2'],['main']),N('C2',0,'main',['C1']),N('C1',0,'main',[])]}
   ],
+  head_ptr:[
+    {cap:`Три коміти c1→c2→c3. Гілка <b>main</b> — це просто «закладка» на коміті c3, а <b>HEAD</b> — позначка «ти зараз тут».`,nodes:[N('c3',0,'main',['c2'],['main','HEAD']),N('c2',0,'main',['c1']),N('c1',0,'main',[])]},
+    {cap:`<b>git branch feature/kpi</b> — нова гілка = ще одна закладка на той самий коміт c3; жоден файл не скопійовано.`,nodes:[N('c3',0,'main',['c2'],['main','HEAD','feature/kpi']),N('c2',0,'main',['c1']),N('c1',0,'main',[])]},
+    {cap:`<b>git switch feature/kpi</b> — switch перемкнув лише позначку «ти тут»: файли й коміти ті самі.`,nodes:[N('c3',0,'main',['c2'],['main','feature/kpi','HEAD']),N('c2',0,'main',['c1']),N('c1',0,'main',[])]},
+    {cap:`Новий коміт c4 — комітиш, і рухається лише та закладка, на яку дивиться HEAD: <b>feature/kpi</b> і HEAD їдуть на c4, main лишився на c3.`,nodes:[N('c4',1,'feature',['c3'],['feature/kpi','HEAD']),N('c3',0,'main',['c2'],['main']),N('c2',0,'main',['c1']),N('c1',0,'main',[])]},
+    {cap:`<b>git switch main</b> — повернувся на main: у папці знову стан c3. c4 нікуди не зник, він лишився на своїй гілці feature/kpi.`,nodes:[N('c4',1,'feature',['c3'],['feature/kpi']),N('c3',0,'main',['c2'],['main','HEAD']),N('c2',0,'main',['c1']),N('c1',0,'main',[])]},
+    {cap:`<b>git checkout c2</b> — HEAD вказує ПРЯМО на c2, повз гілки. Це <b>detached HEAD</b>: екскурсія в минуле; комітити звідси не варто — спершу створи гілку.`,nodes:[N('c4',1,'feature',['c3'],['feature/kpi']),N('c3',0,'main',['c2'],['main']),N('c2',0,'main',['c1'],['HEAD']),N('c1',0,'main',[])]}
+  ],
   bisect:[
     {cap:`Баг є в C8, але не було в C1. Старт: git bisect bad C8; git bisect good C1.`,nodes:[N('C8',0,'hotfix',['C7'],['bad']),N('C7',0,'main',['C6']),N('C6',0,'main',['C5']),N('C5',0,'main',['C4']),N('C4',0,'main',['C3']),N('C3',0,'main',['C2']),N('C2',0,'main',['C1']),N('C1',0,'feature',[],['good'])]},
     {cap:`Git робить checkout СЕРЕДНЬОГО коміту C4. Тестуєш — баг відсутній → git bisect good.`,nodes:[N('C8',0,'hotfix',['C7'],['bad']),N('C7',0,'main',['C6']),N('C6',0,'main',['C5']),N('C5',0,'main',['C4']),N('C4',0,'main',['C3'],['HEAD']),N('C3',0,'main',['C2']),N('C2',0,'main',['C1']),N('C1',0,'feature',[],['good'])]},
@@ -2465,7 +2473,7 @@ function buildCmdanim(){
               if(!el.isConnected){if(obs)obs.disconnect();return;}
               if(!visible)return;
               runLoop();
-            },1500);
+            },5000); // пауза між повторами GIF-циклу
           });
         }
         obs=new IntersectionObserver(entries=>{

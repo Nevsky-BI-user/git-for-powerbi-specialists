@@ -273,9 +273,8 @@ Thumbs.db
 <p><b>Причина:</b> бінарник зберігається повністю при кожній зміні.</p>
 <pre><span class="cmd">git rm</span> <span class="arg">--cached *.pbix</span>
 <span class="c"># echo "*.pbix" у .gitignore</span>
-<span class="cmd">git commit</span> <span class="arg">-m "ignore pbix"</span>
-<span class="c"># очистити історію (за потреби): git filter-repo --path-glob '*.pbix' --invert-paths</span></pre>
-<p class="sol"><b>Підсумок:</b> бінарники не тримати в репозиторії.</p></div>
+<span class="cmd">git commit</span> <span class="arg">-m "ignore pbix"</span></pre>
+<p class="sol"><b>Підсумок:</b> бінарники не тримати в репозиторії; прибрати їх і з історії теж можна, але переписування всієї історії (<code>git filter-repo</code>) — разова деструктивна операція: роби за офіційною документацією або з досвідченим колегою.</p></div>
 
 <div class="scn"><span class="cat">Кеш / службові файли</span><h4><span class="num">10</span>.gitignore не діє на вже доданий файл</h4>
 <p><b>Проблема:</b> файл у .gitignore, але Git далі показує його зміни.</p>
@@ -358,11 +357,7 @@ Thumbs.db
 
 <div class="scn"><span class="cat">Конфлікт звіту (PBIR)</span><h4><span class="num">20</span>Великий бінарний asset роздуває репо</h4>
 <p><b>Проблема:</b> у звіт додано важке зображення; репо росте.</p>
-<p><b>Причина:</b> бінарні asset-и зберігаються повністю.</p>
-<pre><span class="cmd">git lfs</span> <span class="arg">install</span>
-<span class="cmd">git lfs</span> <span class="arg">track "*.png"</span>
-<span class="cmd">git add</span> <span class="arg">.gitattributes</span> && <span class="cmd">git commit</span> <span class="arg">-m "LFS for images"</span></pre>
-<p class="sol"><b>Підсумок:</b> великі бінарники — у Git LFS (окреме сховище).</p></div>
+<p class="sol"><b>Підсумок:</b> якщо у звіті справді важкі зображення і репозиторій розрісся — існує Git LFS; для типових PBIP-звітів не потрібен.</p></div>
 
 <div class="scn"><span class="cat">Deploy / Fabric / CI</span><h4><span class="num">21</span>Fabric workspace розходиться з гілкою</h4>
 <p><b>Проблема:</b> у Fabric Git integration workspace показує uncommitted changes, що не збігаються з гілкою.</p>
@@ -407,11 +402,7 @@ Thumbs.db
 <div class="scn"><span class="cat">Безпека</span><h4><span class="num">26</span>Секрет / рядок підключення в M-виразі</h4>
 <p><b>Проблема:</b> у Power Query (M) чи TMDL потрапив пароль; уже в історії на сервері.</p>
 <p><b>Причина:</b> чутливі дані закомічено в текст.</p>
-<pre><span class="c"># 1) РОТУВАТИ секрет — він скомпрометований</span>
-<span class="c"># 2) видалити з історії:</span>
-<span class="cmd">git filter-repo</span> <span class="arg">--path definition/.../expressions.tmdl --invert-paths</span>
-<span class="cmd">git push</span> <span class="arg">--force-with-lease</span>     <span class="c"># узгодити з командою</span>
-<span class="c"># 3) надалі — параметри / credential store</span></pre>
+<p><b>Токен чи секрет потрапив у історію → НЕГАЙНО відклич/ротуй його</b> — це головне, незалежно від того, чи прибереш його з історії. Переписування всієї історії (<code>git filter-repo</code> чи BFG Repo-Cleaner) — разова деструктивна операція: роби за офіційною документацією або з досвідченим колегою; надалі значення тримай у параметрах / credential store, не в коді.</p>
 <p class="sol"><b>Підсумок:</b> ніколи не зашивати секрети в код.</p></div>
 
 <div class="scn"><span class="cat">Налаштування</span><h4><span class="num">27</span>Git щоразу питає логін і пароль</h4>
@@ -424,11 +415,7 @@ Thumbs.db
 
 <div class="scn"><span class="cat">Продуктивність</span><h4><span class="num">28</span>Клонування величезне й повільне</h4>
 <p><b>Проблема:</b> репозиторій з довгою історією та великими asset-ами тягнеться дуже довго.</p>
-<p><b>Причина:</b> clone за замовчуванням забирає ВСЮ історію всіх файлів.</p>
-<pre><span class="cmd">git clone</span> <span class="arg">--depth 1 &lt;url&gt;</span>            <span class="c"># shallow: лише останній стан, без історії</span>
-<span class="cmd">git fetch</span> <span class="arg">--unshallow</span>                <span class="c"># добрати повну історію пізніше, якщо треба</span>
-<span class="cmd">git sparse-checkout</span> <span class="arg">set Reports/PDP</span>  <span class="c"># викачати в робочу папку лише потрібний шлях</span></pre>
-<p class="sol"><b>Підсумок:</b> shallow clone і sparse-checkout дають швидкий старт на великих репозиторіях.</p></div>
+<p class="sol"><b>Підсумок:</b> величезні репозиторії — не випадок одного PBIP-звіту; якщо колись зіткнешся, шукай shallow clone.</p></div>
 
 <div class="scn"><span class="cat">Історія</span><h4><span class="num">29</span>Помилковий merge у main уже запушено</h4>
 <p><b>Проблема:</b> у main злили гілку, якої там бути не мало; історію переписувати не можна — main спільний.</p>
@@ -503,6 +490,7 @@ hotfix/prod-refresh-error
 <h2><span class="ticon" data-i="azuredevops"></span>Azure DevOps: pipelines, задачі, політики</h2>
 <p class="lead">Що дає Azure DevOps навколо Git-репозиторію PBIP.</p>
 <div class="goalbox"><b>Ціль уроку</b>звʼязати репозиторій із задачами та автоматичними перевірками.</div>
+<div class="note"><b>Хто це робить:</b> ці YAML-налаштування зазвичай робить адміністратор або DevOps-інженер один раз; тобі як PBI-розробнику досить розуміти, що тут відбувається і як прочитати результат перевірки.</div>
 <div class="tdef"><div class="t">Work items (робочі елементи)</div><div class="d">Задачі / баги / User Stories в Azure DevOps з власними ID.</div><div class="plain"><b>Простими словами:</b> «квитки» роботи; згадка ID у коміті прив'язує зміну до задачі для трасування.</div></div>
 <pre><span class="c"># у повідомленні коміту або описі:</span>
 fix(report): correct sales filter   #123

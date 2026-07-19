@@ -117,6 +117,7 @@
 *.tmdl text eol=lf          <span class="c"># TMDL завжди LF у репозиторії</span>
 *.json text eol=lf
 *.pbix binary               <span class="c"># не намагатись діфити/мерджити бінарник</span></pre>
+<div class="dobox">Створи у корені свого тестового репозиторію файл <code>.gitattributes</code> з цим вмістом (можна прямо з термінала або у VS Code) і закоміть — раз і назавжди знімає проблему CRLF/LF. Перевір, що спрацювало: збережи модель у Power BI Desktop і подивись <code>git status</code> — не мають «змінитися» одразу всі файли, лише ті, де реально є правки.</div>
 <div class="note tip"><b>Для PBIP-команди.</b> Зафіксуйте <code>*.tmdl text eol=lf</code> і <code>*.json text eol=lf</code> — це прибирає фальшиві діфи через CRLF/LF між Windows-машинами та уникає шумних конфліктів у моделі й звіті.</div>
 
 <div class="qcheck" data-qc="qc_config"></div>
@@ -161,6 +162,8 @@
 <div class="goalbox"><b>Ціль уроку</b>розуміти, що таке HEAD, і не губити коміти в detached-стані.</div>
 <div class="tdef"><div class="t">Гілка = вказівник (41 байт)</div><div class="d">Технічно гілка — це маленький файл у <code>.git/refs/heads/</code>, що містить лише хеш коміту (40 символів + перенесення рядка).</div><div class="plain"><b>Простими словами:</b> гілка — це «закладка» на коміт, а не окрема копія проєкту. Тому створення гілки миттєве й майже безкоштовне.</div><div class="ex">Файл <code>.git/refs/heads/main</code> містить рядок на кшталт <code>a1b2c3d…</code></div></div>
 <p>Із цього факту випливає кілька практичних наслідків. Гілку можна створювати під будь-яку дрібну спробу — нову візуалізацію, експериментальну DAX-міру: вона не копіює файли моделі, а лише додає новий 41-байтовий вказівник, тож коштує долі секунди й нуль додаткового місця на диску. Видалення гілки (<code>git branch -d</code>) прибирає лише цей вказівник — самі коміти нікуди не діваються, поки на них указує хоч щось інше (інша гілка, тег або HEAD), тому «видалив гілку» майже ніколи не означає «втратив роботу». І коли комітиш — рухається саме цей файл-вказівник на новий tip, а не переписується все, що було до нього.</p>
+<p>Подивись, як це виглядає насправді — прокрути кроки:</p>
+<div class="widget"><div class="wtitle">Візуалізація: гілка-закладка, HEAD і detached</div><div class="gplayer" data-p="head_ptr"></div></div>
 <div class="tdef"><div class="t">HEAD</div><div class="d">Вказівник на те, де ти зараз. Зазвичай: HEAD → гілка → коміт.</div><div class="plain"><b>Простими словами:</b> «ти тут». Коли комітиш, рухається та гілка, на яку дивиться HEAD.</div></div>
 <div class="tdef"><div class="t">Detached HEAD (відчеплений HEAD)</div><div class="d">Стан, коли HEAD указує ПРЯМО на коміт, а не на гілку. Виникає після <code>git checkout &lt;sha&gt;</code>.</div><div class="plain"><b>Простими словами:</b> ти стоїш «на коміті без закладки». Нові коміти тут не належать жодній гілці й при перемиканні можуть загубитись.</div></div>
 <div class="widget"><div class="wtitle">Як виникає й вирішується detached HEAD</div><div class="gplayer" data-p="detached"></div></div>
@@ -271,6 +274,7 @@
 <h2>Автентифікація: SSH-ключі та Personal Access Token</h2>
 <p class="lead">Сервер має знати, що push робиш саме ти. Два стандартні способи — токен для HTTPS і SSH-ключі.</p>
 <div class="goalbox"><b>Ціль уроку</b>налаштувати доступ до сервера без введення пароля щоразу.</div>
+<div class="note tip"><b>За замовчуванням обирай HTTPS + PAT.</b> Під час першого push Git Credential Manager (ставиться разом із Git для Windows) сам відкриє вікно входу і запамʼятає доступ — далі нічого вводити не треба. SSH-ключі — лише якщо цього вимагає політика компанії або в тебе кілька акаунтів.</div>
 <div class="tdef"><div class="t">Personal Access Token (PAT)</div><div class="d">Згенерований на сервері (Azure DevOps, GitHub) рядок-токен, що використовується ЗАМІСТЬ пароля при роботі через HTTPS. Має термін дії та обмежені права (scopes).</div><div class="plain"><b>Простими словами:</b> «тимчасовий пароль лише для Git» — вводиш один раз при першому push, далі його запам'ятовує менеджер креденшлів.</div><div class="ex">Azure DevOps: User settings → Personal access tokens → New Token → права Code (Read & write).</div></div>
 <div class="tdef"><div class="t">Credential manager (менеджер креденшлів)</div><div class="d">Системне сховище, куди Git кладе введений токен, щоб не питати його щоразу.</div><div class="plain"><b>Простими словами:</b> «запам'ятовувач паролів» для Git. На Windows ставиться разом із Git (Git Credential Manager).</div></div>
 <div class="tdef"><div class="t">SSH-ключі</div><div class="d">Пара файлів: <b>приватний</b> ключ (лишається тільки в тебе) і <b>публічний</b> (додається у профіль на сервері). Сервер звіряє пару — пароль не потрібен взагалі.</div><div class="plain"><b>Простими словами:</b> «замок і ключ»: публічний ключ-замок віддаєш серверу, приватним ключем відмикаєш. Приватний ключ нікому й ніколи не передається.</div></div>
@@ -278,8 +282,8 @@
 <span class="tw-p">$</span> <span class="tw-c">cat ~/.ssh/id_ed25519.pub</span>                     <span class="tw-cm"># показати ПУБЛІЧНИЙ ключ</span>
 <span class="tw-o">ssh-ed25519 AAAA… ivan@company.com</span>              <span class="tw-cm"># цей рядок → у профіль на сервері</span></div></div>
 <table class="cmdtable">
-<tr><td>HTTPS + PAT</td><td>Простіше стартувати; токен має термін дії; зберігається credential manager-ом.</td></tr>
-<tr><td>SSH</td><td>Разове налаштування; без паролів назавжди; URL виду git@…</td></tr>
+<tr><td>HTTPS + PAT (за замовчуванням)</td><td>Найпростіше стартувати; Credential Manager запамʼятовує токен сам після першого push; токен має термін дії.</td></tr>
+<tr><td>SSH</td><td>Лише за вимогою політики компанії або для кількох акаунтів; разове налаштування ключів; URL виду git@…</td></tr>
 </table>
 <div class="note warn"><b>Токен = пароль.</b> Ніколи не встав-ляй PAT у код, .tmdl, M-вирази чи README — це витік (кейс 26 у довіднику). Якщо токен потрапив у коміт — негайно відкликати і згенерувати новий.</div>
 <div class="qcheck" data-qc="qc_auth"></div>
@@ -320,10 +324,11 @@
 <div class="goalbox"><b>Ціль уроку</b>збирати атомарні коміти та точно шукати зміни в історії.</div>
 <div class="tdef"><div class="t">git add -p (patch mode)</div><div class="d">Додає у staging не весь файл, а окремі БЛОКИ змін (hunks) на твій вибір.</div><div class="plain"><b>Простими словами:</b> якщо в одному файлі дві різні правки — можна застейджити лише одну, щоб коміт лишився логічним.</div></div>
 <div class="tdef"><div class="t">Атомарний коміт</div><div class="d">Коміт, що містить одну логічну зміну.</div><div class="plain"><b>Простими словами:</b> «один коміт — одна думка». Легше читати історію, робити revert і review.</div></div>
+<div class="note warn"><b>Для самого PBIP-звіту add -p не використовуй</b> — звіт комітиться цілком (<code>git add .</code>); ця техніка — для випадків, коли в одному сторонньому файлі (скрипт, README) опинилися дві незалежні правки.</div>
 <pre><span class="cmd">git add</span> <span class="arg">-p</span>            <span class="c"># для кожного блоку: y (взяти), n (пропустити), s (розбити на менші)</span>
-<span class="c"># приклад блоку у Sales.tmdl:</span>
-<span class="c"># - SUM(Sales[Amount])</span>
-<span class="c"># + SUMX(Sales, Sales[Amount] * (1 - Sales[Discount]))</span></pre>
+<span class="c"># приклад блоку у deploy-notes.md:</span>
+<span class="c"># - Перед релізом перевір формат дати.</span>
+<span class="c"># + Перед релізом перевір формат дати (dd.mm.yyyy).</span></pre>
 <h3>diff — точний перегляд</h3>
 <table class="cmdtable">
 <tr><td>git diff</td><td>Незакомічені зміни (working dir vs staging).</td></tr>

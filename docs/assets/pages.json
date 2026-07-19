@@ -129,12 +129,9 @@
   "slug": "08-advanced",
   "title": "Просунуті техніки",
   "file": "modules/08-advanced.html",
-  "count": 4,
+  "count": 1,
   "lessons": [
-   "git bisect: пошук бага",
-   "Git hooks: автоматизація",
-   "Worktrees: паралельні директорії",
-   "Вправи · Модуль G"
+   "Інструменти на виріст"
   ]
  },
  {
